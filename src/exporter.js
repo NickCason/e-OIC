@@ -9,7 +9,7 @@
 // Heavy libraries (exceljs, jszip) are dynamic-imported so they're not part of
 // the initial PWA bundle — they only load when the user taps "Build Export".
 
-import schemaMap from './schema.json';
+import schemaMap from './schema.json' with { type: 'json' };
 import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
 } from './db.js';

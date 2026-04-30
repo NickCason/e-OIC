@@ -5,6 +5,7 @@ import PanelView from './components/PanelView.jsx';
 import SettingsView from './components/SettingsView.jsx';
 import ToastHost from './components/ToastHost.jsx';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation.js';
+import { maybeSeedSampleJob } from './lib/seed.js';
 
 function parseHash() {
   const h = window.location.hash.replace(/^#\/?/, '');
@@ -40,6 +41,17 @@ export default function App() {
       const consent = await getGeolocationConsent();
       if (consent === undefined || consent === null) setShowGeoPrompt(true);
     })();
+  }, []);
+
+  // First-launch sample-job seed (idempotent).
+  useEffect(() => {
+    maybeSeedSampleJob().then((seeded) => {
+      if (seeded) {
+        // Trigger a route refresh so JobList re-fetches and the sample
+        // job appears without requiring a manual reload.
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
+    });
   }, []);
 
   return (

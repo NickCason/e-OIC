@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
 import { applyTheme, saveTheme } from '../lib/theme.js';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation.js';
+import { reloadSampleJob } from '../lib/seed.js';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
+import { BUILD_VERSION } from '../version.js';
 
 const APP_VERSION = '1.1.0';
 
@@ -166,8 +168,32 @@ export default function SettingsView() {
         </section>
 
         <section className="card">
+          <h3 style={{ marginTop: 0 }}>Sample data</h3>
+          <p style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 0 }}>
+            Restore the bundled sample job ("Cooker Line Investigation"). Useful
+            for demos or for testing the export end-to-end without entering data.
+          </p>
+          <button
+            onClick={async () => {
+              if (!confirm('Reload the sample job? Any local edits to the sample will be overwritten. Other jobs are untouched.')) return;
+              setBusy(true);
+              try {
+                const stats = await reloadSampleJob();
+                toast.show(`Sample reloaded: ${stats.jobs} job, ${stats.panels} panels, ${stats.rows} rows`);
+              } catch (e) {
+                toast.error('Could not load sample: ' + (e.message || e));
+              } finally {
+                setBusy(false);
+              }
+            }}
+            disabled={busy}
+          >🧪 Reload sample job</button>
+        </section>
+
+        <section className="card">
           <h3 style={{ marginTop: 0 }}>About</h3>
           <div className="kv"><span className="k">App</span><span className="v">e-OIC</span></div>
+          <div className="kv"><span className="k">Build</span><span className="v">{BUILD_VERSION}</span></div>
           <div className="kv"><span className="k">Full name</span><span className="v">eTechGroup Onsite Investigation Checklist</span></div>
           <div className="kv"><span className="k">Version</span><span className="v">{APP_VERSION}</span></div>
           <div className="kv"><span className="k">Storage</span><span className="v">IndexedDB · local to this device</span></div>

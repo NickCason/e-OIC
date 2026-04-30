@@ -1,0 +1,563 @@
+{
+  "backupVersion": 1,
+  "exportedAt": 1714478400000,
+  "jobs": [
+    {
+      "id": "seed-job-cooker-line",
+      "name": "Sample — Cooker Line Investigation",
+      "client": "ConAgra Foods",
+      "location": "Plant 6 — E/F/V Cookers",
+      "notes": "Sample investigation seeded on first launch. Three panels (MCC PLC Cabinet #1, MCC-0025, IDF B) with cross-referenced PLC, drive, network, and safety entries. Delete this job anytime; you can re-seed it from Settings → Reload sample job.",
+      "createdAt": 1714478400000,
+      "updatedAt": 1714478400000
+    }
+  ],
+  "panels": [
+    {
+      "id": "seed-panel-mcc-plc-1",
+      "jobId": "seed-job-cooker-line",
+      "name": "MCC PLC Cabinet #1",
+      "createdAt": 1714478400000,
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-panel-mcc-0025",
+      "jobId": "seed-job-cooker-line",
+      "name": "MCC-0025",
+      "createdAt": 1714478460000,
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-panel-idf-b",
+      "jobId": "seed-job-cooker-line",
+      "name": "IDF B",
+      "createdAt": 1714478520000,
+      "updatedAt": 1714478520000
+    }
+  ],
+  "rows": [
+    {
+      "id": "seed-row-panels-mcc1",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "Panels",
+      "idx": 0,
+      "data": {
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Description": "Main ControlLogix processor + Ethernet bridge cabinet",
+        "Panel Location": "MCC Room, north wall",
+        "Power Feed Circuit": "MCC-Main-CB1",
+        "Phase": "Single",
+        "FLA": "5",
+        "Volts Max": "120",
+        "Frequency": "60",
+        "Largest Motor HP": "N/A",
+        "Height": "72\"",
+        "Width": "36\"",
+        "Depth": "12\""
+      },
+      "notes": "Verified door swing clearance is adequate.",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-panels-mcc25",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Panels",
+      "idx": 0,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Description": "Drive cabinet for E/V Coolers (PF40 ×2)",
+        "Panel Location": "Behind Cooker F Infeed",
+        "Power Feed Circuit": "MCC-54C-2B",
+        "Phase": "Three",
+        "Volts Max": "480",
+        "SCC": "5.39kA",
+        "Frequency": "60",
+        "Largest Motor HP": "10",
+        "Height": "95 7/8\"",
+        "Width": "179 1/2\"",
+        "Depth": "37 5/8\""
+      },
+      "notes": "Front access tight — 28\" clearance to opposite wall.",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-panels-idfb",
+      "panelId": "seed-panel-idf-b",
+      "sheet": "Panels",
+      "idx": 0,
+      "data": {
+        "Area": "War Room",
+        "Panel Name": "IDF B",
+        "Description": "Network distribution cabinet (managed switch + patch panel)",
+        "Panel Location": "War Room SE corner",
+        "Phase": "Single",
+        "Volts Max": "120",
+        "Frequency": "60"
+      },
+      "notes": "",
+      "updatedAt": 1714478520000
+    },
+    {
+      "id": "seed-row-power-mcc1",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "Power",
+      "idx": 0,
+      "data": {
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Drawing Reference": "DWG-MCC-001 sheet 3",
+        "Voltage In": "120 VAC",
+        "Phase In": "Single",
+        "Voltage Out": "120 VAC",
+        "Phase Out": "Single",
+        "Wire Number (V+)": "L1",
+        "Wire Number (COM)": "N"
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-power-mcc25-ac",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Power",
+      "idx": 0,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Drawing Reference": "DWG-MCC-0025 sheet 1",
+        "Voltage In": "480 VAC",
+        "Phase In": "Three",
+        "Amperage In": "30",
+        "Voltage Out": "120 VAC",
+        "Phase Out": "Single",
+        "Amperage Out": "10"
+      },
+      "notes": "Incoming 480V from MCC-54C-2B per drawing.",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-power-mcc25-dc",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Power",
+      "idx": 1,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Voltage In": "120 VAC",
+        "Phase In": "Single",
+        "Voltage Out": "24 VDC",
+        "Phase Out": "N/A",
+        "Amperage Out": "5",
+        "Device Name": "PS-24V-Bus1",
+        "Part Number": "APS-DR1072-24"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-rack-local",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "PLC Racks",
+      "idx": 0,
+      "data": {
+        "IO List Completed": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Rack Name": "Local",
+        "Description": "Main MCC ControlLogix rack",
+        "Part Number": "1756-A10",
+        "Comm Address (IP, Serial, Fieldbus, RIO)": "172.25.106.100",
+        "Comm Protocol": "EtherNet/IP",
+        "Power Supply Part Number": "1756-PA75",
+        "Voltage": "120 VAC",
+        "Wire Number (V+)": "L1",
+        "Wire Number (COM)": "N",
+        "Fuse/CB": "CB-MCC-1"
+      },
+      "notes": "10-slot chassis, all slots populated except 2.",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-slot-0",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "PLC Slots",
+      "idx": 0,
+      "data": {
+        "IO List Completed": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Rack Name": "Local",
+        "Description": "MCC Processor",
+        "Part Number": "1756-L72",
+        "Firmware Revision": "32.013",
+        "Slot": "0"
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-slot-1",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "PLC Slots",
+      "idx": 1,
+      "data": {
+        "IO List Completed": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Rack Name": "Local",
+        "Description": "EtherNet/IP Bridge",
+        "Part Number": "1756-EN2T",
+        "Firmware Revision": "11.001",
+        "Slot": "1"
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-slot-2",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "PLC Slots",
+      "idx": 2,
+      "data": {
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Rack Name": "Local",
+        "Description": "SPARE",
+        "Part Number": "1756-N2",
+        "Slot": "2"
+      },
+      "notes": "Empty filler.",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-slot-3",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "PLC Slots",
+      "idx": 3,
+      "data": {
+        "IO List Completed": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Rack Name": "Local",
+        "Description": "16-pt 24VDC Sink Input",
+        "Part Number": "1756-IB16",
+        "Firmware Revision": "3.001",
+        "Slot": "3",
+        "Voltage": "24 VDC",
+        "IO Terminal (V+)": "0-15",
+        "Wire Number (V+)": "I-301..I-316",
+        "Fuse/CB": "CB-MCC-3"
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-slot-4",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "PLC Slots",
+      "idx": 4,
+      "data": {
+        "IO List Completed": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Rack Name": "Local",
+        "Description": "16-pt 24VDC Source Output",
+        "Part Number": "1756-OB16",
+        "Firmware Revision": "3.001",
+        "Slot": "4",
+        "Voltage": "24 VDC",
+        "IO Terminal (V+)": "0-15",
+        "Wire Number (V+)": "O-401..O-416",
+        "Fuse/CB": "CB-MCC-4"
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-net-ecooler",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Network Devices",
+      "idx": 0,
+      "data": {
+        "Device List Completed": true,
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Device Name": "E Cooler",
+        "Description": "PowerFlex 40 — 10HP, drives E Cooler conveyor",
+        "Part Number": "22B-D017N104",
+        "Firmware Revision": "5.001",
+        "Comm Address (IP, Serial, Fieldbus, RIO)": "172.25.106.110",
+        "Communication Protocol": "EtherNet/IP",
+        "Control Device (VFD, MS, Relay, IO Card)": "VFD",
+        "Field Device (Motor, valve, flowmeter, etc.)": "10HP TEFC motor",
+        "Field Device Location/Area": "E Cooler upper deck"
+      },
+      "notes": "Drive is OEM original (2014 install).",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-net-vcooler",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Network Devices",
+      "idx": 1,
+      "data": {
+        "Device List Completed": true,
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Device Name": "V Cooler",
+        "Description": "PowerFlex 40 — 7.5HP, drives V Cooler conveyor",
+        "Part Number": "22B-D012N104",
+        "Firmware Revision": "5.001",
+        "Comm Address (IP, Serial, Fieldbus, RIO)": "172.25.106.111",
+        "Communication Protocol": "EtherNet/IP",
+        "Control Device (VFD, MS, Relay, IO Card)": "VFD",
+        "Field Device (Motor, valve, flowmeter, etc.)": "7.5HP TEFC motor",
+        "Field Device Location/Area": "V Cooler middle gear"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-drive-ecooler",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Drive Parameters",
+      "idx": 0,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Device Name": "E Cooler",
+        "Motor NP Volts": "460",
+        "Motor NP Hz": "60",
+        "Motor OL Current": "12.0",
+        "Minimum Freq.": "0",
+        "Maximum Freq.": "100",
+        "Start Mode": "2-Wire",
+        "Stop Mode": "Ramp, CF",
+        "Speed Reference": "InternalFreq (60Hz)",
+        "Accel Time 1 (sec)": "10",
+        "Decel Time 1 (sec)": "0.5"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-drive-vcooler",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Drive Parameters",
+      "idx": 1,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Device Name": "V Cooler",
+        "Motor NP Volts": "460",
+        "Motor NP Hz": "60",
+        "Motor OL Current": "12.0",
+        "Minimum Freq.": "0",
+        "Maximum Freq.": "100",
+        "Start Mode": "2-Wire",
+        "Stop Mode": "Coast, CF",
+        "Speed Reference": "Drive Pot",
+        "Accel Time 1 (sec)": "10",
+        "Decel Time 1 (sec)": "5"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-conv-ecooler",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Conv. Speeds",
+      "idx": 0,
+      "data": {
+        "Area": "E & F Cookers",
+        "Device Name": "E Cooler",
+        "Tach Reading 1 (fpm)": "6.4",
+        "VFD Speed 1 (Hz)": "60.0"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-conv-vcooler",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Conv. Speeds",
+      "idx": 1,
+      "data": {
+        "Area": "E & F Cookers",
+        "Device Name": "V Cooler",
+        "Tach Reading 1 (fpm)": "27.1",
+        "VFD Speed 1 (Hz)": "62.1"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-hmi-gallon",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "HMIs",
+      "idx": 0,
+      "data": {
+        "Program Uploaded": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "HMI Name": "Gallon_Cookers",
+        "Application Name": "Gallon_Cookers_v3.2",
+        "Description": "Cookers/Coolers 7-9 + E/V cookers operator interface",
+        "Hardware Platform": "WonderWare InTouch",
+        "Firmware Revision": "2020 R2",
+        "Comm Address (IP, Serial, Fieldbus, RIO)": "10.226.40.19",
+        "Comm Protocol": "EtherNet/IP",
+        "Power Supply Part Number": "APS-DR1072-24",
+        "Voltage": "24 VDC",
+        "Height": "14 1/4\"",
+        "Width": "12\""
+      },
+      "notes": "Industrial PC behind cabinet door.",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-switch-b3",
+      "panelId": "seed-panel-idf-b",
+      "sheet": "Ethernet Switches",
+      "idx": 0,
+      "data": {
+        "Configuration Backup": true,
+        "Network Investigation Complete": true,
+        "Area": "War Room",
+        "Panel Name": "IDF B",
+        "Name": "B3",
+        "Part Number": "Stratix 5700 (1783-BMS10CGN)",
+        "# Ports in use": "8",
+        "Power Supply": "120VAC -> 24VDC",
+        "Voltage": "24 VDC",
+        "Wire Number (V+)": "L+",
+        "Wire Number (COM)": "L-"
+      },
+      "notes": "Uplink to plant core via fiber port G1.",
+      "updatedAt": 1714478520000
+    },
+    {
+      "id": "seed-row-switch-ntron",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "Ethernet Switches",
+      "idx": 0,
+      "data": {
+        "Configuration Backup": true,
+        "Network Investigation Complete": true,
+        "Area": "MCC Room",
+        "Panel Name": "MCC PLC Cabinet #1",
+        "Name": "N-TRON",
+        "Part Number": "516TX-A",
+        "# Ports in use": "10",
+        "Power Supply": "120VAC -> 24VDC",
+        "Voltage": "24 VDC",
+        "Wire Number (V+)": "L+",
+        "Wire Number (COM)": "L-",
+        "Fuse/CB": "N/A (First in Group)",
+        "Top": "5 7/8\"",
+        "Bottom": "4 3/4\"",
+        "Left": "1 1/4\""
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-row-safetyckt-mcr",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Safety Circuit",
+      "idx": 0,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Drawing Reference": "DWG-SAFETY-MCC-0025",
+        "Circuit Name": "MCR",
+        "Description": "Master Control Relay — drops drive enables on E-Stop or guard interlock open",
+        "Circuit Rating": "6A",
+        "MSR Part Number": "440R-N23132 (Cutler-Hammer aux)",
+        "Input Device Count": "3",
+        "Output Device Count": "2"
+      },
+      "notes": "Existing Cutler-Hammer relay; recommend MSR replacement next outage.",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-safetydev-estop-e",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Safety Devices",
+      "idx": 0,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Safety Circuit": "MCR",
+        "Drawing Reference": "DWG-SAFETY-MCC-0025",
+        "Device Name": "E-Stop Cooker E",
+        "Description": "Mushroom E-Stop on Cooker E operator station",
+        "Part Number": "800FP-MT44 (red mushroom, 22mm, NC×2)",
+        "Safety Input Count (To PLC/MSR)": "2",
+        "Safety Input Wire Numbers": "S-101, S-102"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-safetydev-estop-v",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Safety Devices",
+      "idx": 1,
+      "data": {
+        "Area": "E & F Cookers",
+        "Panel Name": "MCC-0025",
+        "Safety Circuit": "MCR",
+        "Drawing Reference": "DWG-SAFETY-MCC-0025",
+        "Device Name": "E-Stop Cooker V",
+        "Description": "Mushroom E-Stop on Cooker V operator station",
+        "Part Number": "800FP-MT44 (red mushroom, 22mm, NC×2)",
+        "Safety Input Count (To PLC/MSR)": "2",
+        "Safety Input Wire Numbers": "S-103, S-104"
+      },
+      "notes": "",
+      "updatedAt": 1714478460000
+    },
+    {
+      "id": "seed-row-p2p-cooler-fault",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "Peer to Peer Comms",
+      "idx": 0,
+      "data": {
+        "Area": "MCC Room",
+        "Device Name": "MCC L72",
+        "Description": "Cooler #1 fault status pull from old gallon PLC",
+        "Hardware Platform/Part Number": "1756-L72",
+        "Comm Address (IP, Serial, Fieldbus, RIO)": "172.25.106.100",
+        "Communication Protocol": "EtherNet/IP",
+        "Type": "MSG — CIP Generic Read",
+        "Source Tag": "Cooler_1_Fault_MSG",
+        "Destination Device Name": "Old_Gallon_PLC",
+        "Destination Address": "172.25.106.50",
+        "Destination Tag": "Cooler_1_DriveData",
+        "Communication Path": "1, 4, 2, 9"
+      },
+      "notes": "",
+      "updatedAt": 1714478400000
+    }
+  ],
+  "sheetNotes": [
+    {
+      "id": "seed-note-mcc1-panels",
+      "panelId": "seed-panel-mcc-plc-1",
+      "sheet": "Panels",
+      "text": "Cabinet was installed during 2014 line build. Door interlock is operational. No labels on inside of door — recommend label kit during next outage.",
+      "updatedAt": 1714478400000
+    },
+    {
+      "id": "seed-note-mcc25-drives",
+      "panelId": "seed-panel-mcc-0025",
+      "sheet": "Drive Parameters",
+      "text": "Both drives are factory PowerFlex 40s; configuration matches OEM. Recommend dropping decel on V Cooler to 1s during next mod.",
+      "updatedAt": 1714478460000
+    }
+  ],
+  "photos": []
+}
