@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db.js';
 import { applyOverlay, fmtTimestamp, fmtGps } from '../photoOverlay.js';
 import { maybeGetGps } from '../lib/geolocation.js';
 import { toast } from '../lib/toast.js';
 import { BUILD_VERSION } from '../version.js';
+import Icon from './Icon.jsx';
+import Lightbox from './Lightbox.jsx';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.
@@ -25,15 +27,9 @@ export default function PhotoCapture({
   const [photos, setPhotos] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const [lightbox, setLightbox] = useState(null);
-  const [debug, setDebug] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const cameraRef = useRef(null);
   const libraryRef = useRef(null);
-
-  function logDebug(msg) {
-    const stamp = new Date().toLocaleTimeString();
-    setDebug((d) => [...d.slice(-7), `${stamp} ${msg}`]);
-  }
 
   async function refresh() {
     if (rowId) {
@@ -45,9 +41,21 @@ export default function PhotoCapture({
 
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [panel.id, sheetName, item, rowId]);
 
+  // Build blob URLs for the current photo set; revoke on change/unmount.
+  const photosWithUrls = useMemo(
+    () => photos.map((p) => ({ ...p, blobUrl: URL.createObjectURL(p.blob) })),
+    [photos]
+  );
+  useEffect(() => {
+    return () => {
+      for (const p of photosWithUrls) {
+        try { URL.revokeObjectURL(p.blobUrl); } catch {}
+      }
+    };
+  }, [photosWithUrls]);
+
   async function handleFiles(fileList) {
     const len = fileList?.length ?? 0;
-    logDebug(`onChange: ${len} file(s)`);
     if (len === 0) {
       setError('iOS handed back zero files. This usually means the camera/library was cancelled, or a known iOS standalone-PWA bug.');
       return;
@@ -56,25 +64,19 @@ export default function PhotoCapture({
     // on the live FileList reference (which iOS Safari can invalidate when
     // the input's value is reset asynchronously).
     const files = Array.from(fileList);
-    for (const f of files) {
-      logDebug(`  ${f.name || '(no name)'} type="${f.type || ''}" ${f.size}b`);
-    }
     setBusy(true);
     setError(null);
     let savedCount = 0;
     try {
       const gps = await maybeGetGps();
-      logDebug(gps ? `gps ok ±${Math.round(gps.accuracy)}m` : 'gps null');
       for (const file of files) {
         const overlayLabel = rowId ? (rowLabelHint || 'Row') : item;
         const lines = [
           `${job.name} • ${panel.name}`,
           `${sheetName} — ${overlayLabel}`,
-          fmtTimestamp() + (gps ? `  📍 ${fmtGps(gps)}` : ''),
+          fmtTimestamp() + (gps ? `  ${fmtGps(gps)}` : ''),
         ];
-        logDebug(`overlay: ${file.name || '(no name)'}`);
         const { blob, width, height } = await applyOverlay(file, lines, gps);
-        logDebug(`saved: ${width}x${height} ${blob?.size || 0}b`);
         await addPhoto({
           panelId: panel.id,
           sheet: sheetName,
@@ -89,21 +91,19 @@ export default function PhotoCapture({
         if (navigator.vibrate) navigator.vibrate(20);
       }
       await refresh();
-      logDebug(`done: ${savedCount}/${files.length} saved`);
       if (savedCount === 0) {
         setError('Photo could not be saved. The file may not be a recognized image format.');
       }
     } catch (e) {
       console.error(e);
-      logDebug(`error: ${e.message || e}`);
       setError(e.message || 'Could not save photo');
     } finally {
       setBusy(false);
     }
   }
 
-  async function onDelete(id) {
-    await deletePhoto(id);
+  async function onDelete(photo) {
+    await deletePhoto(photo.id);
     await refresh();
     toast.show('Photo deleted');
   }
@@ -126,10 +126,10 @@ export default function PhotoCapture({
 
         <div className="btn-row" style={{ marginBottom: 12 }}>
           <button className="primary" onClick={() => cameraRef.current?.click()} disabled={busy}>
-            📷 Take Photo
+            <Icon name="camera" size={16} strokeWidth={2} /> Take Photo
           </button>
           <button onClick={() => libraryRef.current?.click()} disabled={busy}>
-            🖼 From Library
+            <Icon name="image" size={16} strokeWidth={2} /> From Library
           </button>
         </div>
         <input
@@ -162,24 +162,30 @@ export default function PhotoCapture({
         {busy && <div style={{ color: 'var(--text-dim)', marginBottom: 8 }}>Processing…</div>}
         {error && <div style={{ color: 'var(--danger)', marginBottom: 8 }}>{error}</div>}
 
-        {photos.length === 0 && !busy && (
+        {photosWithUrls.length === 0 && !busy && (
           <div className="empty" style={{ padding: '20px 0' }}>
             <p>No photos yet for this {rowId ? 'row' : 'item'}.</p>
           </div>
         )}
 
-        {photos.length > 0 && (
+        {photosWithUrls.length > 0 && (
           <div className="photo-grid">
-            {photos.map((p) => (
-              <Tile key={p.id} photo={p} onClick={() => setLightbox(p)} onDelete={() => onDelete(p.id)} />
+            {photosWithUrls.map((p, i) => (
+              <div
+                key={p.id}
+                className="photo-tile"
+                onClick={() => setLightboxIndex(i)}
+              >
+                <img src={p.blobUrl} alt="" />
+                {p.gps && (
+                  <div className="photo-tile-gps">
+                    <Icon name="gps" size={10} />
+                    <span>{p.gps.lat.toFixed(3)},{p.gps.lng.toFixed(3)}</span>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
-        )}
-
-        {debug.length > 0 && (
-          <pre className="debug-strip">
-            {debug.join('\n')}
-          </pre>
         )}
 
         <div className="btn-row" style={{ marginTop: 16, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -187,42 +193,13 @@ export default function PhotoCapture({
           <button onClick={onClose}>Done</button>
         </div>
       </div>
-      {lightbox && <Lightbox photo={lightbox} onClose={() => setLightbox(null)} />}
-    </div>
-  );
-}
-
-function Tile({ photo, onClick, onDelete }) {
-  const [url, setUrl] = useState(null);
-  useEffect(() => {
-    const u = URL.createObjectURL(photo.blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [photo.id]);
-  return (
-    <div className="photo-tile" onClick={onClick}>
-      {url && <img src={url} alt="" />}
-      {photo.gps && <div className="gps">📍</div>}
-      <button className="del" onClick={(e) => { e.stopPropagation(); onDelete(); }} aria-label="Delete">✕</button>
-    </div>
-  );
-}
-
-function Lightbox({ photo, onClose }) {
-  const [url, setUrl] = useState(null);
-  useEffect(() => {
-    const u = URL.createObjectURL(photo.blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [photo.id]);
-  return (
-    <div className="lightbox" onClick={onClose}>
-      {url && <img src={url} alt="" />}
-      <button className="close" onClick={onClose}>✕</button>
-      {photo.gps && (
-        <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, textAlign: 'center', color: 'white', fontSize: 12, opacity: 0.8 }}>
-          📍 {fmtGps(photo.gps)}
-        </div>
+      {lightboxIndex !== null && photosWithUrls[lightboxIndex] && (
+        <Lightbox
+          photos={photosWithUrls}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onDelete={onDelete}
+        />
       )}
     </div>
   );

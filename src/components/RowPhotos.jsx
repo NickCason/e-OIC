@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { listRowPhotos, deletePhoto } from '../db.js';
-import { fmtGps } from '../photoOverlay.js';
 import PhotoCapture from './PhotoCapture.jsx';
+import Icon from './Icon.jsx';
+import Lightbox from './Lightbox.jsx';
 import { toast } from '../lib/toast.js';
 
 // Row-level photos: tied to a specific row (one PLC card, one drive, etc.).
@@ -10,7 +11,7 @@ import { toast } from '../lib/toast.js';
 export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
   const [photos, setPhotos] = useState([]);
   const [open, setOpen] = useState(false);
-  const [lightbox, setLightbox] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   async function refresh() {
     setPhotos(await listRowPhotos(row.id));
@@ -18,7 +19,19 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
 
   useEffect(() => { refresh(); }, [row.id]);
 
-  async function onDelete(p) {
+  const photosWithUrls = useMemo(
+    () => photos.map((p) => ({ ...p, blobUrl: URL.createObjectURL(p.blob) })),
+    [photos]
+  );
+  useEffect(() => {
+    return () => {
+      for (const p of photosWithUrls) {
+        try { URL.revokeObjectURL(p.blobUrl); } catch {}
+      }
+    };
+  }, [photosWithUrls]);
+
+  async function handleDeletePhoto(p) {
     await deletePhoto(p.id);
     await refresh();
     onChange?.();
@@ -30,16 +43,31 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
       <div style={{ color: 'var(--text-dim)', fontSize: 12, marginBottom: 10 }}>
         Photos attached directly to this row (not the panel).
       </div>
-      <button className="primary" onClick={() => setOpen(true)} style={{ marginBottom: 10 }}>
-        📷 Capture for this row
-      </button>
-      {photos.length > 0 && (
-        <div className="photo-grid">
-          {photos.map((p) => (
-            <RowTile key={p.id} photo={p} onClick={() => setLightbox(p)} onDelete={() => onDelete(p)} />
-          ))}
-        </div>
-      )}
+      <div className="photo-grid">
+        {photosWithUrls.map((p, i) => (
+          <div
+            key={p.id}
+            className="photo-tile"
+            onClick={() => setLightboxIndex(i)}
+          >
+            <img src={p.blobUrl} alt="" />
+            {p.gps && (
+              <div className="photo-tile-gps">
+                <Icon name="gps" size={10} />
+                <span>{p.gps.lat.toFixed(3)},{p.gps.lng.toFixed(3)}</span>
+              </div>
+            )}
+          </div>
+        ))}
+        <button
+          className="photo-tile photo-tile--add"
+          onClick={() => setOpen(true)}
+          aria-label="Add photo"
+          type="button"
+        >
+          <Icon name="add" size={22} strokeWidth={1.75} />
+        </button>
+      </div>
       {open && (
         <PhotoCapture
           job={job}
@@ -51,42 +79,13 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
           onClose={() => { setOpen(false); refresh(); onChange?.(); }}
         />
       )}
-      {lightbox && <Lightbox photo={lightbox} onClose={() => setLightbox(null)} />}
-    </div>
-  );
-}
-
-function RowTile({ photo, onClick, onDelete }) {
-  const [url, setUrl] = useState(null);
-  useEffect(() => {
-    const u = URL.createObjectURL(photo.blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [photo.id]);
-  return (
-    <div className="photo-tile" onClick={onClick}>
-      {url && <img src={url} alt="" />}
-      {photo.gps && <div className="gps">📍</div>}
-      <button className="del" onClick={(e) => { e.stopPropagation(); onDelete(); }} aria-label="Delete">✕</button>
-    </div>
-  );
-}
-
-function Lightbox({ photo, onClose }) {
-  const [url, setUrl] = useState(null);
-  useEffect(() => {
-    const u = URL.createObjectURL(photo.blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [photo.id]);
-  return (
-    <div className="lightbox" onClick={onClose}>
-      {url && <img src={url} alt="" />}
-      <button className="close" onClick={onClose}>✕</button>
-      {photo.gps && (
-        <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, textAlign: 'center', color: 'white', fontSize: 12, opacity: 0.8 }}>
-          📍 {fmtGps(photo.gps)}
-        </div>
+      {lightboxIndex !== null && photosWithUrls[lightboxIndex] && (
+        <Lightbox
+          photos={photosWithUrls}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onDelete={handleDeletePhoto}
+        />
       )}
     </div>
   );

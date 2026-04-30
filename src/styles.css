@@ -842,6 +842,111 @@ main {
   border-top: 1px solid var(--border);
 }
 
+/* Photo grid + tiles */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-1);
+}
+.photo-tile {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--bg-3);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-family: inherit;
+}
+.photo-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-tile-gps {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: var(--r-sm);
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 500;
+}
+.photo-tile--add {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: transparent;
+  color: var(--text-dim);
+  transition: color 150ms ease, border-color 150ms ease;
+}
+.photo-tile--add:hover {
+  color: var(--energy);
+  border-color: var(--energy);
+}
+
+/* Photo checklist */
+.checklist-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: border-color 150ms ease;
+}
+.checklist-row:hover { border-color: var(--accent); }
+.checklist-cb {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  background: transparent;
+}
+.checklist-row.done .checklist-cb {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+.checklist-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: var(--fs-body);
+}
+.checklist-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-3);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+
+/* Section label (slab small caps) */
+.section-label {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: var(--sp-4) 0 var(--sp-2);
+  letter-spacing: -0.005em;
+}
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
@@ -927,36 +1032,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .row-pill .more { background: transparent; border: none; padding: 6px 8px; font-size: 13px; color: var(--text-dim); cursor: pointer; border-left: 1px solid var(--border); }
 .row-pill.active .more { color: var(--accent-on); border-left-color: rgba(255,255,255,0.3); }
 .row-pill .more:disabled { display: none; }
-
-.photo-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
-}
-.photo-tile {
-  position: relative; aspect-ratio: 1; background: var(--bg-3);
-  border-radius: 8px; overflow: hidden; cursor: pointer;
-  border: 1px solid var(--border);
-}
-.photo-tile img { width: 100%; height: 100%; object-fit: cover; }
-.photo-tile .del {
-  position: absolute; top: 4px; right: 4px;
-  background: rgba(0,0,0,0.6); color: white; border: none;
-  width: 24px; height: 24px; border-radius: 50%; font-size: 14px; line-height: 1;
-  cursor: pointer;
-}
-.photo-tile .gps {
-  position: absolute; bottom: 4px; left: 4px;
-  background: rgba(0,0,0,0.6); color: white;
-  border-radius: 4px; padding: 2px 5px; font-size: 10px;
-}
-.photo-checklist-item {
-  background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--r-md); padding: 12px; margin-bottom: 8px;
-}
-.photo-checklist-item .head {
-  display: flex; align-items: center; gap: 10px;
-}
-.photo-checklist-item .head .name { flex: 1; font-weight: 500; }
-.photo-checklist-item .head .count { font-size: 12px; color: var(--text-dim); }
 
 .progress-bar {
   height: 6px; background: var(--bg-3); border-radius: 3px; overflow: hidden;
