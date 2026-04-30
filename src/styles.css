@@ -71,6 +71,8 @@ button {
   background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
   padding: 10px 14px; border-radius: var(--radius); cursor: pointer;
   font-weight: 500;
+  -webkit-appearance: none; appearance: none;
+  font: inherit;
 }
 button.primary { background: var(--accent-2); border-color: var(--accent-2); color: white; }
 button.primary:hover { filter: brightness(1.08); }
@@ -180,14 +182,23 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
-  flex: 0 0 auto; padding: 8px 12px;
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
   background: var(--bg-2); border: 1px solid var(--border);
   border-radius: 999px; font-size: 13px; cursor: pointer;
   white-space: nowrap;
   color: var(--text);
+  -webkit-appearance: none; appearance: none;
+  font: inherit;
 }
 .tab.active { background: var(--accent-2); border-color: var(--accent-2); color: white; }
-.tab .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.tab .dot {
+  flex: 0 0 8px;
+  width: 8px; height: 8px; min-width: 8px; min-height: 8px;
+  border-radius: 50%;
+  align-self: center;
+}
 .tab .dot.empty { background: var(--text-dim); }
 .tab .dot.partial { background: var(--warn); }
 .tab .dot.complete { background: var(--ok); }
