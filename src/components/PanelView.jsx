@@ -3,6 +3,9 @@ import schemaMap from '../schema.json';
 import { getJob, getPanel, listRows, listPanelPhotos } from '../db.js';
 import { nav } from '../App.jsx';
 import SheetForm from './SheetForm.jsx';
+import AppBar from './AppBar.jsx';
+import Icon from './Icon.jsx';
+import SheetPicker from './SheetPicker.jsx';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',
@@ -15,6 +18,7 @@ export default function PanelView({ jobId, panelId }) {
   const [panel, setPanel] = useState(null);
   const [activeSheet, setActiveSheet] = useState('Panels');
   const [progress, setProgress] = useState({});
+  const [showSheetPicker, setShowSheetPicker] = useState(false);
 
   async function refreshProgress() {
     const p = {};
@@ -45,27 +49,44 @@ export default function PanelView({ jobId, panelId }) {
 
   if (!job || !panel) return null;
 
+  const sheetStatus = (sheet) => progress[sheet] || 'empty';
+  const idx = SHEET_ORDER.indexOf(activeSheet);
+  const total = SHEET_ORDER.length;
+
   return (
     <>
-      <header className="appbar">
-        <button className="back" onClick={() => nav(`/job/${jobId}`)} aria-label="Back">‹</button>
-        <div className="grow">
-          <h1>{panel.name}</h1>
-          <div className="crumb">{job.name}</div>
-        </div>
-      </header>
+      <AppBar
+        onBack={() => nav(`/job/${jobId}`)}
+        wordmark={job?.name || panel?.name || 'e-OIC'}
+        crumb={panel?.name && job?.name ? panel.name : null}
+      />
       <main>
+        <div className="hero">
+          <div className="hero-pretitle">
+            {idx >= 0 ? `PANEL · ${idx + 1} OF ${total} SHEETS` : 'PANEL'}
+          </div>
+          <h1 className="hero-title">{panel?.name || 'Panel'}</h1>
+        </div>
         <div className="tabs">
           {SHEET_ORDER.map((s) => (
             <button
               key={s}
+              type="button"
               className={'tab' + (activeSheet === s ? ' active' : '')}
               onClick={() => setActiveSheet(s)}
             >
-              <span className={'dot ' + (progress[s] || 'empty')} />
-              {s}
+              <span className={`dot ${sheetStatus(s)}`} aria-hidden="true" />
+              <span>{s}</span>
             </button>
           ))}
+          <button
+            type="button"
+            className="tab tab--overflow"
+            onClick={() => setShowSheetPicker(true)}
+            aria-label="All sheets"
+          >
+            <Icon name="grid" size={14} />
+          </button>
         </div>
         <SheetForm
           job={job}
@@ -74,6 +95,19 @@ export default function PanelView({ jobId, panelId }) {
           onChange={refreshProgress}
         />
       </main>
+      {showSheetPicker && (
+        <SheetPicker
+          sheets={SHEET_ORDER.map((s) => ({
+            id: s,
+            name: s,
+            status: sheetStatus(s),
+            counts: { rows: 0, total: 0 },
+          }))}
+          activeId={activeSheet}
+          onPick={(id) => setActiveSheet(id)}
+          onClose={() => setShowSheetPicker(false)}
+        />
+      )}
     </>
   );
 }
