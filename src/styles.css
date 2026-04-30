@@ -559,6 +559,64 @@ main {
 }
 .sheet-picker-chev { color: var(--text-dim); }
 
+/* SaveBar (sticky save & next) */
+.savebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding:
+    var(--sp-2)
+    max(env(safe-area-inset-right), var(--sp-3))
+    max(var(--sp-2), env(safe-area-inset-bottom))
+    max(env(safe-area-inset-left), var(--sp-3));
+  background: linear-gradient(to top, var(--bg) 60%, rgba(0,0,0,0));
+  pointer-events: none;
+}
+.savebar-saved {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--ok);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.savebar-saved.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.savebar-cta {
+  pointer-events: auto;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  background: var(--energy);
+  color: white;
+  border: 1px solid var(--energy);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: var(--fs-body);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 50ms ease;
+}
+.savebar-cta:active { transform: scale(0.96); }
+.savebar-cta:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
