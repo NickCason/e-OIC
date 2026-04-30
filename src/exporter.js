@@ -76,6 +76,21 @@ export async function buildExport(job, {
   // 2. Job-level data
   const panels = await listPanels(job.id);
 
+  // Pre-fetch photos so we can:
+  //   a) decide whether each row's Photo/Folder Hyperlink cell should be a
+  //      live hyperlink (rows with no photos get plain text, no broken click)
+  //   b) reuse the result during the bundling phase below
+  const photosByPanel = new Map();
+  for (const panel of panels) {
+    photosByPanel.set(panel.id, await listPanelPhotos(panel.id));
+  }
+  const rowsWithPhotos = new Set();
+  for (const photos of photosByPanel.values()) {
+    for (const ph of photos) {
+      if (ph.rowId) rowsWithPhotos.add(ph.rowId);
+    }
+  }
+
   // 3. Populate sheets
   onProgress({ phase: 'populating', percent: 15 });
   const sheetCount = SHEET_ORDER.length;
@@ -132,15 +147,23 @@ export async function buildExport(job, {
           if (!ci) continue;
           if (col.header === schema.hyperlink_column) {
             const folder = `Photos/${safe(panel.name)}/${safe(sheetName)}/${rowLabel(row, schema)}/`;
-            // Excel rejects relationship targets that aren't valid URIs —
-            // unencoded spaces / specials in panel/row names corrupt the
-            // workbook. encodeURI keeps `/` as-is and percent-encodes the
-            // rest, producing a valid Target attribute. Display text stays
-            // human-readable. If anything still trips the writer, fall back
-            // to a plain string so the file at least opens.
-            try {
-              r.getCell(ci).value = { text: folder, hyperlink: encodeURI(folder) };
-            } catch (e) {
+            if (rowsWithPhotos.has(row.id)) {
+              // Excel for Mac (and the App Sandbox) won't reliably "open" a
+              // folder URL via a relative hyperlink — clicks end up no-ops.
+              // It WILL reliably open a JPG file in Preview, so target the
+              // first photo (we always name the first IMG_001.jpg). Display
+              // text remains the folder path so the user can see where the
+              // batch lives.
+              const firstFile = folder + 'IMG_001.jpg';
+              try {
+                r.getCell(ci).value = { text: folder, hyperlink: encodeURI(firstFile) };
+              } catch (e) {
+                r.getCell(ci).value = folder;
+              }
+            } else {
+              // No row-level photos for this row — write plain text so the
+              // user can still see where photos would go, but no broken
+              // hyperlink to click on.
               r.getCell(ci).value = folder;
             }
           } else {
@@ -322,8 +345,7 @@ export async function buildExport(job, {
   let writtenPhotos = 0;
   const allPanelPhotos = [];
   for (const panel of panels) {
-    const photos = await listPanelPhotos(panel.id);
-    allPanelPhotos.push({ panel, photos });
+    allPanelPhotos.push({ panel, photos: photosByPanel.get(panel.id) || [] });
   }
   const grandTotalPhotos = allPanelPhotos.reduce((s, p) => s + p.photos.length, 0);
 
