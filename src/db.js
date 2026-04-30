@@ -15,7 +15,7 @@ import { openDB } from 'idb';
 // e-OIC. Renaming the IndexedDB would orphan every job, panel, photo, and
 // note already stored on installed devices. The internal name stays.
 const DB_NAME = 'onsite-investigation';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise = null;
 
@@ -51,6 +51,11 @@ export function getDB() {
           }
           if (!db.objectStoreNames.contains('settings')) {
             db.createObjectStore('settings', { keyPath: 'key' });
+          }
+        }
+        if (oldVersion < 3) {
+          if (!db.objectStoreNames.contains('checklistState')) {
+            db.createObjectStore('checklistState', { keyPath: 'jobId' });
           }
         }
       },
