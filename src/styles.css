@@ -947,6 +947,66 @@ main {
   letter-spacing: -0.005em;
 }
 
+/* Export sheet */
+.export-sheet {
+  background: var(--bg-2);
+  width: 100%;
+  max-width: 500px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: var(--sp-2) var(--sp-4) max(var(--sp-5), env(safe-area-inset-bottom));
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  animation: sheet-up 250ms ease-out;
+}
+.export-summary {
+  background: var(--bg-3);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  font-size: var(--fs-body);
+}
+.export-summary-sub {
+  font-size: var(--fs-caption);
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.export-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-3);
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+.export-progress-text {
+  font-size: var(--fs-body);
+  color: var(--text);
+  font-weight: 500;
+}
+.export-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid var(--bg-3);
+  border-top-color: var(--energy);
+  animation: spin 800ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.export-check {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.export-progress--error { color: var(--danger); }
+.export-progress--error .export-progress-text { color: var(--danger); }
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
