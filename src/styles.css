@@ -383,17 +383,34 @@ main {
 }
 
 /* Search input with leading icon */
-.search-wrap { position: relative; margin-bottom: var(--sp-3); }
-.search-wrap .search-icon {
-  position: absolute;
-  left: var(--sp-3);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-dim);
-  pointer-events: none;
-  z-index: 1;
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+  padding: 0 var(--sp-3);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  transition: border-color 150ms ease;
 }
-.search-bar--with-icon { padding-left: 36px; }
+.search-wrap:focus-within { border-color: var(--accent); }
+.search-wrap .search-icon {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.search-bar--with-icon {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 10px 0;
+  outline: none;
+  color: var(--text);
+}
+.search-bar--with-icon::placeholder { color: var(--text-dim); }
 
 /* Stat tiles */
 .stat-row {
