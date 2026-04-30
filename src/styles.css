@@ -1242,16 +1242,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   padding: 8px 10px; word-break: break-all;
 }
 
-.debug-strip {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px; color: var(--text-dim);
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 8px 10px; margin: 8px 0 0;
-  white-space: pre-wrap; word-break: break-all;
-  max-height: 160px; overflow: auto;
-}
-
 .row-pills {
   display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
 }
@@ -1336,8 +1326,3 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .view-toggle button.active { background: var(--accent); color: var(--accent-on); }
 
-.kv {
-  display: flex; gap: 8px; font-size: 13px; padding: 4px 0;
-}
-.kv .k { color: var(--text-dim); flex: 0 0 40%; }
-.kv .v { flex: 1; word-break: break-word; }
