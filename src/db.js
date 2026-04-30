@@ -421,6 +421,7 @@ export async function exportAllJSON() {
   const panels = await db.getAll('panels');
   const rows = await db.getAll('rows');
   const sheetNotes = await db.getAll('sheetNotes');
+  const checklistState = await db.getAll('checklistState');
   const photoRecs = await db.getAll('photos');
   const photos = [];
   for (const p of photoRecs) {
@@ -429,7 +430,7 @@ export async function exportAllJSON() {
   return {
     backupVersion: BACKUP_VERSION,
     exportedAt: Date.now(),
-    jobs, panels, rows, sheetNotes, photos,
+    jobs, panels, rows, sheetNotes, checklistState, photos,
   };
 }
 
@@ -451,6 +452,8 @@ export async function exportJobJSON(jobId) {
       photosAll.push({ ...photo, blob: await blobToBase64(photo.blob) });
     }
   }
+  const clRec = await db.get('checklistState', jobId);
+  const checklistState = clRec ? [clRec] : [];
   return {
     backupVersion: BACKUP_VERSION,
     exportedAt: Date.now(),
@@ -458,6 +461,7 @@ export async function exportJobJSON(jobId) {
     panels,
     rows: rowsAll,
     sheetNotes: sheetNotesAll,
+    checklistState,
     photos: photosAll,
   };
 }
@@ -475,7 +479,10 @@ export async function importJSON(snapshot, { mode = 'merge' } = {}) {
     }
   }
 
-  const tx = db.transaction(['jobs', 'panels', 'rows', 'sheetNotes', 'photos'], 'readwrite');
+  const tx = db.transaction(
+    ['jobs', 'panels', 'rows', 'sheetNotes', 'checklistState', 'photos'],
+    'readwrite'
+  );
   for (const j of snapshot.jobs) {
     const existing = await tx.objectStore('jobs').get(j.id);
     if (!existing || mode === 'replace') await tx.objectStore('jobs').put(j);
@@ -491,6 +498,10 @@ export async function importJSON(snapshot, { mode = 'merge' } = {}) {
   for (const n of snapshot.sheetNotes || []) {
     const existing = await tx.objectStore('sheetNotes').get(n.id);
     if (!existing || mode === 'replace') await tx.objectStore('sheetNotes').put(n);
+  }
+  for (const cl of snapshot.checklistState || []) {
+    const existing = await tx.objectStore('checklistState').get(cl.jobId);
+    if (!existing || mode === 'replace') await tx.objectStore('checklistState').put(cl);
   }
   for (const photo of snapshot.photos) {
     const existing = await tx.objectStore('photos').get(photo.id);
