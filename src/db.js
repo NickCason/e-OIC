@@ -109,6 +109,7 @@ export async function deleteJob(id) {
   const db = await getDB();
   const panels = await db.getAllFromIndex('panels', 'jobId', id);
   for (const p of panels) await deletePanel(p.id);
+  await db.delete('checklistState', id);
   await db.delete('jobs', id);
 }
 
@@ -305,6 +306,90 @@ export async function getJobSizeEstimate(jobId) {
     rowCount += rows.length;
   }
   return { panels: panels.length, rows: rowCount, photos: photoCount, bytes: byteCount };
+}
+
+// ======= Checklist State =======
+
+// Slug used as the stable taskId for manual tasks. Mirrors the canonical
+// label list defined in src/lib/metrics.js — keep them in sync.
+export function slugifyTaskLabel(label) {
+  return String(label || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const DEFAULT_CHECKLIST_STATE = () => ({
+  manualTasks: {},
+  customTasks: [],
+});
+
+export async function getChecklistState(jobId) {
+  const db = await getDB();
+  const rec = await db.get('checklistState', jobId);
+  if (!rec) return { jobId, ...DEFAULT_CHECKLIST_STATE() };
+  return {
+    jobId,
+    manualTasks: rec.manualTasks || {},
+    customTasks: Array.isArray(rec.customTasks) ? rec.customTasks : [],
+  };
+}
+
+export async function setChecklistState(jobId, state) {
+  const db = await getDB();
+  await db.put('checklistState', {
+    jobId,
+    manualTasks: state.manualTasks || {},
+    customTasks: state.customTasks || [],
+  });
+}
+
+export async function setManualTaskCompleted(jobId, taskId, completed) {
+  const state = await getChecklistState(jobId);
+  state.manualTasks = { ...state.manualTasks, [taskId]: !!completed };
+  await setChecklistState(jobId, state);
+  return state;
+}
+
+export async function addCustomTask(jobId, label) {
+  const trimmed = String(label || '').trim();
+  if (!trimmed) throw new Error('Task label is required');
+  const state = await getChecklistState(jobId);
+  const task = {
+    id: (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+    label: trimmed,
+    completed: false,
+    createdAt: Date.now(),
+  };
+  state.customTasks = [...state.customTasks, task];
+  await setChecklistState(jobId, state);
+  return task;
+}
+
+export async function renameCustomTask(jobId, taskId, label) {
+  const trimmed = String(label || '').trim();
+  if (!trimmed) throw new Error('Task label is required');
+  const state = await getChecklistState(jobId);
+  state.customTasks = state.customTasks.map((t) =>
+    t.id === taskId ? { ...t, label: trimmed } : t
+  );
+  await setChecklistState(jobId, state);
+}
+
+export async function setCustomTaskCompleted(jobId, taskId, completed) {
+  const state = await getChecklistState(jobId);
+  state.customTasks = state.customTasks.map((t) =>
+    t.id === taskId ? { ...t, completed: !!completed } : t
+  );
+  await setChecklistState(jobId, state);
+}
+
+export async function deleteCustomTask(jobId, taskId) {
+  const state = await getChecklistState(jobId);
+  state.customTasks = state.customTasks.filter((t) => t.id !== taskId);
+  await setChecklistState(jobId, state);
 }
 
 // ======= Backup / Restore =======
