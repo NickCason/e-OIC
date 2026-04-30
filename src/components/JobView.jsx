@@ -3,6 +3,7 @@ import {
   getJob, listPanels, createPanel, updatePanel, deletePanel, duplicatePanel,
   listAllRows, listPanelPhotos, exportJobJSON, importJSON, updateJob,
 } from '../db.js';
+import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics.js';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import ExportDialog from './ExportDialog.jsx';
@@ -10,6 +11,8 @@ import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import EmptyState from './EmptyState.jsx';
+import PercentRing from './PercentRing.jsx';
+import PercentBar from './PercentBar.jsx';
 
 export default function JobView({ jobId }) {
   const [job, setJob] = useState(null);
@@ -18,6 +21,9 @@ export default function JobView({ jobId }) {
   const [editing, setEditing] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [stats, setStats] = useState({});
+  const [panelPercents, setPanelPercents] = useState({});
+  const [aggregate, setAggregate] = useState({ panelCount: 0, photoCount: 0, jobPercent: 0 });
+  const [checklistTotals, setChecklistTotals] = useState({ checked: 0, total: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
 
   async function refresh() {
@@ -27,15 +33,26 @@ export default function JobView({ jobId }) {
     const ps = await listPanels(jobId);
     setPanels(ps);
     const s = {};
+    const pp = {};
     for (const p of ps) {
       const rows = await listAllRows(p.id);
       const photos = await listPanelPhotos(p.id);
       s[p.id] = { rows: rows.length, photos: photos.length };
+      pp[p.id] = (await getPanelProgress(p.id)).percent;
     }
     setStats(s);
+    setPanelPercents(pp);
+    setAggregate(await getJobAggregateStats(jobId));
+    const tasks = await getJobChecklist(jobId);
+    setChecklistTotals({ checked: tasks.filter((t) => t.completed).length, total: tasks.length });
   }
 
   useEffect(() => { refresh(); }, [jobId]);
+  useEffect(() => {
+    const onFocus = () => { refresh(); };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [jobId]);
 
   async function onDelete(panel) {
     // Snapshot panel via per-job export, then filter to just this panel's data
@@ -118,12 +135,27 @@ export default function JobView({ jobId }) {
       <main>
         <div className="hero">
           <div className="hero-pretitle">
-            {totalPanels > 0
-              ? `JOB · ${totalPanels} PANEL${totalPanels === 1 ? '' : 'S'}`
-              : 'JOB'}
+            {`JOB · ${aggregate.jobPercent}% COMPLETE · ${aggregate.panelCount} PANEL${aggregate.panelCount === 1 ? '' : 'S'} · ${aggregate.photoCount} PHOTO${aggregate.photoCount === 1 ? '' : 'S'}`}
           </div>
           <h1 className="hero-title">{job.name || 'Loading…'}</h1>
         </div>
+        <button
+          type="button"
+          className="checklist-cta"
+          onClick={() => nav(`/job/${jobId}/checklist`)}
+        >
+          <div className="checklist-cta__top">
+            <span className="checklist-cta__title">Checklist</span>
+            <span className="checklist-cta__count">
+              {checklistTotals.checked} / {checklistTotals.total} · {aggregate.jobPercent}%
+            </span>
+          </div>
+          <PercentBar
+            percent={aggregate.jobPercent}
+            height={6}
+            ariaLabel={`Checklist ${aggregate.jobPercent}% complete`}
+          />
+        </button>
         {panels.length === 0 && (
           <EmptyState
             icon="add"
@@ -143,6 +175,15 @@ export default function JobView({ jobId }) {
                   {p.updatedAt && <> · {fmtRelative(p.updatedAt)}</>}
                 </div>
               </div>
+              <PercentRing
+                percent={panelPercents[p.id] ?? 0}
+                size={36}
+                stroke={3}
+                className="panel-row-ring"
+                ariaLabel={`${panelPercents[p.id] ?? 0}% complete`}
+              >
+                <span className="panel-row-ring__pct">{panelPercents[p.id] ?? 0}</span>
+              </PercentRing>
               <div className="actions">
                 <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); setEditing(p); }} aria-label="Edit">✎</button>
                 <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); onDuplicate(p); }} aria-label="Duplicate">⧉</button>

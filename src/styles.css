@@ -1434,3 +1434,41 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .stat-row--four { grid-template-columns: repeat(4, 1fr); }
 .stat-row--four .stat-val { font-size: 22px; }
+.checklist-cta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-3);
+  margin: 0 var(--sp-3) var(--sp-3) var(--sp-3);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.checklist-cta:active { transform: scale(0.998); }
+.checklist-cta__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+.checklist-cta__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-strong);
+  font-size: 16px;
+}
+.checklist-cta__count {
+  color: var(--text-dim);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.panel-row-ring { margin-right: var(--sp-2); }
+.panel-row-ring__pct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
