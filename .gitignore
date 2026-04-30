@@ -11,3 +11,4 @@ dist/
 # Reference investigation files used for E2E test design — kept local,
 # may contain real plant data we don't want in source control.
 Investigation Checklist*.xlsx
+.superpowers/
