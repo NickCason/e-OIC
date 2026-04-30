@@ -12,6 +12,7 @@
 import schemaMap from './schema.json' with { type: 'json' };
 import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
+  getChecklistState, slugifyTaskLabel,
 } from './db.js';
 import { fmtTimestamp, fmtGps } from './photoOverlay.js';
 import { safe, rowLabel } from './lib/paths.js';
@@ -214,10 +215,13 @@ export async function buildExport(job, {
     }
   }
 
-  // 4. Update Checklist completion
+  // 4. Update Checklist completion (auto + manual) and append custom tasks
+  let checklistSheet = null;
+  let checklistLastTaskRow = 0;
   try {
     const cl = wb.getWorksheet('Checklist');
     if (cl) {
+      checklistSheet = cl;
       const sheetByTask = {
         'Panel Sheet': 'Panels',
         'Power Sheet': 'Power',
@@ -237,11 +241,20 @@ export async function buildExport(job, {
         const rs = await listAllRows(p.id);
         for (const r of rs) filled.add(r.sheet);
       }
+      const cls = await getChecklistState(job.id);
+      const manualTasks = cls.manualTasks || {};
       for (let r = 2; r <= cl.rowCount; r++) {
-        const task = cl.getCell(r, 1).value;
-        if (!task) continue;
-        const sheet = sheetByTask[String(task).trim()];
+        const taskCell = cl.getCell(r, 1).value;
+        if (!taskCell) continue;
+        const taskLabel = String(taskCell).trim();
+        checklistLastTaskRow = r;
+        const sheet = sheetByTask[taskLabel];
         if (sheet && filled.has(sheet)) {
+          cl.getCell(r, 3).value = CHK_ON;
+          continue;
+        }
+        const slug = slugifyTaskLabel(taskLabel);
+        if (manualTasks[slug] === true) {
           cl.getCell(r, 3).value = CHK_ON;
         }
       }
