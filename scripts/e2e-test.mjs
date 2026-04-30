@@ -170,5 +170,29 @@ const notesWs = wb.getWorksheet('Notes');
 if (!notesWs) throw new Error('Notes sheet not found');
 console.log(`  Notes sheet has ${notesWs.rowCount} rows`);
 
+// Boolean fields render as Unicode checkbox glyphs, not as TRUE/FALSE text.
+console.log('[e2e] verifying boolean -> checkbox glyph conversion…');
+{
+  let foundCheckbox = false;
+  let foundLiteralBoolean = false;
+  for (const ws of wb.worksheets) {
+    ws.eachRow((row) => {
+      row.eachCell((cell) => {
+        const v = cell.value;
+        const text = v && typeof v === 'object' && 'text' in v ? v.text : v;
+        if (text === '☑' || text === '☐') foundCheckbox = true;
+        if (text === true || text === false) foundLiteralBoolean = true;
+      });
+    });
+  }
+  if (foundLiteralBoolean) {
+    throw new Error('regression: at least one cell still holds a literal true/false (should be ☑/☐ glyph)');
+  }
+  if (!foundCheckbox) {
+    throw new Error('expected at least one ☑ or ☐ glyph in the workbook (seed has true-valued IO List Completed flags)');
+  }
+  console.log('  found ☑/☐ glyphs, no literal true/false values ✓');
+}
+
 console.log('\n[e2e] ✅ all checks passed');
 console.log(`[e2e] inspect outputs at: ${outDir}`);

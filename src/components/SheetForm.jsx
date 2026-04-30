@@ -3,9 +3,13 @@ import schemaMap from '../schema.json';
 import {
   listRows, createRow, updateRow, deleteRow, reorderRow,
   getSheetNotes, setSheetNotes, listRowPhotos, exportJobJSON, importJSON,
+  listPanels, listAllRows,
 } from '../db.js';
 import { toast } from '../lib/toast.js';
 import { rowPhotoFolder } from '../lib/paths.js';
+import {
+  getHint, getEnumOptions, isSharedHeader, slugForId,
+} from '../lib/fieldHints.js';
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
 
@@ -21,6 +25,10 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
   const [rows, setRows] = useState([]);
   const [activeRowId, setActiveRowId] = useState(null);
   const [view, setView] = useState('form'); // 'form' | 'table'
+  // Map of header -> string[] of distinct values across all rows in the job.
+  // Drives the cross-row autocomplete for SHARED_HEADERS (Area, Panel Name,
+  // etc.). Refreshed on mount, on row save, and on panel/sheet change.
+  const [sharedValues, setSharedValues] = useState({});
 
   async function refresh() {
     const r = await listRows(panel.id, sheetName);
@@ -31,7 +39,31 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
     if (r.length === 0) setActiveRowId(null);
   }
 
+  async function refreshSharedValues() {
+    if (!job?.id) return;
+    const acc = {};
+    const panels = await listPanels(job.id);
+    for (const p of panels) {
+      const allRows = await listAllRows(p.id);
+      for (const r of allRows) {
+        for (const [k, v] of Object.entries(r.data || {})) {
+          if (typeof v === 'string') {
+            const t = v.trim();
+            if (t) {
+              if (!acc[k]) acc[k] = new Set();
+              acc[k].add(t);
+            }
+          }
+        }
+      }
+    }
+    const out = {};
+    for (const [k, s] of Object.entries(acc)) out[k] = Array.from(s).sort();
+    setSharedValues(out);
+  }
+
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [panel.id, sheetName]);
+  useEffect(() => { refreshSharedValues(); /* eslint-disable-next-line */ }, [job?.id, panel.id, sheetName]);
 
   async function addRow() {
     const row = await createRow({ panelId: panel.id, sheet: sheetName });
@@ -91,7 +123,8 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
           sheetName={sheetName}
           schema={schema}
           row={activeRow}
-          onSaved={() => { refresh(); onChange?.(); }}
+          sharedValues={sharedValues}
+          onSaved={() => { refresh(); refreshSharedValues(); onChange?.(); }}
         />
       )}
     </div>
@@ -229,7 +262,7 @@ function formatCell(v) {
 }
 
 // ----- Row editor (the heavy form) -----
-function RowEditor({ job, panel, sheetName, schema, row, onSaved }) {
+function RowEditor({ job, panel, sheetName, schema, row, sharedValues, onSaved }) {
   const groups = {};
   for (const col of schema.columns) {
     const g = col.group || 'General Data';
@@ -265,6 +298,9 @@ function RowEditor({ job, panel, sheetName, schema, row, onSaved }) {
                   col.header === schema.hyperlink_column
                     ? rowPhotoFolder(panel.name, sheetName, row, schema)
                     : null
+                }
+                sharedSuggestions={
+                  isSharedHeader(col.header) ? (sharedValues?.[col.header] || []) : null
                 }
                 onChange={async (v) => {
                   await updateRow(row.id, { data: { [col.header]: v } });
@@ -311,7 +347,7 @@ function Group({ name, count, children }) {
 }
 
 // ----- Field with debounced save-on-type -----
-function Field({ column, value, isHyperlink, hyperlinkPath, onChange }) {
+function Field({ column, value, isHyperlink, hyperlinkPath, sharedSuggestions, onChange }) {
   if (isHyperlink) {
     return (
       <div className="field">
@@ -337,10 +373,23 @@ function Field({ column, value, isHyperlink, hyperlinkPath, onChange }) {
     );
   }
 
-  return <DebouncedTextField column={column} value={value} onChange={onChange} />;
+  // Datalist options: prefer hardcoded enum (Phase, Protocol, etc.); fall
+  // back to shared cross-row suggestions (Area, Panel Name, etc.).
+  const enumOpts = getEnumOptions(column.header);
+  const datalistOptions = enumOpts || sharedSuggestions || null;
+
+  return (
+    <DebouncedTextField
+      column={column}
+      value={value}
+      onChange={onChange}
+      datalistOptions={datalistOptions}
+      hint={getHint(column.header)}
+    />
+  );
 }
 
-function DebouncedTextField({ column, value, onChange }) {
+function DebouncedTextField({ column, value, onChange, datalistOptions, hint }) {
   const [local, setLocal] = useState(value ?? '');
   const lastSaved = useRef(value ?? '');
 
@@ -362,18 +411,33 @@ function DebouncedTextField({ column, value, onChange }) {
 
   const isLong = /description|notes/i.test(column.header);
   const isNumeric = looksNumeric(column.header);
+  const listId = datalistOptions && datalistOptions.length > 0
+    ? `dl-${slugForId(column.header)}-${column.index}`
+    : null;
 
   return (
     <div className="field">
       <label>{column.header}</label>
       {isLong ? (
-        <textarea value={local} onChange={(e) => setLocal(e.target.value)} />
+        <textarea
+          value={local}
+          onChange={(e) => setLocal(e.target.value)}
+          placeholder={hint || undefined}
+        />
       ) : (
         <input
           value={local}
           onChange={(e) => setLocal(e.target.value)}
           inputMode={isNumeric ? 'decimal' : undefined}
+          placeholder={hint || undefined}
+          list={listId || undefined}
+          autoComplete="off"
         />
+      )}
+      {listId && (
+        <datalist id={listId}>
+          {datalistOptions.map((opt) => <option key={opt} value={opt} />)}
+        </datalist>
       )}
     </div>
   );

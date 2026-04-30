@@ -34,9 +34,16 @@ function findColumnIndex(ws, headerRow, target) {
   return null;
 }
 
+// Visible Unicode checkbox glyphs — render as actual checkbox shapes in
+// every Excel version, which the user prefers over the literal TRUE/FALSE
+// text Excel writes for native booleans.
+const CHK_ON = '☑'; // ☑
+const CHK_OFF = '☐'; // ☐
+
 function coerce(v) {
   if (v === undefined || v === null || v === '') return null;
-  if (v === true || v === false) return v;
+  if (v === true) return CHK_ON;
+  if (v === false) return CHK_OFF;
   if (typeof v === 'number') return v;
   if (typeof v === 'string') {
     const t = v.trim();
@@ -235,7 +242,7 @@ export async function buildExport(job, {
         if (!task) continue;
         const sheet = sheetByTask[String(task).trim()];
         if (sheet && filled.has(sheet)) {
-          cl.getCell(r, 3).value = true;
+          cl.getCell(r, 3).value = CHK_ON;
         }
       }
     }
@@ -313,6 +320,17 @@ export async function buildExport(job, {
       xml = xml.replace(
         /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
         '$3$2$1',
+      );
+      // Convert every <c ... t="b"><v>1|0</v></c> into a Unicode-checkbox
+      // inline-string cell. Catches booleans that came in from the template
+      // (e.g. the Checklist sheet's pre-marked cells) so the user sees ☑/☐
+      // everywhere instead of TRUE/FALSE text.
+      xml = xml.replace(
+        /<c([^>]*?)\st="b"([^>]*?)><v>([01])<\/v><\/c>/g,
+        (m, before, after, val) => {
+          const glyph = val === '1' ? CHK_ON : CHK_OFF;
+          return `<c${before} t="inlineStr"${after}><is><t>${glyph}</t></is></c>`;
+        },
       );
       fixZip.file(f, xml);
     }
