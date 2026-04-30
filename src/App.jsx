@@ -3,6 +3,7 @@ import JobList from './components/JobList.jsx';
 import JobView from './components/JobView.jsx';
 import PanelView from './components/PanelView.jsx';
 import SettingsView from './components/SettingsView.jsx';
+import ChecklistView from './components/ChecklistView.jsx';
 import ToastHost from './components/ToastHost.jsx';
 import UpdatePill from './components/UpdatePill.jsx';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation.js';
@@ -15,6 +16,9 @@ function parseHash() {
   if (parts[0] === 'settings') return { name: 'settings' };
   if (parts[0] === 'job' && parts[1] && parts[2] === 'panel' && parts[3]) {
     return { name: 'panel', jobId: parts[1], panelId: parts[3] };
+  }
+  if (parts[0] === 'job' && parts[1] && parts[2] === 'checklist') {
+    return { name: 'checklist', jobId: parts[1] };
   }
   if (parts[0] === 'job' && parts[1]) {
     return { name: 'job', jobId: parts[1] };
@@ -60,6 +64,7 @@ export default function App() {
       {route.name === 'jobs' && <JobList />}
       {route.name === 'job' && <JobView jobId={route.jobId} />}
       {route.name === 'panel' && <PanelView jobId={route.jobId} panelId={route.panelId} />}
+      {route.name === 'checklist' && <ChecklistView jobId={route.jobId} />}
       {route.name === 'settings' && <SettingsView />}
       <ToastHost />
       <UpdatePill />
