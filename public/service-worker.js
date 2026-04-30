@@ -1,6 +1,6 @@
 // e-OIC (Onsite Investigation Checklist) PWA — service worker
 // Bump VERSION on each deploy to force clients to fetch fresh assets.
-const VERSION = 'v14';
+const VERSION = 'v15';
 const CACHE = `eoic-${VERSION}`;
 
 const PRECACHE = [
@@ -9,6 +9,14 @@ const PRECACHE = [
   './manifest.webmanifest',
   './template.xlsx',
   './seed.json',
+  './brand/mark-color.png',
+  './brand/mark-white.png',
+  './fonts/Montserrat-400.woff2',
+  './fonts/Montserrat-500.woff2',
+  './fonts/Montserrat-600.woff2',
+  './fonts/Montserrat-700.woff2',
+  './fonts/RobotoSlab-500.woff2',
+  './fonts/RobotoSlab-600.woff2',
 ];
 
 self.addEventListener('install', (e) => {

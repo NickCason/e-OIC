@@ -9,6 +9,12 @@
 
 ---
 
+## Version history
+
+v15: Visual redesign — Choplin Editorial direction (E Tech Group brand kit). Slab-serif page titles, brand mark in app bar, Lucide icon set, themed lightbox, hybrid save model with sticky save-and-next bar, refreshed light/dark token palettes, EmptyState component, three-section Settings layout. No data model or export-pipeline changes.
+
+---
+
 ## 1. Purpose
 
 **e-OIC** (eTechGroup Onsite Investigation Checklist) is a mobile-first
@@ -447,7 +453,7 @@ this device"), and offline status ("Yes (after first load)").
   vite.config.js — these libs (~300 KB gzipped) are only fetched when
   the user taps Export, not on initial PWA install.
 - **Service worker** precaches `index.html`, `manifest.webmanifest`,
-  `template.xlsx`, and assets, then serves them offline. `VERSION = 'v14'`
+  `template.xlsx`, and assets, then serves them offline. `VERSION = 'v15'`
   bust on each deploy forces clients to fetch fresh.
 
 ---
