@@ -259,7 +259,27 @@ export async function buildExport(job, {
 
   // 6. Serialize
   onProgress({ phase: 'serializing', percent: 55 });
-  const xlsxBuf = await wb.xlsx.writeBuffer();
+  let xlsxBuf = await wb.xlsx.writeBuffer();
+
+  // ExcelJS workaround: when round-tripping a loaded template it emits
+  // horizontalDpi="4294967295" and verticalDpi="4294967295" (uint32 max
+  // sentinel for "unset") on every sheet's <pageSetup>. Modern Excel
+  // rejects these as out-of-range integers and reports the file as
+  // corrupted. Open the xlsx zip, strip the bad attributes from each
+  // sheet's XML, and repackage.
+  {
+    const fixZip = new JSZip();
+    await fixZip.loadAsync(xlsxBuf);
+    const sheetFiles = Object.keys(fixZip.files).filter((f) =>
+      /^xl\/worksheets\/sheet\d+\.xml$/.test(f),
+    );
+    for (const f of sheetFiles) {
+      let xml = await fixZip.file(f).async('string');
+      xml = xml.replace(/\s+(horizontalDpi|verticalDpi)="4294967295"/g, '');
+      fixZip.file(f, xml);
+    }
+    xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });
+  }
 
   // 7. Build zip
   onProgress({ phase: 'bundling', percent: 60 });
