@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, importJSON, exportJobJSON } from '../db.js';
+import { getJobPercent } from '../lib/metrics.js';
+import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import { BUILD_VERSION } from '../version.js';
@@ -13,14 +15,20 @@ export default function JobList() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState(null);
   const [stats, setStats] = useState({});
+  const [percents, setPercents] = useState({});
   const [search, setSearch] = useState('');
 
   async function refresh() {
     const all = await listJobs();
     setJobs(all);
     const s = {};
-    for (const j of all) s[j.id] = await getJobSizeEstimate(j.id);
+    const p = {};
+    for (const j of all) {
+      s[j.id] = await getJobSizeEstimate(j.id);
+      p[j.id] = await getJobPercent(j.id);
+    }
     setStats(s);
+    setPercents(p);
   }
 
   useEffect(() => { refresh(); }, []);
@@ -47,16 +55,22 @@ export default function JobList() {
 
   // Aggregate stats across all jobs for the hero stat row.
   const totals = useMemo(() => {
-    let panels = 0, photos = 0, inProgress = 0;
+    let panels = 0, photos = 0, inProgress = 0, percentSum = 0, percentCount = 0;
     for (const j of jobs) {
       const s = stats[j.id];
-      if (!s) continue;
-      panels += s.panels || 0;
-      photos += s.photos || 0;
-      if ((s.panels || 0) > 0) inProgress += 1;
+      if (s) {
+        panels += s.panels || 0;
+        photos += s.photos || 0;
+        if ((s.panels || 0) > 0) inProgress += 1;
+      }
+      if (percents[j.id] != null) {
+        percentSum += percents[j.id];
+        percentCount += 1;
+      }
     }
-    return { panels, photos, inProgress, total: jobs.length };
-  }, [jobs, stats]);
+    const avgPercent = percentCount > 0 ? Math.round(percentSum / percentCount) : 0;
+    return { panels, photos, inProgress, total: jobs.length, avgPercent };
+  }, [jobs, stats, percents]);
 
   return (
     <>
@@ -96,7 +110,7 @@ export default function JobList() {
               />
             </div>
 
-            <div className="stat-row">
+            <div className="stat-row stat-row--four">
               <div className="stat-tile">
                 <div className="stat-label">Active</div>
                 <div className="stat-val">{totals.inProgress}</div>
@@ -108,6 +122,10 @@ export default function JobList() {
               <div className="stat-tile">
                 <div className="stat-label">Photos</div>
                 <div className="stat-val">{totals.photos}</div>
+              </div>
+              <div className="stat-tile">
+                <div className="stat-label">% Complete</div>
+                <div className="stat-val">{totals.avgPercent}%</div>
               </div>
             </div>
           </>
@@ -126,7 +144,15 @@ export default function JobList() {
           const s = stats[j.id];
           return (
             <div key={j.id} className="job-card" onClick={() => nav(`/job/${j.id}`)}>
-              <div className="job-monogram">{monogram(j.name)}</div>
+              <PercentRing
+                percent={percents[j.id] ?? 0}
+                size={56}
+                stroke={5}
+                className="job-monogram-ring"
+                ariaLabel={`${percents[j.id] ?? 0}% complete`}
+              >
+                {monogram(j.name)}
+              </PercentRing>
               <div className="job-grow">
                 <div className="job-title"><Marquee>{j.name}</Marquee></div>
                 <div className="job-sub">

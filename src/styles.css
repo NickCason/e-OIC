@@ -1423,3 +1423,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .percent-bar__fill {
   display: block;
 }
+.job-monogram-ring {
+  margin-right: var(--sp-3);
+}
+.job-monogram-ring .percent-ring__center {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-strong);
+}
+.stat-row--four { grid-template-columns: repeat(4, 1fr); }
+.stat-row--four .stat-val { font-size: 22px; }
