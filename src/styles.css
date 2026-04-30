@@ -1,63 +1,205 @@
-/* Light/dark theme via [data-theme] on <html>. */
+/* ============================================================
+   e-OIC UI — Choplin Editorial direction
+   See docs/superpowers/specs/2026-04-30-ui-redesign-design.md
+   ============================================================ */
 
-:root,
-[data-theme="dark"] {
-  --bg: #0b1220;
-  --bg-2: #111a2e;
-  --bg-3: #1a2540;
-  --border: #243352;
-  --text: #e6edf7;
-  --text-dim: #9aa8c1;
-  --text-strong: #ffffff;
-  --accent: #4aa3ff;
-  --accent-2: #0b5cad;
-  --warn: #f59e0b;
-  --ok: #10b981;
-  --danger: #ef4444;
-  --shadow: 0 4px 12px rgba(0,0,0,0.4);
-  --radius: 10px;
+/* === tokens === */
+
+:root {
+  /* spacing — 8pt grid */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+
+  /* type — sizes */
+  --fs-display-l: 28px;
+  --fs-display-m: 22px;
+  --fs-display-s: 24px; /* stat values */
+  --fs-heading: 14px;
+  --fs-body: 14px;
+  --fs-label: 11px;
+  --fs-caption: 12px;
+  --fs-input: 16px;
+
+  /* type — families */
+  --font-display: 'Choplin', 'Roboto Slab', 'Zilla Slab', ui-serif, Georgia, serif;
+  --font-ui: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 [data-theme="light"] {
-  --bg: #f5f7fb;
-  --bg-2: #ffffff;
-  --bg-3: #eef2f8;
-  --border: #d8dee8;
-  --text: #1a2540;
-  --text-dim: #5a6884;
-  --text-strong: #000000;
-  --accent: #0b5cad;
-  --accent-2: #0b5cad;
-  --warn: #b45309;
-  --ok: #047857;
-  --danger: #b91c1c;
-  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  --bg: #F8F7F2;
+  --bg-2: #FFFFFF;
+  --bg-3: #EFEEE8;
+  --border: rgba(0, 46, 93, 0.10);
+  --border-strong: rgba(0, 46, 93, 0.18);
+  --text: #002E5D;
+  --text-dim: #796E65;
+  --text-strong: #001A38;
+  --accent: #002E5D;
+  --accent-2: #3C5EAB;
+  --accent-on: #FFFFFF;
+  --energy: #BE4829;
+  --energy-soft: rgba(190, 72, 41, 0.08);
+  --ok: #1A8A5A;
+  --warn: #D4A017;
+  --danger: #B91C1C;
+  --shadow-sm: 0 1px 2px rgba(0, 46, 93, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 46, 93, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 46, 93, 0.15);
+  --lightbox-bg: rgba(0, 26, 56, 0.92);
+  --mark-src: url('/brand/mark-color.png');
+}
+
+[data-theme="dark"] {
+  --bg: #06182F;
+  --bg-2: #0D2545;
+  --bg-3: #152D52;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.10);
+  --text: #E8EBF0;
+  --text-dim: #9AA8C1;
+  --text-strong: #FFFFFF;
+  --accent: #FFFFFF;
+  --accent-2: #3C5EAB;
+  --accent-on: #002E5D;
+  --energy: #BE4829;
+  --energy-soft: rgba(190, 72, 41, 0.15);
+  --ok: #3FB87E;
+  --warn: #E5B73B;
+  --danger: #EF4444;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --lightbox-bg: rgba(0, 0, 0, 0.92);
+  --mark-src: url('/brand/mark-white.png');
+}
+
+/* === base === */
+
+@font-face {
+  font-family: 'Montserrat';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Montserrat-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Montserrat-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Montserrat-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Montserrat-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/RobotoSlab-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/RobotoSlab-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Choplin';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Choplin-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Choplin';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Choplin-600.woff2') format('woff2');
 }
 
 * { box-sizing: border-box; }
+
 html, body, #root {
-  margin: 0; height: 100%;
+  margin: 0;
+  height: 100%;
   overflow-x: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
+
 html { touch-action: pan-y; }
+
 body {
-  font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  font-weight: 400;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   width: 100%;
   position: relative;
 }
-input, select, textarea, button { font: inherit; color: inherit; }
-/* iOS Safari zooms the page when focusing inputs whose font-size is below
-   16px. Pinning at 16px (combined with maximum-scale=1 in the viewport
-   meta) keeps the frame locked. */
-input, select, textarea { font-size: 16px; }
+
+input, select, textarea, button {
+  font: inherit;
+  color: inherit;
+}
+
+/* iOS Safari zooms when focusing < 16px input. Pin at 16px. */
+input, select, textarea { font-size: var(--fs-input); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
+main {
+  flex: 1;
+  padding: var(--sp-3);
+  padding-bottom: 110px; /* room for SaveBar + safe area */
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* === components === */
+/* (Component sections are added/replaced in later tasks. Legacy
+   component styles continue below until they are migrated.) */
+
+/* ------ LEGACY (to be migrated) ------ */
 .appbar {
   position: sticky; top: 0; z-index: 10;
   background: var(--bg-2);
@@ -77,16 +219,14 @@ input, select, textarea { font-size: 16px; }
 .appbar .grow { min-width: 0; flex: 1; }
 .crumb { font-size: 12px; color: var(--text-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-main { flex: 1; padding: 12px; padding-bottom: 90px; max-width: 900px; width: 100%; margin: 0 auto; }
-
 button {
   background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
-  padding: 10px 14px; border-radius: var(--radius); cursor: pointer;
+  padding: 10px 14px; border-radius: var(--r-md); cursor: pointer;
   font-weight: 500;
   -webkit-appearance: none; appearance: none;
   font: inherit;
 }
-button.primary { background: var(--accent-2); border-color: var(--accent-2); color: white; }
+button.primary { background: var(--energy); border-color: var(--energy); color: white; }
 button.primary:hover { filter: brightness(1.08); }
 button.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
 button.ghost { background: transparent; }
@@ -97,14 +237,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .card {
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   padding: 14px;
   margin-bottom: 10px;
 }
 
 .list-item {
   background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
+  border-radius: var(--r-md); padding: 12px 14px; margin-bottom: 8px;
   display: flex; align-items: center; gap: 12px;
   cursor: pointer;
   transition: border-color .15s;
@@ -128,7 +268,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   padding: 10px 12px;
   outline: none;
   color: var(--text);
@@ -139,13 +279,11 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .field-checkbox input { width: auto; }
 .field-checkbox label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--text); }
 
-/* Bare textareas (SheetNotes, RowNotes) sit directly in .group-body, not in
-   .field, so give them the same readable styling as form fields. */
 .group-body textarea, .group-body input[type="text"] {
   width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   padding: 10px 12px;
   color: var(--text);
   font: inherit;
@@ -161,7 +299,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px; color: var(--text-dim);
   background: var(--bg); border: 1px dashed var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   padding: 8px 10px; word-break: break-all;
 }
 
@@ -169,7 +307,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 11px; color: var(--text-dim);
   background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   padding: 8px 10px; margin: 8px 0 0;
   white-space: pre-wrap; word-break: break-all;
   max-height: 160px; overflow: auto;
@@ -177,7 +315,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .group {
   background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+  border-radius: var(--r-md); margin-bottom: 10px; overflow: hidden;
 }
 .group-head {
   display: flex; align-items: center; gap: 8px;
@@ -205,7 +343,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   -webkit-appearance: none; appearance: none;
   font: inherit;
 }
-.tab.active { background: var(--accent-2); border-color: var(--accent-2); color: white; }
+.tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
 .tab .dot {
   flex: 0 0 8px;
   width: 8px; height: 8px; min-width: 8px; min-height: 8px;
@@ -224,11 +362,11 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   border-radius: 999px; overflow: hidden;
   background: var(--bg-2);
 }
-.row-pill.active { background: var(--accent-2); border-color: var(--accent-2); }
+.row-pill.active { background: var(--accent); border-color: var(--accent); }
 .row-pill .lbl { padding: 6px 12px; font-size: 13px; cursor: pointer; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row-pill.active .lbl { color: white; }
+.row-pill.active .lbl { color: var(--accent-on); }
 .row-pill .more { background: transparent; border: none; padding: 6px 8px; font-size: 13px; color: var(--text-dim); cursor: pointer; border-left: 1px solid var(--border); }
-.row-pill.active .more { color: white; border-left-color: rgba(255,255,255,0.3); }
+.row-pill.active .more { color: var(--accent-on); border-left-color: rgba(255,255,255,0.3); }
 .row-pill .more:disabled { display: none; }
 
 .photo-grid {
@@ -253,7 +391,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .photo-checklist-item {
   background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 12px; margin-bottom: 8px;
+  border-radius: var(--r-md); padding: 12px; margin-bottom: 8px;
 }
 .photo-checklist-item .head {
   display: flex; align-items: center; gap: 10px;
@@ -277,20 +415,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   background: var(--bg-2); width: 100%; max-width: 500px;
   border-radius: 16px 16px 0 0; padding: 20px 16px max(20px, env(safe-area-inset-bottom));
   max-height: 90vh; overflow-y: auto;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
 }
 .modal h2 { margin: 0 0 12px; font-size: 17px; }
 
 .fab {
   position: fixed; right: 18px; bottom: max(20px, env(safe-area-inset-bottom));
-  background: var(--accent-2); color: white; border: none;
+  background: var(--energy); color: white; border: none;
   width: 56px; height: 56px; border-radius: 28px;
-  font-size: 24px; box-shadow: var(--shadow);
+  font-size: 24px; box-shadow: var(--shadow-md);
   cursor: pointer; z-index: 5;
+  transition: transform 80ms ease, box-shadow 80ms ease;
 }
+.fab:active { transform: scale(0.92); box-shadow: var(--shadow-sm); }
 
 .lightbox {
-  position: fixed; inset: 0; background: black; z-index: 200;
+  position: fixed; inset: 0; background: var(--lightbox-bg); z-index: 200;
   display: flex; align-items: center; justify-content: center;
 }
 .lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -311,7 +451,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   background: var(--bg-2); border: 1px solid var(--border);
   padding: 10px 14px; border-radius: 8px;
   display: flex; align-items: center; gap: 12px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
   min-width: 220px;
 }
 .toast.error { border-color: var(--danger); }
@@ -323,7 +463,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .search-bar {
   width: 100%; padding: 8px 12px;
   background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--text);
+  border-radius: var(--r-md); color: var(--text);
   margin-bottom: 10px; outline: none;
 }
 .search-bar:focus { border-color: var(--accent); }
@@ -343,21 +483,21 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .row-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   background: var(--bg-2);
   max-height: 50vh;
 }
 
 .view-toggle {
   display: inline-flex; gap: 0; border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
+  border-radius: var(--r-md); overflow: hidden;
   margin-left: auto;
 }
 .view-toggle button {
   background: transparent; border: none; padding: 6px 10px; font-size: 12px;
   border-radius: 0;
 }
-.view-toggle button.active { background: var(--accent-2); color: white; }
+.view-toggle button.active { background: var(--accent); color: var(--accent-on); }
 
 .kv {
   display: flex; gap: 8px; font-size: 13px; padding: 4px 0;
