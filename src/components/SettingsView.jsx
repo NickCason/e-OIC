@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import AppBar from './AppBar.jsx';
+import Icon from './Icon.jsx';
+import { nav } from '../App.jsx';
+import { BUILD_VERSION } from '../version.js';
 import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
 import { applyTheme, saveTheme } from '../lib/theme.js';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation.js';
 import { reloadSampleJob } from '../lib/seed.js';
-import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
-import { BUILD_VERSION } from '../version.js';
 
 const APP_VERSION = '1.1.0';
-
-function fmtMB(bytes) {
-  if (bytes == null) return '—';
-  const mb = bytes / (1024 * 1024);
-  if (mb >= 1024) return `${(mb / 1024).toFixed(1)} GB`;
-  return `${mb.toFixed(1)} MB`;
-}
 
 export default function SettingsView() {
   const [theme, setTheme] = useState('auto');
@@ -37,13 +32,14 @@ export default function SettingsView() {
     })();
   }, []);
 
-  async function onTheme(t) {
+  async function pickTheme(t) {
     setTheme(t);
     await saveTheme(t);
   }
 
-  async function onGpsToggle(v) {
-    if (v) {
+  async function onGpsToggle() {
+    const enabling = gpsConsent !== 'granted';
+    if (enabling) {
       const pos = await requestGeolocation({ timeout: 10000 });
       const consent = pos ? 'granted' : 'denied';
       await setGeolocationConsent(consent);
@@ -100,114 +96,150 @@ export default function SettingsView() {
     }
   }
 
+  async function onReloadSample() {
+    if (!confirm('Reload the sample job? Any local edits to the sample will be overwritten. Other jobs are untouched.')) return;
+    setBusy(true);
+    try {
+      const stats = await reloadSampleJob();
+      toast.show(`Sample reloaded: ${stats.jobs} job, ${stats.panels} panels, ${stats.rows} rows`);
+    } catch (e) {
+      toast.error('Could not load sample: ' + (e.message || e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
-      <header className="appbar">
-        <button className="back" onClick={() => nav('/')} aria-label="Back">‹</button>
-        <h1>Settings</h1>
-      </header>
+      <AppBar onBack={() => nav('/')} wordmark="Settings" />
       <main>
-        <section className="card">
-          <h3 style={{ marginTop: 0 }}>Theme</h3>
-          <div className="btn-row">
-            {['auto', 'light', 'dark'].map((t) => (
+        <div className="hero">
+          <div className="hero-pretitle">PREFERENCES</div>
+          <h1 className="hero-title">Settings</h1>
+        </div>
+
+        <section className="settings-card">
+          <h2 className="settings-section">Display</h2>
+          <div className="setting-row">
+            <div className="setting-label">Theme</div>
+            <div className="seg-control">
               <button
-                key={t}
-                className={theme === t ? 'primary' : ''}
-                onClick={() => onTheme(t)}
-                style={{ textTransform: 'capitalize' }}
-              >{t}</button>
-            ))}
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>
-            Auto follows your phone's system setting.
-          </div>
-        </section>
-
-        <section className="card">
-          <h3 style={{ marginTop: 0 }}>Location tagging</h3>
-          <div className="field-checkbox">
-            <input
-              type="checkbox"
-              id="gps-toggle"
-              checked={gpsConsent === 'granted'}
-              onChange={(e) => onGpsToggle(e.target.checked)}
-            />
-            <label htmlFor="gps-toggle">
-              Tag photos with GPS location
-            </label>
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
-            When enabled, every captured photo is tagged with coordinates in:
-            the visible overlay, the JPEG's EXIF metadata, and a sidecar CSV
-            in your export. Status: <strong>{gpsConsent || 'not set'}</strong>.
-          </div>
-          {gpsConsent === 'denied' && (
-            <div style={{ fontSize: 12, color: 'var(--warn)', marginTop: 8 }}>
-              If you blocked location at the OS level, you'll need to also re-enable it in your phone's Settings → app permissions.
+                type="button"
+                className={`seg-option${theme === 'auto' ? ' active' : ''}`}
+                onClick={() => pickTheme('auto')}
+              >
+                <Icon name="themeAuto" size={14} />
+                <span>Auto</span>
+              </button>
+              <button
+                type="button"
+                className={`seg-option${theme === 'light' ? ' active' : ''}`}
+                onClick={() => pickTheme('light')}
+              >
+                <Icon name="themeLight" size={14} />
+                <span>Light</span>
+              </button>
+              <button
+                type="button"
+                className={`seg-option${theme === 'dark' ? ' active' : ''}`}
+                onClick={() => pickTheme('dark')}
+              >
+                <Icon name="themeDark" size={14} />
+                <span>Dark</span>
+              </button>
             </div>
-          )}
-        </section>
-
-        <section className="card">
-          <h3 style={{ marginTop: 0 }}>Backup &amp; Restore</h3>
-          <p style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 0 }}>
-            Backup saves all your jobs (including photos as base64) into a single .json file.
-            Useful for moving data between devices or as a safety copy.
-          </p>
-          <div className="btn-row">
-            <button onClick={onBackup} disabled={busy}>⬇ Backup all jobs</button>
-            <label className="primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 14px', border: '1px solid var(--accent-2)', borderRadius: 'var(--radius)', background: 'var(--accent-2)', color: 'white', cursor: 'pointer' }}>
-              ⬆ Restore
-              <input type="file" accept="application/json" style={{ display: 'none' }} onChange={onRestore} disabled={busy} />
-            </label>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 6 }}>
-            Backups can be large (photos are embedded as base64 — roughly 1.4× the original size).
+          <div className="setting-row">
+            <div className="setting-label">Build</div>
+            <span className="build-badge">{BUILD_VERSION}</span>
           </div>
         </section>
 
-        <section className="card">
-          <h3 style={{ marginTop: 0 }}>Sample data</h3>
-          <p style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 0 }}>
-            Restore the bundled sample job ("Cooker Line Investigation"). Useful
-            for demos or for testing the export end-to-end without entering data.
-          </p>
-          <button
-            onClick={async () => {
-              if (!confirm('Reload the sample job? Any local edits to the sample will be overwritten. Other jobs are untouched.')) return;
-              setBusy(true);
-              try {
-                const stats = await reloadSampleJob();
-                toast.show(`Sample reloaded: ${stats.jobs} job, ${stats.panels} panels, ${stats.rows} rows`);
-              } catch (e) {
-                toast.error('Could not load sample: ' + (e.message || e));
-              } finally {
-                setBusy(false);
-              }
-            }}
-            disabled={busy}
-          >🧪 Reload sample job</button>
+        <section className="settings-card">
+          <h2 className="settings-section">Capture</h2>
+          <div className="setting-row">
+            <div className="setting-label">GPS on photos</div>
+            <button
+              type="button"
+              className={`toggle${gpsConsent === 'granted' ? ' on' : ''}`}
+              onClick={onGpsToggle}
+              aria-pressed={gpsConsent === 'granted'}
+              aria-label="Tag photos with GPS location"
+            >
+              <span className="toggle-thumb" />
+            </button>
+          </div>
         </section>
 
-        <section className="card">
-          <h3 style={{ marginTop: 0 }}>About</h3>
-          <div className="kv"><span className="k">App</span><span className="v">e-OIC</span></div>
-          <div className="kv"><span className="k">Build</span><span className="v">{BUILD_VERSION}</span></div>
-          <div className="kv"><span className="k">Full name</span><span className="v">eTechGroup Onsite Investigation Checklist</span></div>
-          <div className="kv"><span className="k">Version</span><span className="v">{APP_VERSION}</span></div>
-          <div className="kv"><span className="k">Storage</span><span className="v">IndexedDB · local to this device</span></div>
-          <div className="kv"><span className="k">Offline</span><span className="v">Yes (after first load)</span></div>
+        <section className="settings-card">
+          <h2 className="settings-section">Data</h2>
           {storage && (
-            <div className="kv">
-              <span className="k">Storage used</span>
-              <span className="v">
-                {fmtMB(storage.usage)} of {fmtMB(storage.quota)}
-              </span>
+            <div className="setting-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+              <div className="setting-label">Storage</div>
+              <div className="storage-bar">
+                <div
+                  className="storage-bar-fill"
+                  style={{ width: `${Math.min(100, ((storage.usage || 0) / (storage.quota || 1)) * 100)}%` }}
+                />
+              </div>
+              <div className="storage-stats">
+                {fmtBytes(storage.usage)} of {fmtBytes(storage.quota)} used
+              </div>
             </div>
           )}
+          <div className="setting-row">
+            <button className="ghost" onClick={onReloadSample} disabled={busy}>
+              <Icon name="refresh" size={14} />
+              <span style={{ marginLeft: 6 }}>Reload sample job</span>
+            </button>
+          </div>
+          <div className="setting-row">
+            <button className="ghost" onClick={onBackup} disabled={busy}>
+              <Icon name="download" size={14} />
+              <span style={{ marginLeft: 6 }}>Export backup</span>
+            </button>
+            <label
+              className="ghost"
+              style={{
+                cursor: busy ? 'not-allowed' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '10px 14px',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--r-md)',
+                opacity: busy ? 0.6 : 1,
+              }}
+            >
+              <Icon name="image" size={14} />
+              <span style={{ marginLeft: 6 }}>Import backup</span>
+              <input
+                type="file"
+                accept="application/json"
+                style={{ display: 'none' }}
+                onChange={onRestore}
+                disabled={busy}
+              />
+            </label>
+          </div>
         </section>
+
+        <footer className="settings-footer">
+          <div className="settings-footer-mark" aria-hidden="true" />
+          <div className="settings-footer-text">
+            <strong>e-OIC</strong> · {BUILD_VERSION}
+          </div>
+          <div className="settings-footer-sub">An E Tech Group field tool.</div>
+          <div className="settings-footer-sub">v{APP_VERSION}</div>
+        </footer>
       </main>
     </>
   );
+}
+
+function fmtBytes(n) {
+  if (!n) return '0 KB';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0;
+  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  return `${n.toFixed(n >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
 }
