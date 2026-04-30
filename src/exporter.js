@@ -261,12 +261,19 @@ export async function buildExport(job, {
   onProgress({ phase: 'serializing', percent: 55 });
   let xlsxBuf = await wb.xlsx.writeBuffer();
 
-  // ExcelJS workaround: when round-tripping a loaded template it emits
-  // horizontalDpi="4294967295" and verticalDpi="4294967295" (uint32 max
-  // sentinel for "unset") on every sheet's <pageSetup>. Modern Excel
-  // rejects these as out-of-range integers and reports the file as
-  // corrupted. Open the xlsx zip, strip the bad attributes from each
-  // sheet's XML, and repackage.
+  // ExcelJS workarounds. When round-tripping a loaded template, ExcelJS:
+  //   1. Emits horizontalDpi="4294967295" and verticalDpi="4294967295"
+  //      (uint32-max "unset" sentinel) on every <pageSetup>. Modern Excel
+  //      rejects these as out-of-range integers and reports the file as
+  //      corrupted.
+  //   2. Writes <tableParts> BEFORE <legacyDrawing> at the tail of each
+  //      worksheet, but the OOXML schema (ECMA-376 § 18.3.1) requires
+  //      legacyDrawing (element 31) to precede tableParts (element 37).
+  //      Excel enforces the order strictly; ExcelJS, openpyxl, and
+  //      LibreOffice all read it leniently, which is why the smoke tests
+  //      passed but real Excel rejects the file.
+  // Both issues fixed by a regex pass on each sheet's XML, in place inside
+  // the xlsx zip (which is itself a zip).
   {
     const fixZip = new JSZip();
     await fixZip.loadAsync(xlsxBuf);
@@ -276,6 +283,10 @@ export async function buildExport(job, {
     for (const f of sheetFiles) {
       let xml = await fixZip.file(f).async('string');
       xml = xml.replace(/\s+(horizontalDpi|verticalDpi)="4294967295"/g, '');
+      xml = xml.replace(
+        /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
+        '$3$2$1',
+      );
       fixZip.file(f, xml);
     }
     xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });
