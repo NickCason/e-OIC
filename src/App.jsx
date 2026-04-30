@@ -4,6 +4,7 @@ import JobView from './components/JobView.jsx';
 import PanelView from './components/PanelView.jsx';
 import SettingsView from './components/SettingsView.jsx';
 import ToastHost from './components/ToastHost.jsx';
+import UpdatePill from './components/UpdatePill.jsx';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation.js';
 import { maybeSeedSampleJob } from './lib/seed.js';
 
@@ -61,6 +62,7 @@ export default function App() {
       {route.name === 'panel' && <PanelView jobId={route.jobId} panelId={route.panelId} />}
       {route.name === 'settings' && <SettingsView />}
       <ToastHost />
+      <UpdatePill />
       {showGeoPrompt && <GeoPrompt onClose={() => setShowGeoPrompt(false)} />}
     </div>
   );

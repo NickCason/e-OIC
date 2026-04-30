@@ -1181,6 +1181,34 @@ main {
 }
 .toast .undo:hover { background: var(--bg-3); }
 
+/* UpdatePill (sticky "new version available") */
+.update-pill {
+  position: fixed;
+  top: max(env(safe-area-inset-top), var(--sp-2));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 250;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--energy);
+  color: white;
+  border: 1px solid var(--energy);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  animation: update-pill-in 280ms ease-out;
+}
+.update-pill:active { transform: translateX(-50%) scale(0.97); }
+.update-pill:disabled { opacity: 0.7; cursor: wait; }
+@keyframes update-pill-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
