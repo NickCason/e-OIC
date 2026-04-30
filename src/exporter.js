@@ -264,16 +264,20 @@ export async function buildExport(job, {
   // ExcelJS workarounds. When round-tripping a loaded template, ExcelJS:
   //   1. Emits horizontalDpi="4294967295" and verticalDpi="4294967295"
   //      (uint32-max "unset" sentinel) on every <pageSetup>. Modern Excel
-  //      rejects these as out-of-range integers and reports the file as
-  //      corrupted.
+  //      rejects these as out-of-range integers.
   //   2. Writes <tableParts> BEFORE <legacyDrawing> at the tail of each
-  //      worksheet, but the OOXML schema (ECMA-376 § 18.3.1) requires
-  //      legacyDrawing (element 31) to precede tableParts (element 37).
-  //      Excel enforces the order strictly; ExcelJS, openpyxl, and
-  //      LibreOffice all read it leniently, which is why the smoke tests
-  //      passed but real Excel rejects the file.
-  // Both issues fixed by a regex pass on each sheet's XML, in place inside
-  // the xlsx zip (which is itself a zip).
+  //      worksheet. OOXML schema (ECMA-376 § 18.3.1) requires legacyDrawing
+  //      (element 31) to precede tableParts (element 37). Excel is strict
+  //      about the order even though openpyxl/ExcelJS/LibreOffice are not.
+  //   3. Rewrites every table's <autoFilter> with explicit <filterColumn
+  //      hiddenButton="1"/> children AND adds totalsRowShown="1" +
+  //      headerRowCount="0" attributes. The combination is contradictory
+  //      (an autoFilter requires a header row) and Excel logs an
+  //      XmlReaderFatalError on the table records, prompting the
+  //      "needs repair" dialog. Confirmed via Excel's diagnostic log:
+  //      `Data.CorruptItems: [{ipti: "List", irt: 106}, {irt: 107}]`.
+  //      Stripping the autoFilter element entirely matches what Excel's
+  //      own auto-repair does.
   {
     const fixZip = new JSZip();
     await fixZip.loadAsync(xlsxBuf);
@@ -287,6 +291,14 @@ export async function buildExport(job, {
         /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
         '$3$2$1',
       );
+      fixZip.file(f, xml);
+    }
+    const tableFiles = Object.keys(fixZip.files).filter((f) =>
+      /^xl\/tables\/table\d+\.xml$/.test(f),
+    );
+    for (const f of tableFiles) {
+      let xml = await fixZip.file(f).async('string');
+      xml = xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
       fixZip.file(f, xml);
     }
     xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });
