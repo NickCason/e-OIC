@@ -288,6 +288,65 @@ main {
 }
 .appbar-actions button.icon-btn:hover { background: var(--bg-3); }
 
+/* EmptyState */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--sp-10) var(--sp-5);
+  color: var(--text-dim);
+}
+.empty-state-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-3);
+}
+.empty-state-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-display-m);
+  margin: 0 0 var(--sp-2);
+  color: var(--text-strong);
+  letter-spacing: -0.005em;
+}
+.empty-state-body {
+  font-size: var(--fs-body);
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+.empty-state-action {
+  margin-top: var(--sp-4);
+}
+.empty-state-arrow {
+  margin-top: var(--sp-5);
+  color: var(--energy);
+  animation: empty-arrow-bounce 1.5s ease-in-out infinite;
+}
+@keyframes empty-arrow-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+.empty-state-arrow--up {
+  animation-name: empty-arrow-bounce-up;
+}
+.empty-state-arrow--up > * {
+  transform: rotate(180deg);
+  display: inline-block;
+}
+@keyframes empty-arrow-bounce-up {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
@@ -325,10 +384,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .list-item .title { font-weight: 600; }
 .list-item .subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .list-item .actions { display: flex; gap: 4px; }
-
-.empty {
-  text-align: center; padding: 40px 20px; color: var(--text-dim);
-}
 
 .field { margin-bottom: 12px; }
 .field label {
