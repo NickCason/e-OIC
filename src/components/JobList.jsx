@@ -6,6 +6,7 @@ import { BUILD_VERSION } from '../version.js';
 import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
 import Icon from './Icon.jsx';
+import Marquee from './Marquee.jsx';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
@@ -127,13 +128,15 @@ export default function JobList() {
             <div key={j.id} className="job-card" onClick={() => nav(`/job/${j.id}`)}>
               <div className="job-monogram">{monogram(j.name)}</div>
               <div className="job-grow">
-                <div className="job-title">{j.name}</div>
+                <div className="job-title"><Marquee>{j.name}</Marquee></div>
                 <div className="job-sub">
-                  {j.client && <>{j.client} · </>}
-                  {s
-                    ? `${s.panels} ${pl(s.panels, 'panel')} · ${s.photos} ${pl(s.photos, 'photo')}`
-                    : '…'}
-                  {j.updatedAt ? <> · {fmtRelative(j.updatedAt)}</> : null}
+                  <Marquee>
+                    {j.client && <>{j.client} · </>}
+                    {s
+                      ? `${s.panels} ${pl(s.panels, 'panel')} · ${s.photos} ${pl(s.photos, 'photo')}`
+                      : '…'}
+                    {j.updatedAt ? <> · {fmtRelative(j.updatedAt)}</> : null}
+                  </Marquee>
                 </div>
               </div>
               <div className="job-actions">

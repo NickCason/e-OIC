@@ -1,5 +1,6 @@
 import React from 'react';
 import Icon from './Icon.jsx';
+import Marquee from './Marquee.jsx';
 
 // Reusable app bar.
 //
@@ -37,12 +38,12 @@ export default function AppBar({ onBack, wordmark = 'e-OIC', crumb, actions, onW
             className="appbar-wordmark appbar-wordmark--button"
             onClick={onWordmarkClick}
           >
-            {wordmark}
+            <Marquee>{wordmark}</Marquee>
           </button>
         ) : (
-          <h1 className="appbar-wordmark">{wordmark}</h1>
+          <h1 className="appbar-wordmark"><Marquee>{wordmark}</Marquee></h1>
         )}
-        {crumb && <div className="appbar-crumb">{crumb}</div>}
+        {crumb && <div className="appbar-crumb"><Marquee>{crumb}</Marquee></div>}
       </div>
       {actions && <div className="appbar-actions">{actions}</div>}
     </header>

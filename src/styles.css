@@ -391,6 +391,7 @@ main {
   transform: translateY(-50%);
   color: var(--text-dim);
   pointer-events: none;
+  z-index: 1;
 }
 .search-bar--with-icon { padding-left: 36px; }
 
@@ -1180,6 +1181,31 @@ main {
   cursor: pointer;
 }
 .toast .undo:hover { background: var(--bg-3); }
+
+/* Marquee — smooth ease-in-out scroll for overflowing text */
+.marquee {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+.marquee-inner {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+}
+.marquee--scroll .marquee-inner {
+  animation-name: marquee-pan;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+@keyframes marquee-pan {
+  0%, 14%   { transform: translateX(0); }
+  46%, 54%  { transform: translateX(var(--marquee-distance, 0)); }
+  86%, 100% { transform: translateX(0); }
+}
 
 /* UpdatePill (sticky "new version available") */
 .update-pill {

@@ -14,6 +14,7 @@ import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
 import SaveBar from './SaveBar.jsx';
 import Icon from './Icon.jsx';
+import Marquee from './Marquee.jsx';
 
 // Top-level form for one (panel, sheet). Renders:
 //   - sheet-level notes scratchpad
@@ -240,7 +241,7 @@ function RowPicker({ rows, activeRowId, onPick, onAdd, onRemove, onMove, sheetNa
             const isActive = r.id === activeRowId;
             return (
               <div key={r.id} className={'row-pill' + (isActive ? ' active' : '')}>
-                <span className="lbl" onClick={() => onPick(r.id)}>{lbl}</span>
+                <span className="lbl" onClick={() => onPick(r.id)}><Marquee>{lbl}</Marquee></span>
                 {isActive && (
                   <>
                     <button className="more" onClick={() => onMove(r.id, -1)} disabled={i === 0} title="Move up">↑</button>
