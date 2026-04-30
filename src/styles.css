@@ -347,6 +347,155 @@ main {
   50% { transform: translateY(-4px); }
 }
 
+/* Hero (page-title block, used by all top-level screens) */
+.hero { padding: var(--sp-3) 0 var(--sp-4); }
+.hero-pretitle {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-display-l);
+  letter-spacing: -0.01em;
+  margin: 2px 0 0;
+  color: var(--text-strong);
+  line-height: 1.1;
+}
+.hero-title .accent { color: var(--energy); }
+.build-badge {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: var(--bg-3);
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Search input with leading icon */
+.search-wrap { position: relative; margin-bottom: var(--sp-3); }
+.search-wrap .search-icon {
+  position: absolute;
+  left: var(--sp-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  pointer-events: none;
+}
+.search-bar--with-icon { padding-left: 36px; }
+
+/* Stat tiles */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+.stat-tile {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.stat-val {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-display-s);
+  color: var(--text-strong);
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+/* Job card */
+.job-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-2);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.job-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+.job-monogram {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: var(--bg-3);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.job-grow { flex: 1; min-width: 0; }
+.job-title {
+  font-weight: 600;
+  font-size: var(--fs-body);
+  color: var(--text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.job-sub {
+  font-size: var(--fs-caption);
+  color: var(--text-dim);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.job-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.job-actions .icon-btn {
+  background: transparent;
+  border: none;
+  padding: var(--sp-2);
+  color: var(--text-dim);
+  border-radius: var(--r-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.job-actions .icon-btn:hover { background: var(--bg-3); color: var(--text); }
+.job-actions .icon-btn.danger:hover { color: var(--danger); }
+
+/* Modal title (slab) */
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-display-m);
+  letter-spacing: -0.005em;
+  color: var(--text-strong);
+  margin: 0 0 var(--sp-3);
+}
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {

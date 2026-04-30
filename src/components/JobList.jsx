@@ -3,6 +3,9 @@ import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, importJS
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import { BUILD_VERSION } from '../version.js';
+import AppBar from './AppBar.jsx';
+import EmptyState from './EmptyState.jsx';
+import Icon from './Icon.jsx';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
@@ -21,13 +24,11 @@ export default function JobList() {
 
   useEffect(() => { refresh(); }, []);
 
-  // Soft delete with undo: capture full snapshot of the job, then on undo
-  // re-import it. This keeps the undo path simple and reliable.
   async function onDelete(job) {
     const snapshot = await exportJobJSON(job.id);
     await deleteJob(job.id);
     await refresh();
-    toast.undoable(`Deleted “${job.name}”`, {
+    toast.undoable(`Deleted "${job.name}"`, {
       onUndo: async () => {
         await importJSON(snapshot, { mode: 'replace' });
         await refresh();
@@ -43,52 +44,123 @@ export default function JobList() {
     );
   }, [jobs, search]);
 
+  // Aggregate stats across all jobs for the hero stat row.
+  const totals = useMemo(() => {
+    let panels = 0, photos = 0, inProgress = 0;
+    for (const j of jobs) {
+      const s = stats[j.id];
+      if (!s) continue;
+      panels += s.panels || 0;
+      photos += s.photos || 0;
+      if ((s.panels || 0) > 0) inProgress += 1;
+    }
+    return { panels, photos, inProgress, total: jobs.length };
+  }, [jobs, stats]);
+
   return (
     <>
-      <header className="appbar">
-        <h1>e-OIC <span className="build-badge">{BUILD_VERSION}</span></h1>
-        <div className="actions">
-          <button className="ghost icon-btn" onClick={() => nav('/settings')} aria-label="Settings">⚙</button>
-        </div>
-      </header>
+      <AppBar
+        wordmark="e-OIC"
+        actions={
+          <button
+            className="icon-btn"
+            onClick={() => nav('/settings')}
+            aria-label="Settings"
+            type="button"
+          >
+            <Icon name="settings" size={20} />
+          </button>
+        }
+      />
       <main>
+        <div className="hero">
+          <div className="hero-pretitle">
+            {jobs.length === 0
+              ? 'NO JOBS YET'
+              : `${jobs.length} ${jobs.length === 1 ? 'INVESTIGATION' : 'INVESTIGATIONS'}`}
+            <span className="build-badge" title="Build version">{BUILD_VERSION}</span>
+          </div>
+          <h1 className="hero-title">Your jobs</h1>
+        </div>
+
         {jobs.length > 0 && (
-          <input
-            className="search-bar"
-            placeholder="Search jobs…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <>
+            <div className="search-wrap">
+              <Icon name="search" size={16} className="search-icon" />
+              <input
+                className="search-bar search-bar--with-icon"
+                placeholder="Search jobs"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <div className="stat-row">
+              <div className="stat-tile">
+                <div className="stat-label">Active</div>
+                <div className="stat-val">{totals.inProgress}</div>
+              </div>
+              <div className="stat-tile">
+                <div className="stat-label">Panels</div>
+                <div className="stat-val">{totals.panels}</div>
+              </div>
+              <div className="stat-tile">
+                <div className="stat-label">Photos</div>
+                <div className="stat-val">{totals.photos}</div>
+              </div>
+            </div>
+          </>
         )}
 
         {jobs.length === 0 && (
-          <div className="empty">
-            <p>No jobs yet.</p>
-            <p>Tap <strong>+</strong> to create your first job.</p>
-          </div>
+          <EmptyState
+            icon="add"
+            title="No jobs yet"
+            body="Tap the orange + below to start your first investigation."
+            pointTo="fab"
+          />
         )}
 
         {filtered.map((j) => {
           const s = stats[j.id];
           return (
-            <div key={j.id} className="list-item" onClick={() => nav(`/job/${j.id}`)}>
-              <div className="grow">
-                <div className="title">{j.name}</div>
-                <div className="subtitle">
+            <div key={j.id} className="job-card" onClick={() => nav(`/job/${j.id}`)}>
+              <div className="job-monogram">{monogram(j.name)}</div>
+              <div className="job-grow">
+                <div className="job-title">{j.name}</div>
+                <div className="job-sub">
                   {j.client && <>{j.client} · </>}
-                  {s ? `${s.panels} panel${s.panels !== 1 ? 's' : ''} · ${s.photos} photo${s.photos !== 1 ? 's' : ''}` : '…'}
+                  {s
+                    ? `${s.panels} ${pl(s.panels, 'panel')} · ${s.photos} ${pl(s.photos, 'photo')}`
+                    : '…'}
                   {j.updatedAt ? <> · {fmtRelative(j.updatedAt)}</> : null}
                 </div>
               </div>
-              <div className="actions">
-                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); setEditing(j); }} aria-label="Edit">✎</button>
-                <button className="ghost danger icon-btn" onClick={(e) => { e.stopPropagation(); onDelete(j); }} aria-label="Delete">✕</button>
+              <div className="job-actions">
+                <button
+                  className="icon-btn ghost"
+                  onClick={(e) => { e.stopPropagation(); setEditing(j); }}
+                  aria-label="Edit"
+                  type="button"
+                >
+                  <Icon name="edit" size={16} />
+                </button>
+                <button
+                  className="icon-btn ghost danger"
+                  onClick={(e) => { e.stopPropagation(); onDelete(j); }}
+                  aria-label="Delete"
+                  type="button"
+                >
+                  <Icon name="trash" size={16} />
+                </button>
               </div>
             </div>
           );
         })}
       </main>
-      <button className="fab" onClick={() => setCreating(true)} aria-label="New job">+</button>
+      <button className="fab" onClick={() => setCreating(true)} aria-label="New job">
+        <Icon name="add" size={24} strokeWidth={2.25} />
+      </button>
       {creating && <JobModal onClose={() => setCreating(false)} onSaved={refresh} />}
       {editing && <JobModal job={editing} onClose={() => setEditing(null)} onSaved={refresh} />}
     </>
@@ -106,10 +178,20 @@ function JobModal({ job = null, onClose, onSaved }) {
     if (!name.trim()) return;
     setBusy(true);
     if (job) {
-      await updateJob(job.id, { name: name.trim(), client: client.trim(), location: location.trim(), notes });
+      await updateJob(job.id, {
+        name: name.trim(),
+        client: client.trim(),
+        location: location.trim(),
+        notes,
+      });
       toast.show('Job updated');
     } else {
-      const created = await createJob({ name: name.trim(), client: client.trim(), location: location.trim(), notes });
+      const created = await createJob({
+        name: name.trim(),
+        client: client.trim(),
+        location: location.trim(),
+        notes,
+      });
       onSaved();
       onClose();
       nav(`/job/${created.id}`);
@@ -123,10 +205,15 @@ function JobModal({ job = null, onClose, onSaved }) {
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{job ? 'Edit Job' : 'New Job'}</h2>
+        <h2 className="modal-title">{job ? 'Edit job' : 'New job'}</h2>
         <div className="field">
           <label>Job name *</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Acme Plant - May 2026" autoFocus />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Acme Plant — May 2026"
+            autoFocus
+          />
         </div>
         <div className="field">
           <label>Client (optional)</label>
@@ -138,16 +225,36 @@ function JobModal({ job = null, onClose, onSaved }) {
         </div>
         <div className="field">
           <label>Job notes (optional)</label>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="High-level notes for this job. Will be added to the export." />
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="High-level notes for this job. Will be added to the export."
+          />
         </div>
         <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
           <button className="ghost" onClick={onClose}>Cancel</button>
-          <button className="primary" onClick={submit} disabled={busy || !name.trim()}>{job ? 'Save' : 'Create'}</button>
+          <button
+            className="primary"
+            onClick={submit}
+            disabled={busy || !name.trim()}
+          >
+            {job ? 'Save' : 'Create'}
+          </button>
         </div>
       </div>
     </div>
   );
 }
+
+function monogram(name) {
+  if (!name) return '·';
+  const words = name.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '·';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+function pl(n, word) { return n === 1 ? word : `${word}s`; }
 
 export function fmtRelative(ts) {
   const diff = Date.now() - ts;
