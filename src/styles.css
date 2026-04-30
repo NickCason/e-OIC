@@ -685,6 +685,61 @@ main {
   border-radius: var(--r-pill);
 }
 
+/* Sheet tabs */
+.tabs {
+  display: flex;
+  gap: var(--sp-1);
+  overflow-x: auto;
+  padding: 2px 0 var(--sp-2);
+  margin-bottom: var(--sp-3);
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 6px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-on);
+}
+.tab .dot {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 50%;
+  align-self: center;
+}
+.tab .dot.empty { background: var(--text-dim); opacity: 0.6; }
+.tab .dot.partial { background: var(--warn); }
+.tab .dot.complete { background: var(--ok); }
+.tab.active .dot.complete { background: var(--accent-on); }
+.tab.active .dot.partial { background: var(--accent-on); }
+.tab.active .dot.empty { background: rgba(255,255,255,0.6); }
+.tab--overflow {
+  padding: 6px 8px;
+  color: var(--text-dim);
+}
+.tab--overflow:hover { color: var(--text); }
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
@@ -789,34 +844,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .group-head .name { flex: 1; font-weight: 600; }
 .group-head .count { font-size: 12px; color: var(--text-dim); }
 .group-body { padding: 12px 14px; border-top: 1px solid var(--border); }
-
-.tabs {
-  display: flex; gap: 6px; overflow-x: auto;
-  padding-bottom: 8px; margin-bottom: 12px;
-  scrollbar-width: none;
-}
-.tabs::-webkit-scrollbar { display: none; }
-.tab {
-  flex: 0 0 auto;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 12px;
-  background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: 999px; font-size: 13px; cursor: pointer;
-  white-space: nowrap;
-  color: var(--text);
-  -webkit-appearance: none; appearance: none;
-  font: inherit;
-}
-.tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
-.tab .dot {
-  flex: 0 0 8px;
-  width: 8px; height: 8px; min-width: 8px; min-height: 8px;
-  border-radius: 50%;
-  align-self: center;
-}
-.tab .dot.empty { background: var(--text-dim); }
-.tab .dot.partial { background: var(--warn); }
-.tab .dot.complete { background: var(--ok); }
 
 .row-pills {
   display: flex; gap: 6px; flex-wrap: wrap; align-items: center;

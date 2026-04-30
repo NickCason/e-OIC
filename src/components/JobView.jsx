@@ -7,6 +7,9 @@ import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import ExportDialog from './ExportDialog.jsx';
 import { fmtRelative } from './JobList.jsx';
+import AppBar from './AppBar.jsx';
+import Icon from './Icon.jsx';
+import EmptyState from './EmptyState.jsx';
 
 export default function JobView({ jobId }) {
   const [job, setJob] = useState(null);
@@ -77,28 +80,57 @@ export default function JobView({ jobId }) {
 
   if (!job) return null;
 
+  const crumbBits = [];
+  if (job.client) crumbBits.push(job.client);
+  if (job.location) crumbBits.push(job.location);
+  if (job.updatedAt) crumbBits.push(fmtRelative(job.updatedAt));
+  const crumb = crumbBits.join(' · ');
+  const totalPanels = panels.length;
+
   return (
     <>
-      <header className="appbar">
-        <button className="back" onClick={() => nav('/')} aria-label="Back">‹</button>
-        <div className="grow">
-          <h1>{job.name}</h1>
-          <div className="crumb">
-            {job.client || ''}{job.client && job.location ? ' · ' : ''}{job.location || ''}
-            {job.updatedAt && <> · {fmtRelative(job.updatedAt)}</>}
-          </div>
-        </div>
-        <div className="actions">
-          <button className="ghost icon-btn" onClick={() => setMenuOpen(true)} aria-label="More">⋯</button>
-          <button className="primary" onClick={() => setExporting(true)} disabled={panels.length === 0}>Export</button>
-        </div>
-      </header>
+      <AppBar
+        onBack={() => nav('/')}
+        wordmark={job.name || 'e-OIC'}
+        crumb={crumb || undefined}
+        actions={
+          <>
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setMenuOpen(true)}
+              aria-label="More"
+            >
+              <Icon name="more" size={20} />
+            </button>
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setExporting(true)}
+              disabled={panels.length === 0}
+              aria-label="Export"
+            >
+              <Icon name="download" size={20} />
+            </button>
+          </>
+        }
+      />
       <main>
-        {panels.length === 0 && (
-          <div className="empty">
-            <p>No panels yet.</p>
-            <p>Tap <strong>+</strong> to add a panel.</p>
+        <div className="hero">
+          <div className="hero-pretitle">
+            {totalPanels > 0
+              ? `JOB · ${totalPanels} PANEL${totalPanels === 1 ? '' : 'S'}`
+              : 'JOB'}
           </div>
+          <h1 className="hero-title">{job.name || 'Loading…'}</h1>
+        </div>
+        {panels.length === 0 && (
+          <EmptyState
+            icon="add"
+            title="No panels yet"
+            body={`Tap the + button below to add the first panel to ${job.name || 'this job'}.`}
+            pointTo="fab"
+          />
         )}
         {panels.map((p) => {
           const s = stats[p.id] || { rows: 0, photos: 0 };
