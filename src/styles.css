@@ -54,6 +54,12 @@ input, select, textarea, button { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: 10px;
 }
 .appbar h1 { font-size: 16px; margin: 0; flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.appbar h1 .build-badge {
+  font-size: 10px; font-weight: 500; color: var(--text-dim);
+  background: var(--bg-3); padding: 2px 6px; border-radius: 999px;
+  margin-left: 8px; vertical-align: middle;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 .appbar .back { background: none; border: none; color: var(--accent); font-size: 22px; padding: 6px 4px; cursor: pointer; line-height: 1; }
 .appbar .actions { display: flex; gap: 8px; }
 .appbar .grow { min-width: 0; flex: 1; }
@@ -125,6 +131,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   background: var(--bg); border: 1px dashed var(--border);
   border-radius: var(--radius);
   padding: 8px 10px; word-break: break-all;
+}
+
+.debug-strip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px; color: var(--text-dim);
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px; margin: 8px 0 0;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 160px; overflow: auto;
 }
 
 .group {

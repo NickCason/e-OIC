@@ -447,7 +447,7 @@ this device"), and offline status ("Yes (after first load)").
   vite.config.js — these libs (~300 KB gzipped) are only fetched when
   the user taps Export, not on initial PWA install.
 - **Service worker** precaches `index.html`, `manifest.webmanifest`,
-  `template.xlsx`, and assets, then serves them offline. `VERSION = 'v4'`
+  `template.xlsx`, and assets, then serves them offline. `VERSION = 'v5'`
   bust on each deploy forces clients to fetch fresh.
 
 ---

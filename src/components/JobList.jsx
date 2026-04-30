@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, importJSON, exportJobJSON } from '../db.js';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
+import { BUILD_VERSION } from '../version.js';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
@@ -45,7 +46,7 @@ export default function JobList() {
   return (
     <>
       <header className="appbar">
-        <h1>e-OIC</h1>
+        <h1>e-OIC <span className="build-badge">{BUILD_VERSION}</span></h1>
         <div className="actions">
           <button className="ghost icon-btn" onClick={() => nav('/settings')} aria-label="Settings">⚙</button>
         </div>
