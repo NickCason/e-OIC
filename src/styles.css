@@ -1472,3 +1472,92 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   color: var(--text-strong);
   font-variant-numeric: tabular-nums;
 }
+.checklist-task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.checklist-task-row:last-child { border-bottom: none; }
+.checklist-task-row__check {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: var(--accent);
+}
+.checklist-task-row__check:disabled { cursor: default; color: var(--text-dim); }
+.checklist-empty-box {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--text-dim);
+  border-radius: 4px;
+  background: var(--bg-2);
+}
+.checklist-task-row.is-checked .checklist-empty-box {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.checklist-task-row__main { flex: 1 1 auto; min-width: 0; }
+.checklist-task-row__label {
+  color: var(--text-strong);
+  font-size: 15px;
+  line-height: 1.4;
+}
+.checklist-task-row.is-checked .checklist-task-row__label {
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+.checklist-task-row.is-locked .checklist-task-row__label { color: var(--text); }
+.checklist-task-row__caption {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.checklist-task-row__actions {
+  position: relative;
+  flex-shrink: 0;
+}
+.checklist-task-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 5;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding: 4px 0;
+  min-width: 120px;
+}
+.checklist-task-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+}
+.checklist-task-menu button:hover { background: var(--bg-3); }
+.checklist-task-menu button.danger { color: var(--danger); }
+.checklist-rename-input {
+  flex: 1;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--text);
+}
