@@ -1136,6 +1136,51 @@ main {
   font-size: var(--fs-caption);
 }
 
+/* Toast */
+.toast-host {
+  position: fixed;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 300;
+  pointer-events: none;
+  width: max-content;
+  max-width: 90vw;
+}
+.toast {
+  pointer-events: auto;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-body);
+  animation: toast-in 250ms ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast.error { border-color: var(--danger); color: var(--danger); }
+.toast .toast-icon { color: var(--ok); display: inline-flex; }
+.toast.error .toast-icon { color: var(--danger); }
+.toast .undo {
+  background: transparent;
+  color: var(--accent);
+  border: none;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.toast .undo:hover { background: var(--bg-3); }
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
@@ -1251,26 +1296,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   transition: transform 80ms ease, box-shadow 80ms ease;
 }
 .fab:active { transform: scale(0.92); box-shadow: var(--shadow-sm); }
-
-.toast-host {
-  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; gap: 6px;
-  z-index: 300;
-  pointer-events: none;
-}
-.toast {
-  pointer-events: auto;
-  background: var(--bg-2); border: 1px solid var(--border);
-  padding: 10px 14px; border-radius: 8px;
-  display: flex; align-items: center; gap: 12px;
-  box-shadow: var(--shadow-md);
-  min-width: 220px;
-}
-.toast.error { border-color: var(--danger); }
-.toast .undo {
-  background: transparent; color: var(--accent); border: none;
-  font-weight: 600; padding: 4px 8px;
-}
 
 .search-bar {
   width: 100%; padding: 8px 12px;

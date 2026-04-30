@@ -86,7 +86,7 @@ function GeoPrompt({ onClose }) {
   return (
     <div className="modal-bg">
       <div className="modal">
-        <h2>📍 Tag photos with location?</h2>
+        <h2 className="modal-title">Tag photos with location?</h2>
         <p style={{ color: 'var(--text-dim)', fontSize: 14, marginTop: 0 }}>
           The app can attach GPS coordinates to every photo you take, written into:
         </p>
@@ -101,7 +101,7 @@ function GeoPrompt({ onClose }) {
         <div className="btn-row" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
           <button className="ghost" onClick={deny} disabled={busy}>Not now</button>
           <button className="primary" onClick={allow} disabled={busy}>
-            {busy ? 'Asking…' : 'Enable Location'}
+            {busy ? 'Asking…' : 'Enable location'}
           </button>
         </div>
       </div>
