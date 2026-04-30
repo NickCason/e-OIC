@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import schemaMap from '../schema.json';
-import { getJob, getPanel, listRows, listPanelPhotos } from '../db.js';
+import { getJob, getPanel } from '../db.js';
+import { getPanelProgress } from '../lib/metrics.js';
 import { nav } from '../App.jsx';
 import SheetForm from './SheetForm.jsx';
 import AppBar from './AppBar.jsx';
@@ -18,23 +18,13 @@ export default function PanelView({ jobId, panelId }) {
   const [panel, setPanel] = useState(null);
   const [activeSheet, setActiveSheet] = useState('Panels');
   const [progress, setProgress] = useState({});
+  const [panelPercent, setPanelPercent] = useState(0);
   const [showSheetPicker, setShowSheetPicker] = useState(false);
 
   async function refreshProgress() {
-    const p = {};
-    const allPhotos = await listPanelPhotos(panelId);
-    for (const sheet of SHEET_ORDER) {
-      const rows = await listRows(panelId, sheet);
-      const sheetPhotos = allPhotos.filter((ph) => ph.sheet === sheet);
-      const requiredItems = (schemaMap[sheet]?.photo_checklist_columns || []).length;
-      let state = 'empty';
-      if (rows.length > 0) {
-        state = 'partial';
-        if (requiredItems === 0 || sheetPhotos.length >= requiredItems) state = 'complete';
-      }
-      p[sheet] = state;
-    }
-    setProgress(p);
+    const { percent, sheetStatuses } = await getPanelProgress(panelId);
+    setProgress(sheetStatuses);
+    setPanelPercent(percent);
   }
 
   useEffect(() => {
@@ -63,7 +53,9 @@ export default function PanelView({ jobId, panelId }) {
       <main>
         <div className="hero">
           <div className="hero-pretitle">
-            {idx >= 0 ? `PANEL · ${idx + 1} OF ${total} SHEETS` : 'PANEL'}
+            {idx >= 0
+              ? `PANEL · ${panelPercent}% COMPLETE · ${idx + 1} OF ${total} SHEETS`
+              : 'PANEL'}
           </div>
           <h1 className="hero-title">{panel?.name || 'Panel'}</h1>
         </div>
