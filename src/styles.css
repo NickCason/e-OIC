@@ -1416,3 +1416,10 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   text-align: center;
   line-height: 1;
 }
+.percent-bar {
+  width: 100%;
+  overflow: hidden;
+}
+.percent-bar__fill {
+  display: block;
+}
