@@ -263,6 +263,37 @@ export async function buildExport(job, {
     console.warn('Checklist update skipped:', e);
   }
 
+  // 4b. Append custom checklist tasks (added via the in-app Checklist screen)
+  try {
+    if (checklistSheet && checklistLastTaskRow > 0) {
+      const cls = await getChecklistState(job.id);
+      const customTasks = cls.customTasks || [];
+      if (customTasks.length > 0) {
+        const cl = checklistSheet;
+        const styleSrcRow = cl.getRow(checklistLastTaskRow);
+        const srcA = styleSrcRow.getCell(1);
+        const srcB = styleSrcRow.getCell(2);
+        const srcC = styleSrcRow.getCell(3);
+        for (let i = 0; i < customTasks.length; i++) {
+          const t = customTasks[i];
+          const r = checklistLastTaskRow + 1 + i;
+          const a = cl.getCell(r, 1);
+          const b = cl.getCell(r, 2);
+          const c = cl.getCell(r, 3);
+          a.value = t.label;
+          b.value = 'Yes';
+          c.value = t.completed ? CHK_ON : CHK_OFF;
+          // Copy styles so the appended rows match the template's look
+          if (srcA.style) a.style = { ...srcA.style };
+          if (srcB.style) b.style = { ...srcB.style };
+          if (srcC.style) c.style = { ...srcC.style };
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Custom checklist append skipped:', e);
+  }
+
   // 5. Append Notes sheet (job + per-row notes) — added only if we have any
   if (job.notes?.trim() || notesAppendix.length > 0) {
     let notesWs = wb.getWorksheet('Notes');
