@@ -199,25 +199,96 @@ main {
 /* (Component sections are added/replaced in later tasks. Legacy
    component styles continue below until they are migrated.) */
 
-/* ------ LEGACY (to be migrated) ------ */
+/* AppBar */
 .appbar {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--bg-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
   border-bottom: 1px solid var(--border);
-  padding: max(env(safe-area-inset-top), 10px) max(env(safe-area-inset-right), 16px) 10px max(env(safe-area-inset-left), 16px);
-  display: flex; align-items: center; gap: 10px;
+  padding:
+    max(env(safe-area-inset-top), var(--sp-3))
+    max(env(safe-area-inset-right), var(--sp-4))
+    var(--sp-2)
+    max(env(safe-area-inset-left), var(--sp-4));
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
 }
-.appbar h1 { font-size: 16px; margin: 0; flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.appbar h1 .build-badge {
-  font-size: 10px; font-weight: 500; color: var(--text-dim);
-  background: var(--bg-3); padding: 2px 6px; border-radius: 999px;
-  margin-left: 8px; vertical-align: middle;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+.appbar-back {
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: var(--sp-1) var(--sp-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-sm);
 }
-.appbar .back { background: none; border: none; color: var(--accent); font-size: 22px; padding: 6px 4px; cursor: pointer; line-height: 1; }
-.appbar .actions { display: flex; gap: 8px; }
-.appbar .grow { min-width: 0; flex: 1; }
-.crumb { font-size: 12px; color: var(--text-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.appbar-back:hover { background: var(--bg-3); }
+.appbar-mark {
+  width: 26px;
+  height: 26px;
+  background-image: var(--mark-src);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+.appbar-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.appbar-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text-strong);
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.appbar-wordmark--button {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-strong);
+}
+.appbar-crumb {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--text-dim);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.appbar-actions {
+  display: flex;
+  gap: var(--sp-1);
+  align-items: center;
+}
+.appbar-actions button.icon-btn {
+  background: transparent;
+  border: none;
+  padding: var(--sp-2);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.appbar-actions button.icon-btn:hover { background: var(--bg-3); }
+
+/* ------ LEGACY (to be migrated) ------ */
 
 button {
   background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
