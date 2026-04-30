@@ -1397,3 +1397,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .view-toggle button.active { background: var(--accent); color: var(--accent-on); }
 
+.percent-ring {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.percent-ring svg { display: block; }
+.percent-ring__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-strong);
+  pointer-events: none;
+  text-align: center;
+  line-height: 1;
+}
