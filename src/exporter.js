@@ -132,7 +132,17 @@ export async function buildExport(job, {
           if (!ci) continue;
           if (col.header === schema.hyperlink_column) {
             const folder = `Photos/${safe(panel.name)}/${safe(sheetName)}/${rowLabel(row, schema)}/`;
-            r.getCell(ci).value = { text: folder, hyperlink: folder };
+            // Excel rejects relationship targets that aren't valid URIs —
+            // unencoded spaces / specials in panel/row names corrupt the
+            // workbook. encodeURI keeps `/` as-is and percent-encodes the
+            // rest, producing a valid Target attribute. Display text stays
+            // human-readable. If anything still trips the writer, fall back
+            // to a plain string so the file at least opens.
+            try {
+              r.getCell(ci).value = { text: folder, hyperlink: encodeURI(folder) };
+            } catch (e) {
+              r.getCell(ci).value = folder;
+            }
           } else {
             r.getCell(ci).value = coerce(row.data?.[col.header]);
           }

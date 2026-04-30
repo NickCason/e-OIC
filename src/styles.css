@@ -35,14 +35,26 @@
 }
 
 * { box-sizing: border-box; }
-html, body, #root { margin: 0; height: 100%; }
+html, body, #root {
+  margin: 0; height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+html { touch-action: pan-y; }
 body {
   font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  width: 100%;
+  position: relative;
 }
 input, select, textarea, button { font: inherit; color: inherit; }
+/* iOS Safari zooms the page when focusing inputs whose font-size is below
+   16px. Pinning at 16px (combined with maximum-scale=1 in the viewport
+   meta) keeps the frame locked. */
+input, select, textarea { font-size: 16px; }
 
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
