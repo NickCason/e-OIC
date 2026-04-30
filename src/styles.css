@@ -617,6 +617,74 @@ main {
 .savebar-cta:active { transform: scale(0.96); }
 .savebar-cta:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: var(--lightbox-bg);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadein 150ms ease;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.lightbox img {
+  max-width: 95vw;
+  max-height: 90vh;
+  object-fit: contain;
+  touch-action: pinch-zoom;
+}
+.lightbox-btn {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.lightbox-btn:hover { background: rgba(255, 255, 255, 0.18); }
+.lightbox-close {
+  top: max(var(--sp-4), env(safe-area-inset-top));
+  right: var(--sp-4);
+}
+.lightbox-delete {
+  bottom: max(var(--sp-4), env(safe-area-inset-bottom));
+  right: var(--sp-4);
+}
+.lightbox-gps {
+  position: absolute;
+  top: max(var(--sp-4), env(safe-area-inset-top));
+  left: var(--sp-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  font-size: var(--fs-caption);
+  padding: 6px 10px;
+  border-radius: var(--r-pill);
+}
+.lightbox-counter {
+  position: absolute;
+  bottom: max(var(--sp-4), env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  font-size: var(--fs-caption);
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+}
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
@@ -824,17 +892,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   transition: transform 80ms ease, box-shadow 80ms ease;
 }
 .fab:active { transform: scale(0.92); box-shadow: var(--shadow-sm); }
-
-.lightbox {
-  position: fixed; inset: 0; background: var(--lightbox-bg); z-index: 200;
-  display: flex; align-items: center; justify-content: center;
-}
-.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.lightbox .close {
-  position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px;
-  background: rgba(255,255,255,0.15); color: white; border: none;
-  width: 40px; height: 40px; border-radius: 20px; font-size: 18px;
-}
 
 .toast-host {
   position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
