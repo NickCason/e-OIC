@@ -50,7 +50,7 @@ input, select, textarea, button { font: inherit; color: inherit; }
   position: sticky; top: 0; z-index: 10;
   background: var(--bg-2);
   border-bottom: 1px solid var(--border);
-  padding: max(env(safe-area-inset-top), 10px) 12px 10px;
+  padding: max(env(safe-area-inset-top), 10px) max(env(safe-area-inset-right), 16px) 10px max(env(safe-area-inset-left), 16px);
   display: flex; align-items: center; gap: 10px;
 }
 .appbar h1 { font-size: 16px; margin: 0; flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -119,6 +119,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .field-checkbox input { width: auto; }
 .field-checkbox label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--text); }
 
+.hyperlink-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px; color: var(--text-dim);
+  background: var(--bg); border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px; word-break: break-all;
+}
+
 .group {
   background: var(--bg-2); border: 1px solid var(--border);
   border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
@@ -159,9 +167,9 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   border-radius: 999px; overflow: hidden;
   background: var(--bg-2);
 }
-.row-pill.active { border-color: var(--accent-2); }
-.row-pill .lbl { padding: 6px 10px; font-size: 13px; cursor: pointer; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row-pill.active .lbl { background: var(--accent-2); color: white; }
+.row-pill.active { background: var(--accent-2); border-color: var(--accent-2); }
+.row-pill .lbl { padding: 6px 12px; font-size: 13px; cursor: pointer; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-pill.active .lbl { color: white; }
 .row-pill .more { background: transparent; border: none; padding: 6px 8px; font-size: 13px; color: var(--text-dim); cursor: pointer; border-left: 1px solid var(--border); }
 .row-pill.active .more { color: white; border-left-color: rgba(255,255,255,0.3); }
 

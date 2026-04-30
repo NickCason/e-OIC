@@ -32,11 +32,15 @@ export default function PhotoCapture({
     if (!fileList || fileList.length === 0) return;
     setBusy(true);
     setError(null);
+    let savedCount = 0;
     try {
       // Get a single GPS reading and reuse it for the whole batch.
       const gps = await maybeGetGps();
       for (const file of fileList) {
-        if (!file.type.startsWith('image/')) continue;
+        // Don't skip on missing or generic MIME — iOS Safari sometimes hands
+        // back camera captures with file.type === '' or 'application/octet-stream'.
+        // Genuinely invalid files are rejected by createImageBitmap, which
+        // throws a friendly error from applyOverlay's try/catch.
         const overlayLabel = rowId ? (rowLabelHint || 'Row') : item;
         const lines = [
           `${job.name} • ${panel.name}`,
@@ -54,10 +58,13 @@ export default function PhotoCapture({
           w: width, h: height,
           gps,
         });
-        // Haptic tick on save (if supported)
+        savedCount += 1;
         if (navigator.vibrate) navigator.vibrate(20);
       }
       await refresh();
+      if (savedCount === 0 && fileList.length > 0) {
+        setError('Photo could not be saved. The file may not be a recognized image format.');
+      }
     } catch (e) {
       console.error(e);
       setError(e.message || 'Could not save photo');

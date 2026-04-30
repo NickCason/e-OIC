@@ -14,16 +14,13 @@ import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
 } from './db.js';
 import { fmtTimestamp, fmtGps } from './photoOverlay.js';
+import { safe, rowLabel } from './lib/paths.js';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',
   'Network Devices', 'HMIs', 'Ethernet Switches', 'Drive Parameters',
   'Conv. Speeds', 'Safety Circuit', 'Safety Devices', 'Peer to Peer Comms',
 ];
-
-function safe(name) {
-  return String(name || 'unnamed').replace(/[\\/:*?"<>|]/g, '_').trim();
-}
 
 function pad3(n) { return String(n).padStart(3, '0'); }
 
@@ -48,23 +45,6 @@ function coerce(v) {
     return v;
   }
   return v;
-}
-
-// Pick a meaningful folder label for a row's photos: prefer "Device Name",
-// "Panel Name", or another *Name field; fall back to "Row N".
-function rowLabel(row, schema) {
-  const preferred = ['Device Name', 'Panel Name', 'Tag/Component Name', 'Address'];
-  for (const p of preferred) {
-    const v = row.data?.[p];
-    if (v) return safe(v);
-  }
-  for (const col of schema.columns) {
-    if (/name/i.test(col.header) && !/hyperlink/i.test(col.header)) {
-      const v = row.data?.[col.header];
-      if (v) return safe(v);
-    }
-  }
-  return `Row${pad3(row.idx + 1)}`;
 }
 
 function csvEscape(v) {

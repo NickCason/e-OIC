@@ -5,6 +5,7 @@ import {
   getSheetNotes, setSheetNotes, listRowPhotos, exportJobJSON, importJSON,
 } from '../db.js';
 import { toast } from '../lib/toast.js';
+import { rowPhotoFolder } from '../lib/paths.js';
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
 
@@ -260,8 +261,11 @@ function RowEditor({ job, panel, sheetName, schema, row, onSaved }) {
                 value={row.data[col.header]}
                 rowId={row.id}
                 isHyperlink={col.header === schema.hyperlink_column}
-                panelName={panel.name}
-                sheetName={sheetName}
+                hyperlinkPath={
+                  col.header === schema.hyperlink_column
+                    ? rowPhotoFolder(panel.name, sheetName, row, schema)
+                    : null
+                }
                 onChange={async (v) => {
                   await updateRow(row.id, { data: { [col.header]: v } });
                   onSaved();
@@ -307,17 +311,14 @@ function Group({ name, count, children }) {
 }
 
 // ----- Field with debounced save-on-type -----
-function Field({ column, value, isHyperlink, panelName, sheetName, onChange }) {
+function Field({ column, value, isHyperlink, hyperlinkPath, onChange }) {
   if (isHyperlink) {
     return (
       <div className="field">
         <label>{column.header}</label>
-        <input
-          value={`Photos/${panelName}/${sheetName}/…`}
-          readOnly
-          style={{ opacity: 0.6 }}
-          title="Auto-generated at export"
-        />
+        <div className="hyperlink-path" title="Auto-generated at export. Click in the exported xlsx to open this folder in the unzipped Photos directory.">
+          {hyperlinkPath}
+        </div>
       </div>
     );
   }
