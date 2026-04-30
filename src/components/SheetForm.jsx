@@ -12,6 +12,8 @@ import {
 } from '../lib/fieldHints.js';
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
+import SaveBar from './SaveBar.jsx';
+import Icon from './Icon.jsx';
 
 // Top-level form for one (panel, sheet). Renders:
 //   - sheet-level notes scratchpad
@@ -29,6 +31,9 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
   // Drives the cross-row autocomplete for SHARED_HEADERS (Area, Panel Name,
   // etc.). Refreshed on mount, on row save, and on panel/sheet change.
   const [sharedValues, setSharedValues] = useState({});
+  // Counter that bumps on every confirmed autosave write; SaveBar watches it
+  // to flash its "Saved ✓" pill.
+  const [savePulse, setSavePulse] = useState(0);
 
   async function refresh() {
     const r = await listRows(panel.id, sheetName);
@@ -95,6 +100,21 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
   if (!schema) return <div className="card">No schema for {sheetName}</div>;
   const activeRow = rows.find((r) => r.id === activeRowId);
 
+  const currentRowIndex = rows.findIndex((r) => r.id === activeRowId);
+  const hasNextRow = currentRowIndex >= 0 && currentRowIndex < rows.length - 1;
+
+  function handleSaveAndNext() {
+    // Force-blur the active input so its onBlur/debounced autosave fires.
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    if (hasNextRow) {
+      setActiveRowId(rows[currentRowIndex + 1].id);
+    } else {
+      addRow();
+    }
+  }
+
   return (
     <div>
       <SheetNotes panelId={panel.id} sheet={sheetName} panelName={panel.name} />
@@ -124,7 +144,20 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
           schema={schema}
           row={activeRow}
           sharedValues={sharedValues}
-          onSaved={() => { refresh(); refreshSharedValues(); onChange?.(); }}
+          onSaved={() => {
+            setSavePulse((n) => n + 1);
+            refresh();
+            refreshSharedValues();
+            onChange?.();
+          }}
+        />
+      )}
+
+      {view === 'form' && (
+        <SaveBar
+          onSaveAndNext={handleSaveAndNext}
+          nextLabel={hasNextRow ? 'next' : 'new'}
+          pulseSavedKey={savePulse}
         />
       )}
     </div>
@@ -192,12 +225,11 @@ function RowPicker({ rows, activeRowId, onPick, onAdd, onRemove, onMove, sheetNa
             <button className={view === 'table' ? 'active' : ''} onClick={() => onViewChange('table')}>Table</button>
           </div>
         )}
-        <button className="primary" onClick={onAdd}>+ Row</button>
       </div>
 
       {rows.length === 0 && (
         <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>
-          No rows yet. Tap <strong>+ Row</strong> to add one.
+          No rows yet. Tap <strong>+ New row</strong> below to add one.
         </div>
       )}
 

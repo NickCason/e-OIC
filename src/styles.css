@@ -740,6 +740,108 @@ main {
 }
 .tab--overflow:hover { color: var(--text); }
 
+/* Field (form input + label + hint) */
+.field { margin-bottom: var(--sp-3); }
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  outline: none;
+  color: var(--text);
+  transition: border-color 150ms ease;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--energy-soft);
+}
+.field textarea { resize: vertical; min-height: 60px; }
+.field-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.field input::placeholder, .field textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 0.65;
+}
+
+/* Custom checkbox */
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.field-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ok);
+  cursor: pointer;
+}
+.field-checkbox label {
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-body);
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Refined group/card */
+.group {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-2);
+  overflow: hidden;
+  transition: border-color 150ms ease;
+}
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-3);
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+}
+.group-head .name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--text-strong);
+  letter-spacing: -0.005em;
+}
+.group-head .count {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+  background: var(--bg-3);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+.group-body {
+  padding: 0 var(--sp-3) var(--sp-3);
+  border-top: 1px solid var(--border);
+}
+
 /* ------ LEGACY (to be migrated) ------ */
 
 button {
@@ -778,26 +880,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .list-item .subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .list-item .actions { display: flex; gap: 4px; }
 
-.field { margin-bottom: 12px; }
-.field label {
-  display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 4px;
-  text-transform: uppercase; letter-spacing: 0.04em;
-}
-.field input, .field select, .field textarea {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 10px 12px;
-  outline: none;
-  color: var(--text);
-}
-.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
-.field textarea { resize: vertical; min-height: 60px; }
-.field-checkbox { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.field-checkbox input { width: auto; }
-.field-checkbox label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--text); }
-
 .group-body textarea, .group-body input[type="text"] {
   width: 100%;
   background: var(--bg);
@@ -812,7 +894,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .group-body textarea:focus, .group-body input[type="text"]:focus { border-color: var(--accent); }
 .group-body textarea::placeholder { color: var(--text-dim); }
-.field input::placeholder, .field textarea::placeholder { color: var(--text-dim); opacity: 0.7; }
 
 .hyperlink-path {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -831,19 +912,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   white-space: pre-wrap; word-break: break-all;
   max-height: 160px; overflow: auto;
 }
-
-.group {
-  background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--r-md); margin-bottom: 10px; overflow: hidden;
-}
-.group-head {
-  display: flex; align-items: center; gap: 8px;
-  padding: 12px 14px; cursor: pointer; user-select: none;
-  background: var(--bg-3);
-}
-.group-head .name { flex: 1; font-weight: 600; }
-.group-head .count { font-size: 12px; color: var(--text-dim); }
-.group-body { padding: 12px 14px; border-top: 1px solid var(--border); }
 
 .row-pills {
   display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
