@@ -1,0 +1,24 @@
+{
+  "name": "e-oic",
+  "private": true,
+  "version": "1.1.0",
+  "description": "eTechGroup Onsite Investigation Checklist — mobile PWA for control system field surveys",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "idb": "^8.0.0",
+    "piexifjs": "^1.0.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "exceljs": "^4.4.0",
+    "jszip": "^3.10.1",
+    "vite": "^5.4.11"
+  }
+}

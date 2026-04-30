@@ -1,0 +1,188 @@
+import React, { useState, useEffect } from 'react';
+import {
+  getJob, listPanels, createPanel, updatePanel, deletePanel, duplicatePanel,
+  listAllRows, listPanelPhotos, exportJobJSON, importJSON, updateJob,
+} from '../db.js';
+import { nav } from '../App.jsx';
+import { toast } from '../lib/toast.js';
+import ExportDialog from './ExportDialog.jsx';
+import { fmtRelative } from './JobList.jsx';
+
+export default function JobView({ jobId }) {
+  const [job, setJob] = useState(null);
+  const [panels, setPanels] = useState([]);
+  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [exporting, setExporting] = useState(false);
+  const [stats, setStats] = useState({});
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  async function refresh() {
+    const j = await getJob(jobId);
+    if (!j) { nav('/'); return; }
+    setJob(j);
+    const ps = await listPanels(jobId);
+    setPanels(ps);
+    const s = {};
+    for (const p of ps) {
+      const rows = await listAllRows(p.id);
+      const photos = await listPanelPhotos(p.id);
+      s[p.id] = { rows: rows.length, photos: photos.length };
+    }
+    setStats(s);
+  }
+
+  useEffect(() => { refresh(); }, [jobId]);
+
+  async function onDelete(panel) {
+    // Snapshot panel via per-job export, then filter to just this panel's data
+    // for the undo. Easiest: just snapshot the whole job and re-import the
+    // panel-related slices on undo. We'll do the simpler thing — full
+    // job snapshot, replace on undo (will atomically restore the panel).
+    const snapshot = await exportJobJSON(jobId);
+    await deletePanel(panel.id);
+    await refresh();
+    toast.undoable(`Deleted panel “${panel.name}”`, {
+      onUndo: async () => {
+        await importJSON(snapshot, { mode: 'replace' });
+        await refresh();
+      },
+    });
+  }
+
+  async function onDuplicate(panel) {
+    const newName = prompt(`Duplicate “${panel.name}” as:`, `${panel.name} (copy)`);
+    if (!newName?.trim()) return;
+    const dup = await duplicatePanel(panel.id, newName.trim());
+    await refresh();
+    toast.show(`Duplicated as “${dup.name}” (rows copied, photos not)`);
+  }
+
+  async function onBackupJob() {
+    try {
+      const snapshot = await exportJobJSON(jobId);
+      const blob = new Blob([JSON.stringify(snapshot)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${job.name}-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      toast.show('Job backup downloaded');
+    } catch (e) {
+      toast.error('Backup failed: ' + (e.message || ''));
+    }
+  }
+
+  if (!job) return null;
+
+  return (
+    <>
+      <header className="appbar">
+        <button className="back" onClick={() => nav('/')} aria-label="Back">‹</button>
+        <div className="grow">
+          <h1>{job.name}</h1>
+          <div className="crumb">
+            {job.client || ''}{job.client && job.location ? ' · ' : ''}{job.location || ''}
+            {job.updatedAt && <> · {fmtRelative(job.updatedAt)}</>}
+          </div>
+        </div>
+        <div className="actions">
+          <button className="ghost icon-btn" onClick={() => setMenuOpen(true)} aria-label="More">⋯</button>
+          <button className="primary" onClick={() => setExporting(true)} disabled={panels.length === 0}>Export</button>
+        </div>
+      </header>
+      <main>
+        {panels.length === 0 && (
+          <div className="empty">
+            <p>No panels yet.</p>
+            <p>Tap <strong>+</strong> to add a panel.</p>
+          </div>
+        )}
+        {panels.map((p) => {
+          const s = stats[p.id] || { rows: 0, photos: 0 };
+          return (
+            <div key={p.id} className="list-item" onClick={() => nav(`/job/${jobId}/panel/${p.id}`)}>
+              <div className="grow">
+                <div className="title">{p.name}</div>
+                <div className="subtitle">
+                  {s.rows} row{s.rows !== 1 ? 's' : ''} · {s.photos} photo{s.photos !== 1 ? 's' : ''}
+                  {p.updatedAt && <> · {fmtRelative(p.updatedAt)}</>}
+                </div>
+              </div>
+              <div className="actions">
+                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); setEditing(p); }} aria-label="Edit">✎</button>
+                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); onDuplicate(p); }} aria-label="Duplicate">⧉</button>
+                <button className="ghost danger icon-btn" onClick={(e) => { e.stopPropagation(); onDelete(p); }} aria-label="Delete">✕</button>
+              </div>
+            </div>
+          );
+        })}
+      </main>
+      <button className="fab" onClick={() => setCreating(true)} aria-label="New panel">+</button>
+      {creating && <PanelModal jobId={jobId} onClose={() => setCreating(false)} onSaved={refresh} />}
+      {editing && <PanelModal jobId={jobId} panel={editing} onClose={() => setEditing(null)} onSaved={refresh} />}
+      {exporting && <ExportDialog job={job} onClose={() => setExporting(false)} />}
+      {menuOpen && (
+        <div className="modal-bg" onClick={() => setMenuOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Job options</h2>
+            <button onClick={() => { setMenuOpen(false); onBackupJob(); }} style={{ width: '100%', textAlign: 'left' }}>⬇ Back up this job</button>
+            <button onClick={() => { setMenuOpen(false); setEditing({ ...job, _isJob: true }); }} style={{ width: '100%', textAlign: 'left', marginTop: 8 }}>✎ Edit job details</button>
+            <div className="btn-row" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
+              <button className="ghost" onClick={() => setMenuOpen(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function PanelModal({ jobId, panel = null, onClose, onSaved }) {
+  const isJobEdit = panel?._isJob;
+  const [name, setName] = useState(panel?.name || '');
+  const [busy, setBusy] = useState(false);
+
+  async function submit() {
+    if (!name.trim()) return;
+    setBusy(true);
+    if (isJobEdit) {
+      await updateJob(panel.id, { name: name.trim() });
+    } else if (panel) {
+      await updatePanel(panel.id, { name: name.trim() });
+      toast.show('Panel renamed');
+    } else {
+      const created = await createPanel({ jobId, name: name.trim() });
+      onSaved();
+      onClose();
+      nav(`/job/${jobId}/panel/${created.id}`);
+      return;
+    }
+    setBusy(false);
+    onSaved();
+    onClose();
+  }
+
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2>{panel ? (isJobEdit ? 'Edit job name' : 'Edit Panel') : 'New Panel'}</h2>
+        {!panel && (
+          <p style={{ color: 'var(--text-dim)', marginTop: 0, fontSize: 13 }}>
+            A panel is your working unit. Each gets its own photo folders and rows across all 13 sheets.
+          </p>
+        )}
+        <div className="field">
+          <label>{isJobEdit ? 'Job name' : 'Panel name'} *</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={isJobEdit ? '' : 'e.g. CP2'} autoFocus />
+        </div>
+        <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+          <button className="ghost" onClick={onClose}>Cancel</button>
+          <button className="primary" onClick={submit} disabled={busy || !name.trim()}>{panel ? 'Save' : 'Create'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}

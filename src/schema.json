@@ -1,0 +1,1761 @@
+{
+  "Panels": {
+    "sheet_name": "Panels",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Folder Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Panel Location"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Power Feed Circuit"
+      },
+      {
+        "index": 6,
+        "group": "Nameplate Data",
+        "header": "Phase"
+      },
+      {
+        "index": 7,
+        "group": "Nameplate Data",
+        "header": "FLA"
+      },
+      {
+        "index": 8,
+        "group": "Nameplate Data",
+        "header": "Volts Max"
+      },
+      {
+        "index": 9,
+        "group": "Nameplate Data",
+        "header": "SCC"
+      },
+      {
+        "index": 10,
+        "group": "Nameplate Data",
+        "header": "Frequency"
+      },
+      {
+        "index": 11,
+        "group": "Nameplate Data",
+        "header": "Largest Motor HP"
+      },
+      {
+        "index": 12,
+        "group": "External Panel Measurements (Inches)",
+        "header": "Height"
+      },
+      {
+        "index": 13,
+        "group": "External Panel Measurements (Inches)",
+        "header": "Width"
+      },
+      {
+        "index": 14,
+        "group": "External Panel Measurements (Inches)",
+        "header": "Depth"
+      },
+      {
+        "index": 15,
+        "group": "External Panel Measurements (Inches)",
+        "header": "Legs"
+      },
+      {
+        "index": 16,
+        "group": "External Clearance (Inches)",
+        "header": "Top"
+      },
+      {
+        "index": 17,
+        "group": "External Clearance (Inches)",
+        "header": "Bottom"
+      },
+      {
+        "index": 18,
+        "group": "External Clearance (Inches)",
+        "header": "Left"
+      },
+      {
+        "index": 19,
+        "group": "External Clearance (Inches)",
+        "header": "Right"
+      },
+      {
+        "index": 20,
+        "group": "External Clearance (Inches)",
+        "header": "Front"
+      },
+      {
+        "index": 21,
+        "group": "External Clearance (Inches)",
+        "header": "Back"
+      },
+      {
+        "index": 22,
+        "group": "Photo Checklist",
+        "header": "Panel Labels"
+      },
+      {
+        "index": 23,
+        "group": "Photo Checklist",
+        "header": "Full Panel"
+      },
+      {
+        "index": 24,
+        "group": "Photo Checklist",
+        "header": "Each Door"
+      },
+      {
+        "index": 25,
+        "group": "Photo Checklist",
+        "header": "Each Section"
+      },
+      {
+        "index": 26,
+        "group": "Photo Checklist",
+        "header": "Transformers"
+      },
+      {
+        "index": 27,
+        "group": "Photo Checklist",
+        "header": "Power Supplies"
+      },
+      {
+        "index": 28,
+        "group": "Photo Checklist",
+        "header": "Power Disribution"
+      },
+      {
+        "index": 29,
+        "group": "Photo Checklist",
+        "header": "Fuses/CBs"
+      },
+      {
+        "index": 30,
+        "group": "Photo Checklist",
+        "header": "HMIs"
+      },
+      {
+        "index": 31,
+        "group": "Photo Checklist",
+        "header": "VFDs"
+      },
+      {
+        "index": 32,
+        "group": "Photo Checklist",
+        "header": "Motor Starters"
+      },
+      {
+        "index": 33,
+        "group": "Photo Checklist",
+        "header": "PLC Rack"
+      },
+      {
+        "index": 34,
+        "group": "Photo Checklist",
+        "header": "Safety Relay"
+      },
+      {
+        "index": 35,
+        "group": "Photo Checklist",
+        "header": "Misc. Control Hardware"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Panel Labels",
+      "Full Panel",
+      "Each Door",
+      "Each Section",
+      "Transformers",
+      "Power Supplies",
+      "Power Disribution",
+      "Fuses/CBs",
+      "HMIs",
+      "VFDs",
+      "Motor Starters",
+      "PLC Rack",
+      "Safety Relay",
+      "Misc. Control Hardware"
+    ],
+    "hyperlink_column": "Folder Hyperlink",
+    "primary_key": "Panel Name",
+    "row_photos_enabled": true
+  },
+  "Power": {
+    "sheet_name": "Power",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Photo Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Drawing Reference"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Safety Circuit"
+      },
+      {
+        "index": 7,
+        "group": "Outgoing/Output Power",
+        "header": "Voltage Out"
+      },
+      {
+        "index": 8,
+        "group": "Outgoing/Output Power",
+        "header": "Amperage Out"
+      },
+      {
+        "index": 9,
+        "group": "Outgoing/Output Power",
+        "header": "Phase Out"
+      },
+      {
+        "index": 10,
+        "group": "Outgoing/Output Power",
+        "header": "Wire Number (V+ Out)"
+      },
+      {
+        "index": 11,
+        "group": "Outgoing/Output Power",
+        "header": "Wire Number (COM Out)"
+      },
+      {
+        "index": 12,
+        "group": "Incoming/Input Power",
+        "header": "Voltage In"
+      },
+      {
+        "index": 13,
+        "group": "Incoming/Input Power",
+        "header": "Amperage In"
+      },
+      {
+        "index": 14,
+        "group": "Incoming/Input Power",
+        "header": "Phase In"
+      },
+      {
+        "index": 15,
+        "group": "Incoming/Input Power",
+        "header": "Fuse/CB #"
+      },
+      {
+        "index": 16,
+        "group": "Incoming/Input Power",
+        "header": "Wire Number (V+)"
+      },
+      {
+        "index": 17,
+        "group": "Incoming/Input Power",
+        "header": "Wire Number (COM)"
+      },
+      {
+        "index": 18,
+        "group": "Photo Checklist",
+        "header": "Device"
+      },
+      {
+        "index": 19,
+        "group": "Photo Checklist",
+        "header": "Location"
+      },
+      {
+        "index": 20,
+        "group": "Photo Checklist",
+        "header": "PS Part Number"
+      },
+      {
+        "index": 21,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Device",
+      "Location",
+      "PS Part Number",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Photo Hyperlink",
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  },
+  "PLC Racks": {
+    "sheet_name": "PLC Racks",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Folder Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "IO List Completed"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Rack Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "Comm Address (IP, Serial, Fieldbus, RIO)"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Comm Protocol"
+      },
+      {
+        "index": 9,
+        "group": "General Data",
+        "header": "Comm Wire Number"
+      },
+      {
+        "index": 10,
+        "group": "Chassis Power",
+        "header": "Power Supply Part Number"
+      },
+      {
+        "index": 11,
+        "group": "Chassis Power",
+        "header": "Voltage"
+      },
+      {
+        "index": 12,
+        "group": "Chassis Power",
+        "header": "Wire Number (V+)"
+      },
+      {
+        "index": 13,
+        "group": "Chassis Power",
+        "header": "Wire Number (COM)"
+      },
+      {
+        "index": 14,
+        "group": "Chassis Power",
+        "header": "Fuse/CB"
+      },
+      {
+        "index": 15,
+        "group": "Measurements (Inches)",
+        "header": "Height"
+      },
+      {
+        "index": 16,
+        "group": "Measurements (Inches)",
+        "header": "Width"
+      },
+      {
+        "index": 17,
+        "group": "Measurements (Inches)",
+        "header": "Depth"
+      },
+      {
+        "index": 18,
+        "group": "Clearance (Inches)",
+        "header": "Top"
+      },
+      {
+        "index": 19,
+        "group": "Clearance (Inches)",
+        "header": "Bottom"
+      },
+      {
+        "index": 20,
+        "group": "Clearance (Inches)",
+        "header": "Left"
+      },
+      {
+        "index": 21,
+        "group": "Clearance (Inches)",
+        "header": "Right"
+      },
+      {
+        "index": 22,
+        "group": "Clearance (Inches)",
+        "header": "Front"
+      },
+      {
+        "index": 23,
+        "group": "Clearance (Inches)",
+        "header": "Back"
+      },
+      {
+        "index": 24,
+        "group": "Photo Checklist",
+        "header": "Full Rack"
+      },
+      {
+        "index": 25,
+        "group": "Photo Checklist",
+        "header": "Power Feed"
+      },
+      {
+        "index": 26,
+        "group": "Photo Checklist",
+        "header": "Part Numbers"
+      },
+      {
+        "index": 27,
+        "group": "Photo Checklist",
+        "header": "Comm Cabling (Wire Numbers)"
+      },
+      {
+        "index": 28,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Full Rack",
+      "Power Feed",
+      "Part Numbers",
+      "Comm Cabling (Wire Numbers)",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Folder Hyperlink",
+    "primary_key": "Rack Name",
+    "row_photos_enabled": true
+  },
+  "PLC Slots": {
+    "sheet_name": "PLC Slots",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Photo Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "IO List Completed"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Rack Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "Firmware Revision"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Slot"
+      },
+      {
+        "index": 9,
+        "group": "Power Bus 1",
+        "header": "Safety Circuit"
+      },
+      {
+        "index": 10,
+        "group": "Power Bus 1",
+        "header": "Voltage"
+      },
+      {
+        "index": 11,
+        "group": "Power Bus 1",
+        "header": "IO Terminal (V+)"
+      },
+      {
+        "index": 12,
+        "group": "Power Bus 1",
+        "header": "Wire Number (V+)"
+      },
+      {
+        "index": 13,
+        "group": "Power Bus 1",
+        "header": "IO Terminal (COM)"
+      },
+      {
+        "index": 14,
+        "group": "Power Bus 1",
+        "header": "Wire Number (COM)"
+      },
+      {
+        "index": 15,
+        "group": "Power Bus 1",
+        "header": "Fuse/CB"
+      },
+      {
+        "index": 16,
+        "group": "Power Bus 2",
+        "header": "Safety Circuit 2"
+      },
+      {
+        "index": 17,
+        "group": "Power Bus 2",
+        "header": "Voltage 2"
+      },
+      {
+        "index": 18,
+        "group": "Power Bus 2",
+        "header": "IO Terminal 2 (V+)"
+      },
+      {
+        "index": 19,
+        "group": "Power Bus 2",
+        "header": "Wire Number 2 (V+)"
+      },
+      {
+        "index": 20,
+        "group": "Power Bus 2",
+        "header": "IO Terminal 2 (COM)"
+      },
+      {
+        "index": 21,
+        "group": "Power Bus 2",
+        "header": "Wire Number 2 (COM)"
+      },
+      {
+        "index": 22,
+        "group": "Power Bus 2",
+        "header": "Fuse/CB 2"
+      },
+      {
+        "index": 23,
+        "group": "Photo Checklist",
+        "header": "Slot Part Number"
+      },
+      {
+        "index": 24,
+        "group": "Photo Checklist",
+        "header": "Location"
+      },
+      {
+        "index": 25,
+        "group": "Photo Checklist",
+        "header": "Card/Field Wiring"
+      },
+      {
+        "index": 26,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Slot Part Number",
+      "Location",
+      "Card/Field Wiring",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Photo Hyperlink",
+    "primary_key": "Slot",
+    "row_photos_enabled": true
+  },
+  "Fieldbus IO": {
+    "sheet_name": "Fieldbus IO",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Photo Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "IO List Completed"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "Firmware Revision"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Comm Address (IP, Serial, Fieldbus, RIO)"
+      },
+      {
+        "index": 9,
+        "group": "General Data",
+        "header": "Comm Protocol"
+      },
+      {
+        "index": 10,
+        "group": "General Data",
+        "header": "Comm Wire Number"
+      },
+      {
+        "index": 11,
+        "group": "Power Bus #1 (Duplicate if multiple power buses)",
+        "header": "Power Supply"
+      },
+      {
+        "index": 12,
+        "group": "Power Bus #1 (Duplicate if multiple power buses)",
+        "header": "Source Panel"
+      },
+      {
+        "index": 13,
+        "group": "Power Bus #1 (Duplicate if multiple power buses)",
+        "header": "Voltage"
+      },
+      {
+        "index": 14,
+        "group": "Power Bus #1 (Duplicate if multiple power buses)",
+        "header": "Wire Number (V+)"
+      },
+      {
+        "index": 15,
+        "group": "Power Bus #1 (Duplicate if multiple power buses)",
+        "header": "Wire Number (COM)"
+      },
+      {
+        "index": 16,
+        "group": "Power Bus #1 (Duplicate if multiple power buses)",
+        "header": "Fuse/CB"
+      },
+      {
+        "index": 17,
+        "group": "Relative Distance (Feet)",
+        "header": "Nearest Panel"
+      },
+      {
+        "index": 18,
+        "group": "Relative Distance (Feet)",
+        "header": "Nearest Fieldbus IO 1"
+      },
+      {
+        "index": 19,
+        "group": "Relative Distance (Feet)",
+        "header": "Nearest Fieldbus IO 1 Name"
+      },
+      {
+        "index": 20,
+        "group": "Relative Distance (Feet)",
+        "header": "Nearest Fieldbus IO 2"
+      },
+      {
+        "index": 21,
+        "group": "Relative Distance (Feet)",
+        "header": "Nearest Fieldbus IO 2 Name"
+      },
+      {
+        "index": 22,
+        "group": "Relative Distance (Feet)",
+        "header": "Nearest Power Source"
+      },
+      {
+        "index": 23,
+        "group": "Measurements (Inches)",
+        "header": "Height"
+      },
+      {
+        "index": 24,
+        "group": "Measurements (Inches)",
+        "header": "Width"
+      },
+      {
+        "index": 25,
+        "group": "Measurements (Inches)",
+        "header": "Depth"
+      },
+      {
+        "index": 26,
+        "group": "Clearance (Inches)",
+        "header": "Top"
+      },
+      {
+        "index": 27,
+        "group": "Clearance (Inches)",
+        "header": "Bottom"
+      },
+      {
+        "index": 28,
+        "group": "Clearance (Inches)",
+        "header": "Left"
+      },
+      {
+        "index": 29,
+        "group": "Clearance (Inches)",
+        "header": "Right"
+      },
+      {
+        "index": 30,
+        "group": "Clearance (Inches)",
+        "header": "Front"
+      },
+      {
+        "index": 31,
+        "group": "Clearance (Inches)",
+        "header": "Back"
+      },
+      {
+        "index": 32,
+        "group": "Photo Checklist",
+        "header": "Field Device"
+      },
+      {
+        "index": 33,
+        "group": "Photo Checklist",
+        "header": "Field Device Location"
+      },
+      {
+        "index": 34,
+        "group": "Photo Checklist",
+        "header": "Field Device Part Number"
+      },
+      {
+        "index": 35,
+        "group": "Photo Checklist",
+        "header": "Comm Cabling (Wire Number)"
+      },
+      {
+        "index": 36,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Field Device",
+      "Field Device Location",
+      "Field Device Part Number",
+      "Comm Cabling (Wire Number)",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Photo Hyperlink",
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  },
+  "Network Devices": {
+    "sheet_name": "Network Devices",
+    "header_row": 3,
+    "first_data_row": 4,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Photo Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Device List Completed"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "Firmware Revision"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Comm Address (IP, Serial, Fieldbus, RIO)"
+      },
+      {
+        "index": 9,
+        "group": "General Data",
+        "header": "Communication Protocol"
+      },
+      {
+        "index": 10,
+        "group": "General Data",
+        "header": "Comm Wire Number"
+      },
+      {
+        "index": 11,
+        "group": "General Data",
+        "header": "Safety Circuit"
+      },
+      {
+        "index": 12,
+        "group": "Control Device Measurements (Inches)",
+        "header": "Height"
+      },
+      {
+        "index": 13,
+        "group": "Control Device Measurements (Inches)",
+        "header": "Width"
+      },
+      {
+        "index": 14,
+        "group": "Control Device Measurements (Inches)",
+        "header": "Depth"
+      },
+      {
+        "index": 15,
+        "group": "Control Device Clearance (Inches)",
+        "header": "Top"
+      },
+      {
+        "index": 16,
+        "group": "Control Device Clearance (Inches)",
+        "header": "Bottom"
+      },
+      {
+        "index": 17,
+        "group": "Control Device Clearance (Inches)",
+        "header": "Left"
+      },
+      {
+        "index": 18,
+        "group": "Control Device Clearance (Inches)",
+        "header": "Right"
+      },
+      {
+        "index": 19,
+        "group": "Control Device Clearance (Inches)",
+        "header": "Front"
+      },
+      {
+        "index": 20,
+        "group": "Control Device Clearance (Inches)",
+        "header": "Back"
+      },
+      {
+        "index": 21,
+        "group": "Photo Checklist",
+        "header": "Control Device (VFD, MS, Relay, IO Card)"
+      },
+      {
+        "index": 22,
+        "group": "Photo Checklist",
+        "header": "Control Device Wiring"
+      },
+      {
+        "index": 23,
+        "group": "Photo Checklist",
+        "header": "Control Device Comm Cable (Wire Number)"
+      },
+      {
+        "index": 24,
+        "group": "Photo Checklist",
+        "header": "Field Device (Motor, valve, flowmeter, etc.)"
+      },
+      {
+        "index": 25,
+        "group": "Photo Checklist",
+        "header": "Field Device Location/Area"
+      },
+      {
+        "index": 26,
+        "group": "Photo Checklist",
+        "header": "Field Device Nameplate"
+      },
+      {
+        "index": 27,
+        "group": "Photo Checklist",
+        "header": "Field Device Part Number"
+      },
+      {
+        "index": 28,
+        "group": "Photo Checklist",
+        "header": "Field Device Wiring"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Control Device (VFD, MS, Relay, IO Card)",
+      "Control Device Wiring",
+      "Control Device Comm Cable (Wire Number)",
+      "Field Device (Motor, valve, flowmeter, etc.)",
+      "Field Device Location/Area",
+      "Field Device Nameplate",
+      "Field Device Part Number",
+      "Field Device Wiring"
+    ],
+    "hyperlink_column": "Photo Hyperlink",
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  },
+  "HMIs": {
+    "sheet_name": "HMIs",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Folder Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Program Uploaded"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "HMI Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Application Name"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "Hardware Platform"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Firmware Revision"
+      },
+      {
+        "index": 9,
+        "group": "General Data",
+        "header": "Comm Address (IP, Serial, Fieldbus, RIO)"
+      },
+      {
+        "index": 10,
+        "group": "General Data",
+        "header": "Comm Protocol"
+      },
+      {
+        "index": 11,
+        "group": "General Data",
+        "header": "Comm Wire Number"
+      },
+      {
+        "index": 12,
+        "group": "Power",
+        "header": "Power Supply Part Number"
+      },
+      {
+        "index": 13,
+        "group": "Power",
+        "header": "Voltage"
+      },
+      {
+        "index": 14,
+        "group": "Power",
+        "header": "Wire Number (V+)"
+      },
+      {
+        "index": 15,
+        "group": "Power",
+        "header": "Wire Number (COM)"
+      },
+      {
+        "index": 16,
+        "group": "Power",
+        "header": "Fuse/CB"
+      },
+      {
+        "index": 17,
+        "group": "Cut Out Measurement (Inches)",
+        "header": "Height"
+      },
+      {
+        "index": 18,
+        "group": "Cut Out Measurement (Inches)",
+        "header": "Width"
+      },
+      {
+        "index": 19,
+        "group": "Measurements (Inches)",
+        "header": "Height 2"
+      },
+      {
+        "index": 20,
+        "group": "Measurements (Inches)",
+        "header": "Width 2"
+      },
+      {
+        "index": 21,
+        "group": "Measurements (Inches)",
+        "header": "Depth 2"
+      },
+      {
+        "index": 22,
+        "group": "Clearance (Inches)",
+        "header": "Top"
+      },
+      {
+        "index": 23,
+        "group": "Clearance (Inches)",
+        "header": "Bottom"
+      },
+      {
+        "index": 24,
+        "group": "Clearance (Inches)",
+        "header": "Left"
+      },
+      {
+        "index": 25,
+        "group": "Clearance (Inches)",
+        "header": "Right"
+      },
+      {
+        "index": 26,
+        "group": "Clearance (Inches)",
+        "header": "Front"
+      },
+      {
+        "index": 27,
+        "group": "Clearance (Inches)",
+        "header": "Back"
+      },
+      {
+        "index": 28,
+        "group": "Photo Checklist",
+        "header": "Full HMI (Front/Back)"
+      },
+      {
+        "index": 29,
+        "group": "Photo Checklist",
+        "header": "Power Feed"
+      },
+      {
+        "index": 30,
+        "group": "Photo Checklist",
+        "header": "Part Numbers (Screen/Logic Module)"
+      },
+      {
+        "index": 31,
+        "group": "Photo Checklist",
+        "header": "Comm Cabling (Wire Number)"
+      },
+      {
+        "index": 32,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Full HMI (Front/Back)",
+      "Power Feed",
+      "Part Numbers (Screen/Logic Module)",
+      "Comm Cabling (Wire Number)",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Folder Hyperlink",
+    "primary_key": "HMI Name",
+    "row_photos_enabled": true
+  },
+  "Ethernet Switches": {
+    "sheet_name": "Ethernet Switches",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Folder Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Configuration Backup"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Network Investigation Complete"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Name"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "# Ports in use"
+      },
+      {
+        "index": 8,
+        "group": "Power",
+        "header": "Power Supply"
+      },
+      {
+        "index": 9,
+        "group": "Power",
+        "header": "Voltage"
+      },
+      {
+        "index": 10,
+        "group": "Power",
+        "header": "Wire Number (V+)"
+      },
+      {
+        "index": 11,
+        "group": "Power",
+        "header": "Wire Number (COM)"
+      },
+      {
+        "index": 12,
+        "group": "Power",
+        "header": "Fuse/CB"
+      },
+      {
+        "index": 13,
+        "group": "Clearance (Inches)",
+        "header": "Top"
+      },
+      {
+        "index": 14,
+        "group": "Clearance (Inches)",
+        "header": "Bottom"
+      },
+      {
+        "index": 15,
+        "group": "Clearance (Inches)",
+        "header": "Left"
+      },
+      {
+        "index": 16,
+        "group": "Clearance (Inches)",
+        "header": "Right"
+      },
+      {
+        "index": 17,
+        "group": "Clearance (Inches)",
+        "header": "Front"
+      },
+      {
+        "index": 18,
+        "group": "Clearance (Inches)",
+        "header": "Back"
+      },
+      {
+        "index": 19,
+        "group": "Photo Checklist",
+        "header": "Device"
+      },
+      {
+        "index": 20,
+        "group": "Photo Checklist",
+        "header": "Power Wiring"
+      },
+      {
+        "index": 21,
+        "group": "Photo Checklist",
+        "header": "Comm Cable Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Device",
+      "Power Wiring",
+      "Comm Cable Wire Numbers"
+    ],
+    "hyperlink_column": "Folder Hyperlink",
+    "primary_key": "Name",
+    "row_photos_enabled": true
+  },
+  "Drive Parameters": {
+    "sheet_name": "Drive Parameters",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 3,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Motor NP Volts"
+      },
+      {
+        "index": 4,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Motor NP Hz"
+      },
+      {
+        "index": 5,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Motor NP RPM"
+      },
+      {
+        "index": 6,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Motor NP Power (HP/kW)"
+      },
+      {
+        "index": 7,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Motor OL Current"
+      },
+      {
+        "index": 8,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Minimum Freq."
+      },
+      {
+        "index": 9,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Maximum Freq."
+      },
+      {
+        "index": 10,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Start Mode"
+      },
+      {
+        "index": 11,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Stop Mode"
+      },
+      {
+        "index": 12,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Speed Reference"
+      },
+      {
+        "index": 13,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Accel Time 1 (sec)"
+      },
+      {
+        "index": 14,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Decel Time 1 (sec)"
+      },
+      {
+        "index": 15,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Digital In1"
+      },
+      {
+        "index": 16,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Digital In2"
+      },
+      {
+        "index": 17,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Digital In3"
+      },
+      {
+        "index": 18,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Relay Out1"
+      },
+      {
+        "index": 19,
+        "group": "Parameters (**Add as many as are needed)",
+        "header": "Relay Out2"
+      }
+    ],
+    "photo_checklist_columns": [],
+    "hyperlink_column": null,
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  },
+  "Conv. Speeds": {
+    "sheet_name": "Conv. Speeds",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 2,
+        "group": "Speed 1",
+        "header": "Tach Reading 1 (fpm)"
+      },
+      {
+        "index": 3,
+        "group": "Speed 1",
+        "header": "VFD Speed 1 (Hz)"
+      },
+      {
+        "index": 4,
+        "group": "Speed 2",
+        "header": "Tach Reading 2 (fpm)"
+      },
+      {
+        "index": 5,
+        "group": "Speed 2",
+        "header": "VFD Speed 2 (Hz)"
+      },
+      {
+        "index": 6,
+        "group": "Speed 3",
+        "header": "Tach Reading 3 (fpm)"
+      },
+      {
+        "index": 7,
+        "group": "Speed 3",
+        "header": "VFD Speed 3 (Hz)"
+      },
+      {
+        "index": 8,
+        "group": "Speed 4",
+        "header": "Tach Reading 4 (fpm)"
+      },
+      {
+        "index": 9,
+        "group": "Speed 4",
+        "header": "VFD Speed 4 (Hz)"
+      },
+      {
+        "index": 10,
+        "group": "Speed 5",
+        "header": "Tach Reading 5 (fpm)"
+      },
+      {
+        "index": 11,
+        "group": "Speed 5",
+        "header": "VFD Speed 5 (Hz)"
+      }
+    ],
+    "photo_checklist_columns": [],
+    "hyperlink_column": null,
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  },
+  "Safety Circuit": {
+    "sheet_name": "Safety Circuit",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Photo Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Drawing Reference"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Circuit Name"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Circuit Rating"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "MSR Part Number"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Input Device Count"
+      },
+      {
+        "index": 9,
+        "group": "General Data",
+        "header": "Output Device Count"
+      },
+      {
+        "index": 10,
+        "group": "Photo Checklist",
+        "header": "Device"
+      },
+      {
+        "index": 11,
+        "group": "Photo Checklist",
+        "header": "Location"
+      },
+      {
+        "index": 12,
+        "group": "Photo Checklist",
+        "header": "Part Number"
+      },
+      {
+        "index": 13,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Device",
+      "Location",
+      "Part Number",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Photo Hyperlink",
+    "primary_key": "Circuit Name",
+    "row_photos_enabled": true
+  },
+  "Safety Devices": {
+    "sheet_name": "Safety Devices",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Photo Hyperlink"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Panel Name"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Safety Circuit"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Drawing Reference"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 6,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 7,
+        "group": "General Data",
+        "header": "Part Number"
+      },
+      {
+        "index": 8,
+        "group": "General Data",
+        "header": "Safety Input Count (To PLC/MSR)"
+      },
+      {
+        "index": 9,
+        "group": "General Data",
+        "header": "Safety Input Wire Numbers"
+      },
+      {
+        "index": 10,
+        "group": "General Data",
+        "header": "Safety Output Count (From PLC/MSR)"
+      },
+      {
+        "index": 11,
+        "group": "General Data",
+        "header": "Safety Ouput Wire Numbers"
+      },
+      {
+        "index": 12,
+        "group": "Photo Checklist",
+        "header": "Device"
+      },
+      {
+        "index": 13,
+        "group": "Photo Checklist",
+        "header": "Location"
+      },
+      {
+        "index": 14,
+        "group": "Photo Checklist",
+        "header": "Device Part Number"
+      },
+      {
+        "index": 15,
+        "group": "Photo Checklist",
+        "header": "Wire Numbers"
+      }
+    ],
+    "photo_checklist_columns": [
+      "Device",
+      "Location",
+      "Device Part Number",
+      "Wire Numbers"
+    ],
+    "hyperlink_column": "Photo Hyperlink",
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  },
+  "Peer to Peer Comms": {
+    "sheet_name": "Peer to Peer Comms",
+    "header_row": 2,
+    "first_data_row": 3,
+    "columns": [
+      {
+        "index": 0,
+        "group": "General Data",
+        "header": "Area"
+      },
+      {
+        "index": 1,
+        "group": "General Data",
+        "header": "Device Name"
+      },
+      {
+        "index": 2,
+        "group": "General Data",
+        "header": "Description"
+      },
+      {
+        "index": 3,
+        "group": "General Data",
+        "header": "Hardware Platform/Part Number"
+      },
+      {
+        "index": 4,
+        "group": "General Data",
+        "header": "Comm Address (IP, Serial, Fieldbus, RIO)"
+      },
+      {
+        "index": 5,
+        "group": "General Data",
+        "header": "Communication Protocol"
+      },
+      {
+        "index": 6,
+        "group": "Message",
+        "header": "Type"
+      },
+      {
+        "index": 7,
+        "group": "Message",
+        "header": "Source Tag"
+      },
+      {
+        "index": 8,
+        "group": "Message",
+        "header": "Destination Device Name"
+      },
+      {
+        "index": 9,
+        "group": "Message",
+        "header": "Destination Part Number"
+      },
+      {
+        "index": 10,
+        "group": "Message",
+        "header": "Destination Address"
+      },
+      {
+        "index": 11,
+        "group": "Message",
+        "header": "Destination Tag"
+      },
+      {
+        "index": 12,
+        "group": "Message",
+        "header": "Communication Path"
+      }
+    ],
+    "photo_checklist_columns": [],
+    "hyperlink_column": null,
+    "primary_key": "Device Name",
+    "row_photos_enabled": true
+  }
+}
