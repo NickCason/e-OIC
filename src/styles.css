@@ -125,6 +125,23 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .field-checkbox input { width: auto; }
 .field-checkbox label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--text); }
 
+/* Bare textareas (SheetNotes, RowNotes) sit directly in .group-body, not in
+   .field, so give them the same readable styling as form fields. */
+.group-body textarea, .group-body input[type="text"] {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+}
+.group-body textarea:focus, .group-body input[type="text"]:focus { border-color: var(--accent); }
+.group-body textarea::placeholder { color: var(--text-dim); }
+
 .hyperlink-path {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px; color: var(--text-dim);
@@ -188,6 +205,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .row-pill.active .lbl { color: white; }
 .row-pill .more { background: transparent; border: none; padding: 6px 8px; font-size: 13px; color: var(--text-dim); cursor: pointer; border-left: 1px solid var(--border); }
 .row-pill.active .more { color: white; border-left-color: rgba(255,255,255,0.3); }
+.row-pill .more:disabled { display: none; }
 
 .photo-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
