@@ -131,3 +131,31 @@ test('parser does not throw when Notes sheet is absent', async () => {
   assert.equal(r.jobMeta.notes, '');
   assert.deepEqual(r.sheetNotes, []);
 });
+
+test('warns on unknown panel reference', async () => {
+  const ExcelJS = (await import('exceljs')).default;
+  const wb = new ExcelJS.Workbook();
+  // Panels sheet with one panel
+  const panels = wb.addWorksheet('Panels');
+  panels.getCell(2, 1).value = 'Folder Hyperlink';
+  panels.getCell(2, 2).value = 'Area';
+  panels.getCell(2, 3).value = 'Panel Name';
+  panels.getCell(3, 3).value = 'Real-Panel';
+  // Power sheet with a row referencing an unknown panel
+  const power = wb.addWorksheet('Power');
+  power.getCell(2, 1).value = 'Folder Hyperlink';
+  power.getCell(2, 2).value = 'Panel Name';
+  power.getCell(2, 3).value = 'Device Name';
+  power.getCell(3, 2).value = 'Ghost-Panel';
+  power.getCell(3, 3).value = 'Some Device';
+  const buf = Buffer.from(await wb.xlsx.writeBuffer());
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  const r = await parseChecklistXlsx(ab);
+  const w = r.warnings.find((w) =>
+    w.kind === 'unknown-panel-reference' &&
+    w.sheetName === 'Power' &&
+    w.panelName === 'Ghost-Panel',
+  );
+  assert.ok(w, 'expected unknown-panel-reference warning');
+  assert.equal(w.rowCount, 1);
+});

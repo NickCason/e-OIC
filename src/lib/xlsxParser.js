@@ -190,6 +190,26 @@ export async function parseChecklistXlsx(arrayBuffer) {
     result.rowsBySheet[sn] = parseSheetRows(ws, schemaMap[sn], result.warnings);
   }
 
+  // Validate panel-name references across non-Panels sheets.
+  const knownPanelNames = new Set(result.panels.map((p) => p.name));
+  for (const sn of Object.keys(result.rowsBySheet)) {
+    if (sn === 'Panels') continue;
+    const counts = new Map();
+    for (const row of result.rowsBySheet[sn]) {
+      if (row.panelName == null) continue;
+      if (knownPanelNames.has(row.panelName)) continue;
+      counts.set(row.panelName, (counts.get(row.panelName) || 0) + 1);
+    }
+    for (const [panelName, rowCount] of counts) {
+      result.warnings.push({
+        kind: 'unknown-panel-reference',
+        sheetName: sn,
+        panelName,
+        rowCount,
+      });
+    }
+  }
+
   // Notes sheet
   const notesWs = wb.getWorksheet('Notes');
   const notes = parseNotesSheet(notesWs);
