@@ -37,7 +37,10 @@ export default function App() {
   const [showGeoPrompt, setShowGeoPrompt] = useState(false);
 
   useEffect(() => {
-    const onHash = () => setRoute(parseHash());
+    const onHash = () => {
+      window.scrollTo(0, 0);
+      setRoute(parseHash());
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
