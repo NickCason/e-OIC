@@ -104,8 +104,9 @@ export default function PullDialog({ onClose, onCreated }) {
         {stage === 'idle' && (
           <>
             <p style={{ color: 'var(--text-dim)', fontSize: 13 }}>
-              Pick the e-OIC checklist .xlsx from SharePoint (or anywhere).
-              We&apos;ll parse it and create a new job populated from the data.
+              Bring an existing investigation in from SharePoint. We&apos;ll read
+              the panels, rows, and notes — your data lives in the app, ready to
+              update in the field.
             </p>
             <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
               <button className="ghost" onClick={onClose}>Cancel</button>
