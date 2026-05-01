@@ -15,7 +15,7 @@ import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
   getChecklistState, slugifyTaskLabel, exportJobJSON,
 } from './db.js';
-import { fmtTimestamp, fmtGps } from './photoOverlay.js';
+import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
 import { safe, rowLabel } from './lib/paths.js';
 
 const SHEET_ORDER = [
@@ -590,11 +590,18 @@ export async function buildExport(job, {
     }
 
     for (const [folder, list] of byFolder) {
-      list.forEach((entry, i) => {
+      for (let i = 0; i < list.length; i++) {
+        const entry = list[i];
         const ph = entry.photo;
         const ext = (ph.mime || 'image/jpeg').split('/')[1] || 'jpg';
         const fname = `IMG_${pad3(i + 1)}.${ext === 'jpeg' ? 'jpg' : ext}`;
-        zip.file(`${folder}/${fname}`, ph.blob);
+        const overlayLines = [
+          `${job.name} • ${panel.name}`,
+          `${ph.sheet} — ${entry.itemLabel}`,
+          fmtTimestamp(new Date(ph.takenAt)) + (ph.gps ? `  ${fmtGps(ph.gps)}` : ''),
+        ];
+        const baked = await applyOverlay(ph.blob, overlayLines, ph.gps);
+        zip.file(`${folder}/${fname}`, baked.blob);
         csvRows.push([
           panel.name,
           ph.sheet,
@@ -615,7 +622,7 @@ export async function buildExport(job, {
             detail: `${writtenPhotos} / ${grandTotalPhotos} photos`,
           });
         }
-      });
+      }
     }
   }
 
