@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Icon from './Icon.jsx';
+import { rowDisplayLabel } from '../lib/rowLabel.js';
+import schemaMap from '../schema.json' with { type: 'json' };
 
 export default function DiffView({ diff, direction = 'pull', removedDecisions, onToggleRemoved }) {
   const [expanded, setExpanded] = useState(() => initialExpanded(diff));
@@ -67,7 +69,7 @@ export default function DiffView({ diff, direction = 'pull', removedDecisions, o
               <div className="diff-section-body">
                 {sd.modified.map((m, i) => (
                   <div key={`m${i}`} className="diff-row diff-row--mod">
-                    <span className="diff-mark">~</span> {m.label || '(unlabeled)'}
+                    <span className="diff-mark">~</span> {m.label || labelOrFallback(m.row || { data: {} }, sheetName, sd, 'mod', i)}
                     {m.fieldChanges.map((fc, j) => (
                       <div key={j} className="diff-field-change">
                         {fc.field}:{' '}
@@ -146,9 +148,11 @@ function countChanges(diff) {
   return n;
 }
 
-function labelOrFallback(r, sheetName, sd, kind, i) {
-  const data = r?.data || {};
-  const panelName = data['Panel Name'] || '';
-  const labelHint = panelName ? `${panelName} · ` : '';
-  return `${labelHint}${kind === 'add' ? 'new row' : 'row'} (${(data[Object.keys(data).find((k) => k !== 'Panel Name')] || '?')})`;
+function labelOrFallback(r, sheetName, _sd, _kind, i) {
+  const schema = schemaMap[sheetName];
+  const label = rowDisplayLabel(r, sheetName, schema);
+  // rowDisplayLabel returns "Row N" as last-resort generic. In a diff
+  // context that's ambiguous across sheets, so qualify it.
+  if (/^Row \d+$/.test(label)) return `${sheetName} · row ${i + 1}`;
+  return label;
 }
