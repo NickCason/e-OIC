@@ -195,6 +195,14 @@ main {
   margin: 0 auto;
 }
 
+/* Keep focused inputs visually centered above keyboard + AppBar */
+input,
+textarea,
+[contenteditable] {
+  scroll-margin-top: 80px;
+  scroll-margin-bottom: 24px;
+}
+
 /* === components === */
 /* (Component sections are added/replaced in later tasks. Legacy
    component styles continue below until they are migrated.) */
