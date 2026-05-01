@@ -36,16 +36,15 @@ function findColumnIndex(ws, headerRow, target) {
   return null;
 }
 
-// Visible Unicode checkbox glyphs — render as actual checkbox shapes in
-// every Excel version, which the user prefers over the literal TRUE/FALSE
-// text Excel writes for native booleans.
-const CHK_ON = '☑'; // ☑
-const CHK_OFF = '☐'; // ☐
-
+// The template uses Microsoft 365's native in-cell checkbox feature, which
+// requires real boolean cells (t="b") plus a FeaturePropertyBag part that
+// ExcelJS strips on round-trip. The fixZip pass below re-attaches the
+// FeaturePropertyBag from the template so the booleans render as live
+// interactive checkboxes instead of TRUE/FALSE text.
 function coerce(v) {
   if (v === undefined || v === null || v === '') return null;
-  if (v === true) return CHK_ON;
-  if (v === false) return CHK_OFF;
+  if (v === true) return true;
+  if (v === false) return false;
   if (typeof v === 'number') return v;
   if (typeof v === 'string') {
     const t = v.trim();
@@ -251,12 +250,12 @@ export async function buildExport(job, {
         checklistLastTaskRow = r;
         const sheet = sheetByTask[taskLabel];
         if (sheet && filled.has(sheet)) {
-          cl.getCell(r, 3).value = CHK_ON;
+          cl.getCell(r, 3).value = true;
           continue;
         }
         const slug = slugifyTaskLabel(taskLabel);
         if (manualTasks[slug] === true) {
-          cl.getCell(r, 3).value = CHK_ON;
+          cl.getCell(r, 3).value = true;
         }
       }
     }
@@ -282,8 +281,8 @@ export async function buildExport(job, {
           const b = cl.getCell(r, 2);
           const c = cl.getCell(r, 3);
           a.value = t.label;
-          b.value = 'Yes';
-          c.value = t.completed ? CHK_ON : CHK_OFF;
+          b.value = true;
+          c.value = !!t.completed;
           // Copy styles so the appended rows match the template's look
           if (srcA.style) a.style = { ...srcA.style };
           if (srcB.style) b.style = { ...srcB.style };
@@ -353,6 +352,13 @@ export async function buildExport(job, {
   //      `Data.CorruptItems: [{ipti: "List", irt: 106}, {irt: 107}]`.
   //      Stripping the autoFilter element entirely matches what Excel's
   //      own auto-repair does.
+  //   4. Drops xl/featurePropertyBag/featurePropertyBag.xml and the
+  //      workbook.xml.rels relationship to it. The template uses the new
+  //      cell-checkbox feature whose t="b" cells reference a Checkbox bag
+  //      via xfComplement extLst entries in styles.xml. Without the
+  //      FeaturePropertyBag part, those cells render as plain TRUE/FALSE.
+  //      We re-attach the FeaturePropertyBag part and relationship from
+  //      the original template so the booleans become live checkboxes.
   {
     const fixZip = new JSZip();
     await fixZip.loadAsync(xlsxBuf);
@@ -366,17 +372,6 @@ export async function buildExport(job, {
         /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
         '$3$2$1',
       );
-      // Convert every <c ... t="b"><v>1|0</v></c> into a Unicode-checkbox
-      // inline-string cell. Catches booleans that came in from the template
-      // (e.g. the Checklist sheet's pre-marked cells) so the user sees ☑/☐
-      // everywhere instead of TRUE/FALSE text.
-      xml = xml.replace(
-        /<c([^>]*?)\st="b"([^>]*?)><v>([01])<\/v><\/c>/g,
-        (m, before, after, val) => {
-          const glyph = val === '1' ? CHK_ON : CHK_OFF;
-          return `<c${before} t="inlineStr"${after}><is><t>${glyph}</t></is></c>`;
-        },
-      );
       fixZip.file(f, xml);
     }
     const tableFiles = Object.keys(fixZip.files).filter((f) =>
@@ -387,6 +382,58 @@ export async function buildExport(job, {
       xml = xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
       fixZip.file(f, xml);
     }
+
+    // Re-attach FeaturePropertyBag from the template so cell-checkboxes work.
+    const tmplZip = new JSZip();
+    await tmplZip.loadAsync(tmplBuf);
+    const fpbPath = 'xl/featurePropertyBag/featurePropertyBag.xml';
+    const fpbFile = tmplZip.file(fpbPath);
+    if (fpbFile) {
+      const fpbXml = await fpbFile.async('uint8array');
+      fixZip.file(fpbPath, fpbXml);
+
+      // workbook.xml.rels — add the FeaturePropertyBag relationship if missing.
+      const relsPath = 'xl/_rels/workbook.xml.rels';
+      const relsFile = fixZip.file(relsPath);
+      if (relsFile) {
+        let rels = await relsFile.async('string');
+        const fpbType = 'http://schemas.microsoft.com/office/2022/11/relationships/FeaturePropertyBag';
+        if (!rels.includes(fpbType)) {
+          const idMatches = [...rels.matchAll(/Id="rId(\d+)"/g)].map((m) => parseInt(m[1], 10));
+          const nextId = (idMatches.length ? Math.max(...idMatches) : 0) + 1;
+          const rel = `<Relationship Id="rId${nextId}" Type="${fpbType}" Target="featurePropertyBag/featurePropertyBag.xml"/>`;
+          rels = rels.replace('</Relationships>', `${rel}</Relationships>`);
+          fixZip.file(relsPath, rels);
+        }
+      }
+
+      // [Content_Types].xml — add the override for the FeaturePropertyBag part.
+      const ctPath = '[Content_Types].xml';
+      const ctFile = fixZip.file(ctPath);
+      if (ctFile) {
+        let ct = await ctFile.async('string');
+        const ctType = 'application/vnd.ms-excel.featurepropertybag+xml';
+        if (!ct.includes(ctType)) {
+          const override = `<Override PartName="/${fpbPath}" ContentType="${ctType}"/>`;
+          ct = ct.replace('</Types>', `${override}</Types>`);
+          fixZip.file(ctPath, ct);
+        }
+      }
+
+      // styles.xml — if ExcelJS dropped the xfpb:xfComplement extLst entries
+      // from xf rows, restore styles.xml from the template wholesale. This is
+      // safe because the exporter never modifies styles, only cell values.
+      const stylesPath = 'xl/styles.xml';
+      const stylesFile = fixZip.file(stylesPath);
+      if (stylesFile) {
+        const styles = await stylesFile.async('string');
+        if (!styles.includes('xfpb:xfComplement')) {
+          const tmplStyles = await tmplZip.file(stylesPath)?.async('uint8array');
+          if (tmplStyles) fixZip.file(stylesPath, tmplStyles);
+        }
+      }
+    }
+
     xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });
   }
 
