@@ -41,3 +41,49 @@ export function compareWrapperVersions(a, b) {
   if (pa > pb) return 1;
   return 0;
 }
+
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const r = reader.result;
+      if (typeof r !== 'string') {
+        reject(new Error('Unexpected FileReader result'));
+        return;
+      }
+      const idx = r.indexOf(',');
+      resolve(idx >= 0 ? r.slice(idx + 1) : r);
+    };
+    reader.onerror = () => reject(reader.error || new Error('FileReader failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// Bridge entry: write the File to Capacitor's CACHE directory, then call
+// the Share plugin with the resulting file:// URI. Bypasses Chrome's
+// share_service_impl.cc allowlist by going straight through Android's
+// Intent.ACTION_SEND via Capacitor's FileProvider.
+export async function shareViaCapacitor(file) {
+  const Capacitor = globalThis.Capacitor;
+  const Filesystem = Capacitor?.Plugins?.Filesystem;
+  const Share = Capacitor?.Plugins?.Share;
+  if (!Filesystem || !Share) {
+    throw new Error('Capacitor Share/Filesystem plugin not available');
+  }
+  const base64 = await fileToBase64(file);
+  const path = `eoic-share-${Date.now()}-${file.name}`;
+  const written = await Filesystem.writeFile({
+    path,
+    directory: 'CACHE',
+    data: base64,
+    recursive: false,
+  });
+  try {
+    await Share.share({
+      title: file.name,
+      files: [written.uri],
+    });
+  } finally {
+    Filesystem.deleteFile({ path, directory: 'CACHE' }).catch(() => {});
+  }
+}
