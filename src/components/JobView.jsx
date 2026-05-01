@@ -356,7 +356,7 @@ function PanelModal({ jobId, panel = null, onClose, onSaved }) {
         <h2>{panel ? (isJobEdit ? 'Edit job name' : 'Edit Panel') : 'New Panel'}</h2>
         {!panel && (
           <p style={{ color: 'var(--text-dim)', marginTop: 0, fontSize: 13 }}>
-            A panel is your working unit. Each gets its own photo folders and rows across all 13 sheets.
+            One panel per cabinet. Photos and notes live inside.
           </p>
         )}
         <div className="field">
