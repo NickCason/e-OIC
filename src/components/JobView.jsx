@@ -7,6 +7,7 @@ import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import ExportDialog from './ExportDialog.jsx';
+import ResyncDialog from './ResyncDialog.jsx';
 import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
@@ -25,6 +26,8 @@ export default function JobView({ jobId }) {
   const [aggregate, setAggregate] = useState({ panelCount: 0, photoCount: 0, jobPercent: 0 });
   const [checklistTotals, setChecklistTotals] = useState({ checked: 0, total: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [resyncing, setResyncing] = useState(false);
+  const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
 
   async function refresh() {
     const j = await getJob(jobId);
@@ -76,6 +79,12 @@ export default function JobView({ jobId }) {
     const dup = await duplicatePanel(panel.id, newName.trim());
     await refresh();
     toast.show(`Duplicated as “${dup.name}” (rows copied, photos not)`);
+  }
+
+  async function handleDisconnect() {
+    await updateJob(job.id, { source: null });
+    setConfirmingDisconnect(false);
+    await refresh();
   }
 
   async function onBackupJob() {
@@ -197,12 +206,38 @@ export default function JobView({ jobId }) {
       {creating && <PanelModal jobId={jobId} onClose={() => setCreating(false)} onSaved={refresh} />}
       {editing && <PanelModal jobId={jobId} panel={editing} onClose={() => setEditing(null)} onSaved={refresh} />}
       {exporting && <ExportDialog job={job} onClose={() => setExporting(false)} />}
+      {resyncing && (
+        <ResyncDialog
+          job={job}
+          onClose={() => setResyncing(false)}
+          onApplied={() => { refresh(); }}
+        />
+      )}
+      {confirmingDisconnect && (
+        <div className="modal-bg" onClick={() => setConfirmingDisconnect(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">Disconnect from xlsx?</h2>
+            <p style={{ color: 'var(--text-dim)' }}>
+              This job will no longer be linked to <strong>{job.source?.filename}</strong>.
+              Future pushes will save as new.
+            </p>
+            <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+              <button className="ghost" onClick={() => setConfirmingDisconnect(false)}>Cancel</button>
+              <button className="primary" onClick={handleDisconnect}>Disconnect</button>
+            </div>
+          </div>
+        </div>
+      )}
       {menuOpen && (
         <div className="modal-bg" onClick={() => setMenuOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h2>Job options</h2>
             <button className="modal-list-btn" onClick={() => { setMenuOpen(false); onBackupJob(); }}>⬇ Back up this job</button>
             <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setEditing({ ...job, _isJob: true }); }}>✎ Edit job details</button>
+            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setResyncing(true); }}>↻ Re-sync from xlsx</button>
+            {job.source && (
+              <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setConfirmingDisconnect(true); }}>⛓ Disconnect from xlsx</button>
+            )}
             <div className="btn-row" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
               <button className="ghost" onClick={() => setMenuOpen(false)}>Close</button>
             </div>
