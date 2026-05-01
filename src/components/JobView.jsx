@@ -13,6 +13,7 @@ import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import EmptyState from './EmptyState.jsx';
+import Marquee from './Marquee.jsx';
 import PercentRing from './PercentRing.jsx';
 import PercentBar from './PercentBar.jsx';
 
@@ -218,7 +219,7 @@ export default function JobView({ jobId }) {
           return (
             <div key={p.id} className="list-item" onClick={() => nav(`/job/${jobId}/panel/${p.id}`)}>
               <div className="grow">
-                <div className="title">{p.name}</div>
+                <div className="title"><Marquee>{p.name}</Marquee></div>
                 <div className="subtitle">
                   {s.rows} row{s.rows !== 1 ? 's' : ''} · {s.photos} photo{s.photos !== 1 ? 's' : ''}
                   {p.updatedAt && <> · {fmtRelative(p.updatedAt)}</>}
