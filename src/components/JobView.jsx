@@ -56,7 +56,7 @@ export default function JobView({ jobId }) {
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; onFocus intentionally re-reads refresh() via closure on each focus event.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; only state it reads is jobId (already the dep), so the closure is correct on each re-creation.
   }, [jobId]);
 
   async function onDelete(panel) {
