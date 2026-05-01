@@ -26,11 +26,18 @@ export default function JobList() {
   async function refresh() {
     const all = await listJobs();
     setJobs(all);
+    const results = await Promise.all(
+      all.map(async (j) => [
+        j.id,
+        await getJobSizeEstimate(j.id),
+        await getJobPercent(j.id),
+      ])
+    );
     const s = {};
     const p = {};
-    for (const j of all) {
-      s[j.id] = await getJobSizeEstimate(j.id);
-      p[j.id] = await getJobPercent(j.id);
+    for (const [id, size, pct] of results) {
+      s[id] = size;
+      p[id] = pct;
     }
     setStats(s);
     setPercents(p);

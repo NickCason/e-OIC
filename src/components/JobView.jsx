@@ -35,18 +35,29 @@ export default function JobView({ jobId }) {
     setJob(j);
     const ps = await listPanels(jobId);
     setPanels(ps);
+    const perPanel = await Promise.all(
+      ps.map(async (p) => {
+        const [rows, photos, progress] = await Promise.all([
+          listAllRows(p.id),
+          listPanelPhotos(p.id),
+          getPanelProgress(p.id),
+        ]);
+        return [p.id, { rows: rows.length, photos: photos.length }, progress.percent];
+      })
+    );
     const s = {};
     const pp = {};
-    for (const p of ps) {
-      const rows = await listAllRows(p.id);
-      const photos = await listPanelPhotos(p.id);
-      s[p.id] = { rows: rows.length, photos: photos.length };
-      pp[p.id] = (await getPanelProgress(p.id)).percent;
+    for (const [id, sizes, pct] of perPanel) {
+      s[id] = sizes;
+      pp[id] = pct;
     }
     setStats(s);
     setPanelPercents(pp);
-    setAggregate(await getJobAggregateStats(jobId));
-    const tasks = await getJobChecklist(jobId);
+    const [agg, tasks] = await Promise.all([
+      getJobAggregateStats(jobId),
+      getJobChecklist(jobId),
+    ]);
+    setAggregate(agg);
     setChecklistTotals({ checked: tasks.filter((t) => t.completed).length, total: tasks.length });
   }
 
