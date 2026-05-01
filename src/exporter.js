@@ -646,10 +646,18 @@ export async function buildExport(job, {
   zip.file(`${jobSafe}.backup.json`, JSON.stringify(backup));
 
   onProgress({ phase: 'compressing', percent: 92 });
-  const zipBlob = await zip.generateAsync({
-    type: 'blob',
+  // Generate as ArrayBuffer (not 'blob') and wrap in a single-part Blob.
+  // JSZip's 'blob' output is chunked internally; on Android Chrome the
+  // share-intent IPC layer rejects chunked blobs with NotAllowedError
+  // when navigator.share tries to hand them to the OS share cache.
+  // Materializing to a contiguous ArrayBuffer here, before the user
+  // ever clicks Share, sidesteps that without spending activation at
+  // share time.
+  const zipBuffer = await zip.generateAsync({
+    type: 'arraybuffer',
     compression: 'STORE',
   });
+  const zipBlob = new Blob([zipBuffer], { type: 'application/zip' });
 
   onProgress({ phase: 'done', percent: 100 });
   return { blob: zipBlob, filename: `${jobSafe}.zip`, sizeBytes: zipBlob.size };
@@ -666,25 +674,22 @@ export function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-export async function shareBlob(blob, filename, _title) {
-  // navigator.share consumes the user-activation token on call. Any work
-  // here must stay synchronous up to the share() call; a single await is
-  // fine, but never call share() twice from one gesture.
-  //
-  // Android quirks driving the choices below:
-  //   • Filename must be ASCII (em-dash / smart quotes trip MediaStore).
-  //   • application/octet-stream is accepted by far more Android share
-  //     targets than application/zip; the .zip extension on the filename
-  //     still tells receiving apps what the bytes are.
-  //   • lastModified on the File ctor has been observed to make some
-  //     older Chrome-on-Android reject. Omit.
-  //   • Bare { files: [...] } payload — no title, no text — keeps the
-  //     surface area minimal. Title is optional per spec.
+export async function shareBlob(blob, filename, title) {
+  // navigator.share consumes the user-activation token on call. Stay
+  // synchronous up to the share() call; never call share() twice from
+  // one gesture. Filename and title both need ASCII normalization for
+  // Android's content-URI / share-intent layer.
   const safeName = shareSafeFilename(filename);
-  const file = new File([blob], safeName, { type: 'application/octet-stream' });
+  const safeTitle = shareSafeFilename(title);
+  const mime = safeName.endsWith('.xlsx')
+    ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    : 'application/zip';
+  const file = new File([blob], safeName, { type: mime });
   if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
     return false;
   }
-  await navigator.share({ files: [file] });
+  const payload = { files: [file] };
+  if (safeTitle && safeTitle !== 'unnamed') payload.title = safeTitle;
+  await navigator.share(payload);
   return true;
 }
