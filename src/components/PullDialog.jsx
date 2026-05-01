@@ -20,6 +20,7 @@ export default function PullDialog({ onClose, onCreated }) {
   const [client, setClient] = useState('');
   const [location, setLocation] = useState('');
   const [showAllWarnings, setShowAllWarnings] = useState(false);
+  const [progress, setProgress] = useState({ phase: 'loading', detail: '' });
   const inputRef = useRef(null);
 
   function pick() {
@@ -43,7 +44,7 @@ export default function PullDialog({ onClose, onCreated }) {
     setFilename(file.name);
     try {
       const buf = await file.arrayBuffer();
-      const r = await parseChecklistXlsx(buf);
+      const r = await parseChecklistXlsx(buf, { onProgress: setProgress });
       if (r.errors.length > 0) {
         const e0 = r.errors[0];
         if (e0.kind === 'invalid-xlsx') setError('Couldn\'t read this file. Make sure it\'s an .xlsx exported from Excel or e-OIC.');
@@ -118,7 +119,7 @@ export default function PullDialog({ onClose, onCreated }) {
         {stage === 'parsing' && (
           <div className="export-progress">
             <div className="export-spinner" />
-            <div className="export-progress-text">Reading {filename}…</div>
+            <div className="export-progress-text">{progressLabel(progress, filename)}</div>
           </div>
         )}
 
@@ -202,5 +203,15 @@ function formatWarning(w) {
     case 'unknown-panel-reference': return `${w.rowCount} row(s) in ${w.sheetName} reference unknown panel "${w.panelName}"`;
     case 'notes-row-unmatched': return `Note for "${w.label}" in ${w.sheetName} couldn't be matched to a row`;
     default: return JSON.stringify(w);
+  }
+}
+
+function progressLabel(p, filename) {
+  switch (p.phase) {
+    case 'loading': return `Reading ${filename}…`;
+    case 'panels':  return `${p.detail}…`;
+    case 'rows':    return `${p.detail}…`;
+    case 'matching': return `Matching to schema…`;
+    default: return `Reading ${filename}…`;
   }
 }

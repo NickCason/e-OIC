@@ -132,7 +132,12 @@ function parseNotesSheet(ws) {
   return out;
 }
 
-export async function parseChecklistXlsx(arrayBuffer) {
+export async function parseChecklistXlsx(arrayBuffer, { onProgress } = {}) {
+  const emit = (phase, detail) => {
+    if (typeof onProgress === 'function') {
+      try { onProgress({ phase, detail }); } catch { /* swallow callback errors */ }
+    }
+  };
   const result = {
     jobMeta: { name: null, client: '', location: '', notes: '' },
     panels: [],
@@ -144,6 +149,7 @@ export async function parseChecklistXlsx(arrayBuffer) {
 
   const { default: ExcelJS } = await import('exceljs');
   const wb = new ExcelJS.Workbook();
+  emit('loading', `Reading ${Math.round(arrayBuffer.byteLength / 1024)} KB`);
   try {
     await wb.xlsx.load(arrayBuffer);
   } catch (e) {
@@ -182,11 +188,13 @@ export async function parseChecklistXlsx(arrayBuffer) {
       }
     }
   }
+  emit('panels', `Found ${result.panels.length} panel${result.panels.length === 1 ? '' : 's'}`);
 
   for (const sn of Object.keys(schemaMap)) {
     if (sn === 'Panels') continue;
     if (!sheetNames.includes(sn)) continue;
     const ws = wb.getWorksheet(sn);
+    emit('rows', `Reading ${sn}`);
     result.rowsBySheet[sn] = parseSheetRows(ws, schemaMap[sn], result.warnings);
   }
 
@@ -217,6 +225,7 @@ export async function parseChecklistXlsx(arrayBuffer) {
   result.sheetNotes = notes.sheetNotes;
 
   // Match row-note assignments back to parsed rows by (sheet, panelName, label).
+  emit('matching', 'Matching notes to rows');
   const { rowDisplayLabel } = await import('./rowLabel.js');
   for (const assignment of notes.rowNoteAssignments) {
     const rows = result.rowsBySheet[assignment.sheetName];

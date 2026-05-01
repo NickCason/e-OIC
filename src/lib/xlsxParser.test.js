@@ -159,3 +159,14 @@ test('warns on unknown panel reference', async () => {
   assert.ok(w, 'expected unknown-panel-reference warning');
   assert.equal(w.rowCount, 1);
 });
+
+test('parseChecklistXlsx emits progress phases', async () => {
+  const phases = [];
+  await parseChecklistXlsx(readBuf('valid-seed.xlsx'), {
+    onProgress: (p) => phases.push(p.phase),
+  });
+  assert.ok(phases.includes('loading'), `expected 'loading', got ${phases.join(',')}`);
+  assert.ok(phases.includes('panels'), `expected 'panels', got ${phases.join(',')}`);
+  assert.ok(phases.includes('rows'), `expected 'rows', got ${phases.join(',')}`);
+  assert.ok(phases.includes('matching'), `expected 'matching', got ${phases.join(',')}`);
+});
