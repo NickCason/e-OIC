@@ -1,3 +1,6 @@
+// Subtests share a single fake-IDB instance (no reset between tests).
+// All assertions must be scoped by job/panel UUID — counting all jobs or
+// all panels would silently include leftover state from earlier subtests.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import 'fake-indexeddb/auto';

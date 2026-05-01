@@ -581,6 +581,9 @@ export async function restoreJobRaw(snap) {
     ['jobs', 'panels', 'rows', 'photos', 'sheetNotes', 'checklistState'],
     'readwrite'
   );
+  // Each await below resolves from an IDB success event; the transaction
+  // stays open as long as IDB requests are in flight. Do not insert
+  // non-IDB awaits inside these loops — that would auto-commit the tx.
   await tx.objectStore('jobs').put(snap.job);
   for (const ps of snap.panelSnaps) {
     await tx.objectStore('panels').put(ps.panel);
