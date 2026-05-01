@@ -8,6 +8,7 @@ import ToastHost from './components/ToastHost.jsx';
 import UpdatePill from './components/UpdatePill.jsx';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation.js';
 import { maybeSeedSampleJob } from './lib/seed.js';
+import useKeyboardInset from './lib/useKeyboardInset.js';
 
 function parseHash() {
   const h = window.location.hash.replace(/^#\/?/, '');
@@ -31,6 +32,7 @@ export function nav(path) {
 }
 
 export default function App() {
+  useKeyboardInset();
   const [route, setRoute] = useState(parseHash());
   const [showGeoPrompt, setShowGeoPrompt] = useState(false);
 
