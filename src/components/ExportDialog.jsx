@@ -218,7 +218,10 @@ export default function ExportDialog({ job, onClose }) {
 
         {stage === 'push-diff' && targetDiff && (
           <>
-            <div className="export-summary"><strong>Pushing to {targetFilename}</strong></div>
+            <div className="diff-push-ribbon">
+              <Icon name="arrowRight" size={14} />
+              <span>Pushing to <strong>{targetFilename}</strong></span>
+            </div>
             <DiffView diff={targetDiff} direction="push" />
             <div className="btn-row" style={{ justifyContent: 'flex-end', marginTop: 'var(--sp-3)' }}>
               <button className="ghost" onClick={() => setStage('config')}>Back</button>
