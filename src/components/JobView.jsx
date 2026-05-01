@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   getJob, listPanels, createPanel, updatePanel, deletePanel, duplicatePanel,
-  listAllRows, listPanelPhotos, exportJobJSON, importJSON, updateJob,
+  listAllRows, listPanelPhotos, exportJobJSON, updateJob,
+  exportPanelRaw, restorePanelRaw,
 } from '../db.js';
 import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics.js';
 import { nav } from '../App.jsx';
@@ -71,16 +72,12 @@ export default function JobView({ jobId }) {
   }, [jobId]);
 
   async function onDelete(panel) {
-    // Snapshot panel via per-job export, then filter to just this panel's data
-    // for the undo. Easiest: just snapshot the whole job and re-import the
-    // panel-related slices on undo. We'll do the simpler thing — full
-    // job snapshot, replace on undo (will atomically restore the panel).
-    const snapshot = await exportJobJSON(jobId);
+    const snapshot = await exportPanelRaw(panel.id);
     await deletePanel(panel.id);
     await refresh();
     toast.undoable(`Deleted panel “${panel.name}”`, {
       onUndo: async () => {
-        await importJSON(snapshot, { mode: 'replace' });
+        await restorePanelRaw(snapshot);
         await refresh();
       },
     });

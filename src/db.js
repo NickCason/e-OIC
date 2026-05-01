@@ -536,3 +536,58 @@ export async function importJSON(snapshot, { mode = 'merge' } = {}) {
     photos: snapshot.photos.length,
   };
 }
+
+// ======= Raw snapshots (for undo toasts) =======
+// These keep photo blobs as Blob references — no base64 round-trip.
+// Snapshots are in-memory only; never serialized to disk. Use them
+// for short-lived undo state where the user might restore within
+// seconds. For long-term backup, use exportJobJSON / importJSON.
+
+export async function exportPanelRaw(panelId) {
+  const db = await getDB();
+  const panel = await db.get('panels', panelId);
+  if (!panel) throw new Error('Panel not found');
+  const [rows, photos, notes] = await Promise.all([
+    db.getAllFromIndex('rows', 'panelId', panelId),
+    db.getAllFromIndex('photos', 'panelId', panelId),
+    db.getAllFromIndex('sheetNotes', 'panelId', panelId),
+  ]);
+  return { panel, rows, photos, notes };
+}
+
+export async function restorePanelRaw(snap) {
+  const db = await getDB();
+  const tx = db.transaction(['panels', 'rows', 'photos', 'sheetNotes'], 'readwrite');
+  await tx.objectStore('panels').put(snap.panel);
+  for (const r of snap.rows) await tx.objectStore('rows').put(r);
+  for (const p of snap.photos) await tx.objectStore('photos').put(p);
+  for (const n of snap.notes) await tx.objectStore('sheetNotes').put(n);
+  await tx.done;
+}
+
+export async function exportJobRaw(jobId) {
+  const db = await getDB();
+  const job = await db.get('jobs', jobId);
+  if (!job) throw new Error('Job not found');
+  const panels = await db.getAllFromIndex('panels', 'jobId', jobId);
+  const panelSnaps = await Promise.all(panels.map((p) => exportPanelRaw(p.id)));
+  const checklist = await db.get('checklistState', jobId);
+  return { job, panelSnaps, checklist: checklist || null };
+}
+
+export async function restoreJobRaw(snap) {
+  const db = await getDB();
+  const tx = db.transaction(
+    ['jobs', 'panels', 'rows', 'photos', 'sheetNotes', 'checklistState'],
+    'readwrite'
+  );
+  await tx.objectStore('jobs').put(snap.job);
+  for (const ps of snap.panelSnaps) {
+    await tx.objectStore('panels').put(ps.panel);
+    for (const r of ps.rows) await tx.objectStore('rows').put(r);
+    for (const p of ps.photos) await tx.objectStore('photos').put(p);
+    for (const n of ps.notes) await tx.objectStore('sheetNotes').put(n);
+  }
+  if (snap.checklist) await tx.objectStore('checklistState').put(snap.checklist);
+  await tx.done;
+}

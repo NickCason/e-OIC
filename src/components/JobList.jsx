@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, importJSON, exportJobJSON } from '../db.js';
+import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db.js';
 import { getJobPercent } from '../lib/metrics.js';
 import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';
@@ -48,12 +48,12 @@ export default function JobList() {
   useEffect(() => { refresh(); }, []);
 
   async function onDelete(job) {
-    const snapshot = await exportJobJSON(job.id);
+    const snapshot = await exportJobRaw(job.id);
     await deleteJob(job.id);
     await refresh();
     toast.undoable(`Deleted "${job.name}"`, {
       onUndo: async () => {
-        await importJSON(snapshot, { mode: 'replace' });
+        await restoreJobRaw(snapshot);
         await refresh();
       },
     });
