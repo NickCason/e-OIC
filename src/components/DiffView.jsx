@@ -67,8 +67,8 @@ export default function DiffView({ diff, direction = 'pull', removedDecisions, o
               <span className="diff-mark">~</span>
               <span className="diff-label">{n.panelName} · {n.sheetName}</span>
               <div className="diff-field-change diff-field-change--stacked">
-                <div className="diff-field-old">{String(n.old ?? '(empty)')}</div>
-                <div className="diff-field-new">{String(n.new ?? '(empty)')}</div>
+                <div className="diff-field-old">{String(n.old || '(empty)')}</div>
+                <div className="diff-field-new">{String(n.new || '(empty)')}</div>
               </div>
             </div>
           ))}
