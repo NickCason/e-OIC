@@ -53,7 +53,7 @@ jobs:
           retention-days: 30
 
   deploy:
-    needs: build
+    needs: [build, e2e-export]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
