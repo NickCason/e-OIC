@@ -48,7 +48,7 @@ if (typeof Blob === 'undefined') {
 }
 
 console.log('[e2e] importing app modules…');
-const { importJSON, getJob, listPanels, listAllRows, listPanelPhotos } = await import('../src/db.js');
+const { importJSON, getJob, listPanels, listAllRows } = await import('../src/db.js');
 const { buildExport } = await import('../src/exporter.js');
 
 console.log('[e2e] loading public/seed.json…');

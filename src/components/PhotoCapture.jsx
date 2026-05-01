@@ -41,7 +41,8 @@ export default function PhotoCapture({
     }
   }
 
-  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [panel.id, sheetName, item, rowId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when photo context IDs change.
+  useEffect(() => { refresh(); }, [panel.id, sheetName, item, rowId]);
 
   // Build blob URLs for the current photo set; revoke on change/unmount.
   const photosWithUrls = useMemo(

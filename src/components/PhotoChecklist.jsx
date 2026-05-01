@@ -19,7 +19,8 @@ export default function PhotoChecklist({ job, panel, sheetName, items }) {
     setCounts(c);
   }
 
-  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [panel.id, sheetName, items.join('|')]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when photo context IDs change.
+  useEffect(() => { refresh(); }, [panel.id, sheetName, items.join('|')]);
 
   return (
     <div>

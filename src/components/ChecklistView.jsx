@@ -27,6 +27,7 @@ export default function ChecklistView({ jobId }) {
     setPercent(await getJobPercent(jobId));
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when jobId changes.
   useEffect(() => { refresh(); }, [jobId]);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, importJSON, exportJobJSON } from '../db.js';
+import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db.js';
 import { getJobPercent } from '../lib/metrics.js';
 import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';
@@ -26,11 +26,20 @@ export default function JobList() {
   async function refresh() {
     const all = await listJobs();
     setJobs(all);
+    const results = await Promise.all(
+      all.map(async (j) => {
+        const [size, pct] = await Promise.all([
+          getJobSizeEstimate(j.id),
+          getJobPercent(j.id),
+        ]);
+        return [j.id, size, pct];
+      })
+    );
     const s = {};
     const p = {};
-    for (const j of all) {
-      s[j.id] = await getJobSizeEstimate(j.id);
-      p[j.id] = await getJobPercent(j.id);
+    for (const [id, size, pct] of results) {
+      s[id] = size;
+      p[id] = pct;
     }
     setStats(s);
     setPercents(p);
@@ -39,12 +48,12 @@ export default function JobList() {
   useEffect(() => { refresh(); }, []);
 
   async function onDelete(job) {
-    const snapshot = await exportJobJSON(job.id);
+    const snapshot = await exportJobRaw(job.id);
     await deleteJob(job.id);
     await refresh();
     toast.undoable(`Deleted "${job.name}"`, {
       onUndo: async () => {
-        await importJSON(snapshot, { mode: 'replace' });
+        await restoreJobRaw(snapshot);
         await refresh();
       },
     });

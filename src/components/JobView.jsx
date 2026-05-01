@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   getJob, listPanels, createPanel, updatePanel, deletePanel, duplicatePanel,
-  listAllRows, listPanelPhotos, exportJobJSON, importJSON, updateJob,
+  listAllRows, listPanelPhotos, exportJobJSON, updateJob,
+  exportPanelRaw, restorePanelRaw,
 } from '../db.js';
 import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics.js';
 import { nav } from '../App.jsx';
@@ -35,39 +36,48 @@ export default function JobView({ jobId }) {
     setJob(j);
     const ps = await listPanels(jobId);
     setPanels(ps);
+    const perPanel = await Promise.all(
+      ps.map(async (p) => {
+        const [rows, photos, progress] = await Promise.all([
+          listAllRows(p.id),
+          listPanelPhotos(p.id),
+          getPanelProgress(p.id),
+        ]);
+        return [p.id, { rows: rows.length, photos: photos.length }, progress.percent];
+      })
+    );
     const s = {};
     const pp = {};
-    for (const p of ps) {
-      const rows = await listAllRows(p.id);
-      const photos = await listPanelPhotos(p.id);
-      s[p.id] = { rows: rows.length, photos: photos.length };
-      pp[p.id] = (await getPanelProgress(p.id)).percent;
+    for (const [id, sizes, pct] of perPanel) {
+      s[id] = sizes;
+      pp[id] = pct;
     }
     setStats(s);
     setPanelPercents(pp);
-    setAggregate(await getJobAggregateStats(jobId));
-    const tasks = await getJobChecklist(jobId);
+    const [agg, tasks] = await Promise.all([
+      getJobAggregateStats(jobId),
+      getJobChecklist(jobId),
+    ]);
+    setAggregate(agg);
     setChecklistTotals({ checked: tasks.filter((t) => t.completed).length, total: tasks.length });
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when jobId changes.
   useEffect(() => { refresh(); }, [jobId]);
   useEffect(() => {
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; only state it reads is jobId (already the dep), so the closure is correct on each re-creation.
   }, [jobId]);
 
   async function onDelete(panel) {
-    // Snapshot panel via per-job export, then filter to just this panel's data
-    // for the undo. Easiest: just snapshot the whole job and re-import the
-    // panel-related slices on undo. We'll do the simpler thing — full
-    // job snapshot, replace on undo (will atomically restore the panel).
-    const snapshot = await exportJobJSON(jobId);
+    const snapshot = await exportPanelRaw(panel.id);
     await deletePanel(panel.id);
     await refresh();
     toast.undoable(`Deleted panel “${panel.name}”`, {
       onUndo: async () => {
-        await importJSON(snapshot, { mode: 'replace' });
+        await restorePanelRaw(snapshot);
         await refresh();
       },
     });

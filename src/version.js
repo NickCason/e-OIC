@@ -1,5 +1,4 @@
-// Build-time marker so we can tell which deployed version is actually
-// running on a given client. Bump this in lockstep with VERSION in
-// public/service-worker.js. The PWA shows this in Settings -> About and
-// in the PhotoCapture modal footer.
-export const BUILD_VERSION = 'v34';
+// Single source of truth: ../version.json (read by vite.config.js)
+// and injected as __BUILD_VERSION__ at build time. Consumed in
+// Settings → About, JobList header badge, PhotoCapture footer.
+export const BUILD_VERSION = __BUILD_VERSION__;
