@@ -432,6 +432,49 @@ export async function buildExport(job, {
           if (tmplStyles) fixZip.file(stylesPath, tmplStyles);
         }
       }
+
+      // Cell → xf reference remap. ExcelJS rewrites every t="b" cell's
+      // s="N" attribute to point at a plain xf instead of the
+      // checkbox-enabled xf (the one carrying <xfpb:xfComplement>). Without
+      // the right xfId, Excel renders TRUE/FALSE text instead of a live
+      // checkbox even when the FeaturePropertyBag part is wired up. We
+      // resolve which xfIds are checkbox-enabled by parsing the (now
+      // restored) styles.xml and pick the first one as the canonical
+      // reference for the Checklist sheet's boolean cells.
+      const finalStyles = await fixZip.file(stylesPath).async('string');
+      const cellXfsMatch = finalStyles.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);
+      const checkboxXfIds = [];
+      if (cellXfsMatch) {
+        const xfRe = /<xf\b[^/]*?(?:\/>|>[\s\S]*?<\/xf>)/g;
+        let i = 0;
+        let m;
+        while ((m = xfRe.exec(cellXfsMatch[1])) !== null) {
+          if (m[0].includes('xfpb:xfComplement')) checkboxXfIds.push(i);
+          i += 1;
+        }
+      }
+      const checklistXfId = checkboxXfIds[0];
+      if (checklistXfId !== undefined) {
+        // Find the sheet file that holds the Checklist by parsing
+        // workbook.xml + workbook.xml.rels.
+        const wbXml = await fixZip.file('xl/workbook.xml').async('string');
+        const sheetMatch = wbXml.match(/<sheet[^>]+name="Checklist"[^>]+r:id="(rId\d+)"/);
+        const wbRels = await fixZip.file('xl/_rels/workbook.xml.rels').async('string');
+        if (sheetMatch) {
+          const ridRe = new RegExp(`Id="${sheetMatch[1]}"[^>]+Target="([^"]+)"`);
+          const targetMatch = wbRels.match(ridRe);
+          if (targetMatch) {
+            const checklistPath = `xl/${targetMatch[1].replace(/^\.\//, '')}`;
+            let xml = await fixZip.file(checklistPath).async('string');
+            xml = xml.replace(/<c\s+([^>]*?)>/g, (m2, attrs) => {
+              if (!/\bt="b"/.test(attrs)) return m2;
+              const cleaned = attrs.replace(/\s*s="\d+"/g, '');
+              return `<c ${cleaned} s="${checklistXfId}">`;
+            });
+            fixZip.file(checklistPath, xml);
+          }
+        }
+      }
     }
 
     xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });

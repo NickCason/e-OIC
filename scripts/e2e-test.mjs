@@ -214,6 +214,34 @@ console.log('[e2e] verifying native cell-checkbox round-trip…');
     throw new Error('regression: styles.xml missing xfpb:xfComplement extLst entries');
   }
   console.log('  FeaturePropertyBag part + relationship + content-type override + styles extLst all present ✓');
+
+  // v22: Checklist boolean cells must reference a checkbox-enabled xfId
+  // (one carrying <xfpb:xfComplement>), or Excel renders TRUE/FALSE text.
+  const cellXfsMatch = styles.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);
+  const xfRe = /<xf\b[^/]*?(?:\/>|>[\s\S]*?<\/xf>)/g;
+  const checkboxXfIds = new Set();
+  let i = 0; let xm;
+  while ((xm = xfRe.exec(cellXfsMatch[1])) !== null) {
+    if (xm[0].includes('xfpb:xfComplement')) checkboxXfIds.add(i);
+    i += 1;
+  }
+  const wbXml = await xlsxZip.file('xl/workbook.xml').async('string');
+  const sheetMatch = wbXml.match(/<sheet[^>]+name="Checklist"[^>]+r:id="(rId\d+)"/);
+  const wbRels = await xlsxZip.file('xl/_rels/workbook.xml.rels').async('string');
+  const ridRe = new RegExp(`Id="${sheetMatch[1]}"[^>]+Target="([^"]+)"`);
+  const targetMatch = wbRels.match(ridRe);
+  const checklistXml = await xlsxZip.file(`xl/${targetMatch[1].replace(/^\.\//, '')}`).async('string');
+  const boolCells = [...checklistXml.matchAll(/<c\s+([^>]*?)>/g)]
+    .map((m) => m[1])
+    .filter((a) => /\bt="b"/.test(a));
+  const offending = boolCells.filter((a) => {
+    const sm = a.match(/\bs="(\d+)"/);
+    return !sm || !checkboxXfIds.has(parseInt(sm[1], 10));
+  });
+  if (offending.length > 0) {
+    throw new Error(`regression: ${offending.length}/${boolCells.length} Checklist boolean cells reference a non-checkbox xfId — Excel will render TRUE/FALSE`);
+  }
+  console.log(`  ${boolCells.length} Checklist boolean cells reference checkbox-enabled xfIds ✓`);
 }
 
 console.log('\n[e2e] ✅ all checks passed');
