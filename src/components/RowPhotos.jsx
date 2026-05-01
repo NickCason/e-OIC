@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { listRowPhotos, deletePhoto } from '../db.js';
+import schemaMap from '../schema.json';
 import PhotoCapture from './PhotoCapture.jsx';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import { toast } from '../lib/toast.js';
 import PhotoOverlay from './PhotoOverlay.jsx';
+import { rowDisplayLabel } from '../lib/rowLabel.js';
 
 // Row-level photos: tied to a specific row (one PLC card, one drive, etc.).
 // Inside the export these become Photos/{Panel}/{Sheet}/{RowLabel}/IMG_001.jpg.
@@ -32,7 +34,7 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
     };
   }, [photosWithUrls]);
 
-  const itemLabel = row.data?.['Device Name'] || row.data?.['Panel Name'] || `Row ${row.idx + 1}`;
+  const itemLabel = rowDisplayLabel(row, sheetName, schemaMap[sheetName]);
   const overlayPhotos = useMemo(() => photosWithUrls.map((p) => ({
     ...p,
     jobName: job.name,
@@ -87,7 +89,7 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
           sheetName={sheetName}
           item={null}
           rowId={row.id}
-          rowLabelHint={row.data?.['Device Name'] || row.data?.['Panel Name'] || `Row ${row.idx + 1}`}
+          rowLabelHint={itemLabel}
           onClose={() => { setOpen(false); refresh(); onChange?.(); }}
         />
       )}

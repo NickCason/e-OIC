@@ -3,27 +3,16 @@
 // (renders a preview of the same path so the user knows where the photos
 // will land in the exported zip).
 
+import { rowDisplayLabel } from './rowLabel.js';
+
 export function safe(name) {
   return String(name || 'unnamed').replace(/[\\/:*?"<>|]/g, '_').trim();
 }
 
-function pad3(n) { return String(n).padStart(3, '0'); }
-
-// Pick a meaningful folder label for a row's photos: prefer "Device Name",
-// "Panel Name", or another *Name field; fall back to "Row N".
+// Folder label for a row's photos. Mirrors the in-app row pill via
+// rowDisplayLabel, then sanitizes for the filesystem.
 export function rowLabel(row, schema) {
-  const preferred = ['Device Name', 'Panel Name', 'Tag/Component Name', 'Address'];
-  for (const p of preferred) {
-    const v = row.data?.[p];
-    if (v) return safe(v);
-  }
-  for (const col of schema.columns) {
-    if (/name/i.test(col.header) && !/hyperlink/i.test(col.header)) {
-      const v = row.data?.[col.header];
-      if (v) return safe(v);
-    }
-  }
-  return `Row${pad3((row.idx ?? 0) + 1)}`;
+  return safe(rowDisplayLabel(row, row.sheet, schema));
 }
 
 export function rowPhotoFolder(panelName, sheetName, row, schema) {

@@ -7,6 +7,7 @@ import {
 } from '../db.js';
 import { toast } from '../lib/toast.js';
 import { rowPhotoFolder } from '../lib/paths.js';
+import { rowDisplayLabel } from '../lib/rowLabel.js';
 import {
   getHint, getEnumOptions, isSharedHeader, slugForId,
 } from '../lib/fieldHints.js';
@@ -72,7 +73,14 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
   useEffect(() => { refreshSharedValues(); /* eslint-disable-next-line */ }, [job?.id, panel.id, sheetName]);
 
   async function addRow() {
-    const row = await createRow({ panelId: panel.id, sheet: sheetName });
+    // Pre-fill any column inherited from the parent panel. Editable like
+    // anything else — this is just a sensible default so the row's "Panel
+    // Name" cell isn't blank in the export.
+    const initial = {};
+    if (schema?.columns?.some((c) => c.header === 'Panel Name')) {
+      initial['Panel Name'] = panel.name;
+    }
+    const row = await createRow({ panelId: panel.id, sheet: sheetName, data: initial });
     await refresh();
     setActiveRowId(row.id);
     onChange?.();
@@ -212,10 +220,6 @@ function SheetNotes({ panelId, sheet, panelName }) {
 
 // ----- Row picker -----
 function RowPicker({ rows, activeRowId, onPick, onAdd, onRemove, onMove, sheetName, schema, view, onViewChange }) {
-  const labelField = schema.columns.find((c) =>
-    /name/i.test(c.header) && !/hyperlink/i.test(c.header)
-  )?.header || schema.columns[1]?.header;
-
   return (
     <div className="card" style={{ padding: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: rows.length ? 8 : 0 }}>
@@ -237,7 +241,7 @@ function RowPicker({ rows, activeRowId, onPick, onAdd, onRemove, onMove, sheetNa
       {rows.length > 0 && view === 'form' && (
         <div className="row-pills">
           {rows.map((r, i) => {
-            const lbl = (labelField && r.data[labelField]) || `Row ${i + 1}`;
+            const lbl = rowDisplayLabel(r, sheetName, schema);
             const isActive = r.id === activeRowId;
             return (
               <div key={r.id} className={'row-pill' + (isActive ? ' active' : '')}>
