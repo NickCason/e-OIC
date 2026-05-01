@@ -21,6 +21,19 @@ function valuesEqual(a, b) {
     if (Number.isNaN(na) && Number.isNaN(nb)) return true;
     return na === nb;
   }
+  // Cross-type numeric equivalence: "60.0" should equal 60 because xlsx
+  // round-trips numeric-looking strings as native numbers, and a value-level
+  // diff shouldn't flag that as a real change.
+  if (
+    (typeof na === 'number' && typeof nb === 'string') ||
+    (typeof na === 'string' && typeof nb === 'number')
+  ) {
+    const sa = String(na).trim();
+    const sb = String(nb).trim();
+    if (sa !== '' && sb !== '' && !Number.isNaN(Number(sa)) && !Number.isNaN(Number(sb))) {
+      return Number(sa) === Number(sb);
+    }
+  }
   return String(na).trim() === String(nb).trim();
 }
 

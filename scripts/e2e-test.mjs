@@ -244,5 +244,104 @@ console.log('[e2e] verifying native cell-checkbox round-trip…');
   console.log(`  ${boolCells.length} Checklist boolean cells reference checkbox-enabled xfIds ✓`);
 }
 
+// =============================================================
+// Round-trip parse + resync assertions
+// =============================================================
+
+console.log('[e2e] running parser round-trip…');
+const zipBuf = await result.blob.arrayBuffer();
+const zip = await JSZip.loadAsync(zipBuf);
+const xlsxNameRT = Object.keys(zip.files).find((f) => f.endsWith('.xlsx'));
+if (!xlsxNameRT) throw new Error('no xlsx in export zip');
+const xlsxBufRT = await zip.file(xlsxNameRT).async('arraybuffer');
+
+const { parseChecklistXlsx } = await import('../src/lib/xlsxParser.js');
+const parsed = await parseChecklistXlsx(xlsxBufRT);
+if (parsed.errors.length > 0) {
+  console.error('[e2e] parser errors:', parsed.errors);
+  throw new Error('parser returned errors on round-trip');
+}
+console.log(`[e2e] parser: ${parsed.panels.length} panels, ${Object.values(parsed.rowsBySheet).reduce((s, r) => s + r.length, 0)} rows, ${parsed.warnings.length} warnings`);
+
+console.log('[e2e] running resync no-op diff…');
+const { diffJobs } = await import('../src/lib/jobDiff.js');
+const { default: schemaMap } = await import('../src/schema.json', { with: { type: 'json' } });
+const { getSheetNotes } = await import('../src/db.js');
+
+const localPanels = panels;
+const localRowsBySheet = {};
+const localSheetNotes = {};
+for (const p of localPanels) {
+  const rs = await listAllRows(p.id);
+  for (const r of rs) {
+    if (!localRowsBySheet[r.sheet]) localRowsBySheet[r.sheet] = [];
+    localRowsBySheet[r.sheet].push(r);
+  }
+  for (const sn of Object.keys(schemaMap)) {
+    const txt = await getSheetNotes(p.id, sn);
+    if (txt) {
+      if (!localSheetNotes[p.name]) localSheetNotes[p.name] = {};
+      localSheetNotes[p.name][sn] = txt;
+    }
+  }
+}
+const localState = { localJob: job, localPanels, localRowsBySheet, localSheetNotes };
+const noopDiff = diffJobs(localState, parsed, schemaMap);
+
+// The job name is carried in the export filename, not in the xlsx contents,
+// so a parser-only round-trip cannot recover it. Treat that single field as a
+// known unrecoverable divergence and exclude it from the no-op count.
+const jobMetaChangesIgnoringName = noopDiff.jobMeta.changed.filter((c) => c.field !== 'name');
+let totalChanges = jobMetaChangesIgnoringName.length + noopDiff.panels.added.length + noopDiff.panels.removed.length;
+for (const sd of Object.values(noopDiff.sheets)) {
+  totalChanges += sd.added.length + sd.removed.length + sd.modified.length;
+}
+totalChanges += noopDiff.sheetNotes.added.length + noopDiff.sheetNotes.removed.length + noopDiff.sheetNotes.modified.length;
+
+console.log(`[e2e] no-op diff: ${totalChanges} changes (expected 0)`);
+if (totalChanges !== 0) {
+  console.warn('[e2e] no-op diff revealed changes:');
+  for (const c of jobMetaChangesIgnoringName) console.warn('  jobMeta:', c.field, JSON.stringify(c.old), '→', JSON.stringify(c.new));
+  for (const p of noopDiff.panels.added) console.warn('  panel +', p.name);
+  for (const p of noopDiff.panels.removed) console.warn('  panel −', p.name);
+  for (const [sn, sd] of Object.entries(noopDiff.sheets)) {
+    if (sd.added.length || sd.removed.length || sd.modified.length) {
+      console.warn(`  ${sn}: +${sd.added.length} −${sd.removed.length} ~${sd.modified.length}`);
+      for (const m of sd.modified) {
+        for (const fc of m.fieldChanges) console.warn(`    ~${m.label}.${fc.field}: ${JSON.stringify(fc.old)} → ${JSON.stringify(fc.new)}`);
+      }
+    }
+  }
+  throw new Error('round-trip diff is not a no-op — parser/exporter divergence');
+}
+
+console.log('[e2e] running resync-with-edit assertion…');
+const sheetWithRows = Object.keys(parsed.rowsBySheet).find((s) => parsed.rowsBySheet[s].length > 0);
+if (sheetWithRows) {
+  const editedParsed = JSON.parse(JSON.stringify(parsed));
+  const targetRow = editedParsed.rowsBySheet[sheetWithRows][0];
+  const editableField = Object.keys(targetRow.data).find((k) => k !== 'Panel Name' && typeof targetRow.data[k] === 'string');
+  if (editableField) {
+    targetRow.data[editableField] = 'CHANGED-' + targetRow.data[editableField];
+    const editDiff = diffJobs(localState, editedParsed, schemaMap);
+    const sd = editDiff.sheets[sheetWithRows];
+    const mods = sd.modified.length;
+    if (mods !== 1) {
+      // Could be that label-stable mutation causes added+removed instead of modified.
+      // Check that path too — but ideally the test should pick a non-label field.
+      // If field IS a label component, we'd see 1 added + 1 removed.
+      const totalSheetChanges = sd.modified.length + sd.added.length + sd.removed.length;
+      if (totalSheetChanges < 1) throw new Error(`expected ≥1 change in ${sheetWithRows}, got ${totalSheetChanges}`);
+      console.log(`[e2e] edit detected (label-affecting): +${sd.added.length} −${sd.removed.length} ~${sd.modified.length}`);
+    } else {
+      const fc = sd.modified[0].fieldChanges.find((f) => f.field === editableField);
+      if (!fc) throw new Error(`expected fieldChange on ${editableField}`);
+      console.log(`[e2e] edit detected: ${sheetWithRows}.${editableField} → "${fc.new}"`);
+    }
+  }
+}
+
+console.log('[e2e] round-trip + resync assertions passed.');
+
 console.log('\n[e2e] ✅ all checks passed');
 console.log(`[e2e] inspect outputs at: ${outDir}`);
