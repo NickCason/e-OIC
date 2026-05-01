@@ -127,12 +127,22 @@ export default function ExportDialog({ job, onClose }) {
       const shared = await shareBlob(result.blob, result.filename, job.name);
       if (!shared) {
         downloadBlob(result.blob, result.filename);
-        toast.show('Share not supported — downloaded instead');
+        toast.show('Share not supported — saved to Downloads instead');
       }
     } catch (e) {
       if (e.name === 'AbortError') return;
+      // Android Chrome can reject navigator.share with NotAllowedError
+      // even when canShare returned true — share-intent / MediaStore
+      // issues we can't fix from the page. Fall back to download so the
+      // user always ends up with the file in hand.
       console.error('share failed:', e);
-      toast.error(`${e.name || 'Error'}: ${e.message || 'Share failed'}`);
+      try {
+        downloadBlob(result.blob, result.filename);
+        toast.show('Couldn’t open the share sheet — saved to Downloads instead');
+      } catch (e2) {
+        console.error('download fallback also failed:', e2);
+        toast.error(`${e.name || 'Error'}: ${e.message || 'Share failed'}`);
+      }
     }
   }
 
