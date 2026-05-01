@@ -169,4 +169,8 @@ test('parseChecklistXlsx emits progress phases', async () => {
   assert.ok(phases.includes('panels'), `expected 'panels', got ${phases.join(',')}`);
   assert.ok(phases.includes('rows'), `expected 'rows', got ${phases.join(',')}`);
   assert.ok(phases.includes('matching'), `expected 'matching', got ${phases.join(',')}`);
+  assert.equal(phases[0], 'loading', `'loading' must be first, got ${phases[0]}`);
+  assert.equal(phases[phases.length - 1], 'matching', `'matching' must be last, got ${phases[phases.length - 1]}`);
+  const rowsCount = phases.filter((p) => p === 'rows').length;
+  assert.ok(rowsCount >= 1, `expected at least one 'rows' event, got ${rowsCount}`);
 });
