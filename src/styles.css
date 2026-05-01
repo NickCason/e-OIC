@@ -582,7 +582,7 @@ main {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: var(--keyboard-inset, 0);
   z-index: 6;
   display: flex;
   align-items: center;
@@ -594,6 +594,7 @@ main {
     max(env(safe-area-inset-left), var(--sp-3));
   background: linear-gradient(to top, var(--bg) 60%, rgba(0,0,0,0));
   pointer-events: none;
+  transition: bottom 180ms ease-out;
 }
 .savebar-saved {
   pointer-events: auto;
