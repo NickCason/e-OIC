@@ -11,6 +11,7 @@ import Marquee from './Marquee.jsx';
 import PullOrNewModal from './PullOrNewModal.jsx';
 import PullDialog from './PullDialog.jsx';
 import InstallBanner from './InstallBanner.jsx';
+import WrapperUpdateBanner from './WrapperUpdateBanner.jsx';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
@@ -101,6 +102,7 @@ export default function JobList() {
         }
       />
       <main>
+        <WrapperUpdateBanner />
         <InstallBanner />
         <div className="hero">
           <div className="hero-pretitle">
