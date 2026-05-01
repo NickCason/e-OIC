@@ -26,6 +26,7 @@ export default function useKeyboardInset() {
     // so CSS var(--keyboard-inset, 0) falls back to 0 — current behavior.
     if (!vv) return undefined;
 
+    const pendingTimeouts = new Set();
     let rafId = 0;
     const writeInset = () => {
       rafId = 0;
@@ -50,11 +51,13 @@ export default function useKeyboardInset() {
       if (!editable) return;
       // Defer so iOS has time to start the keyboard animation and update
       // visualViewport before the browser measures for scrollIntoView.
-      setTimeout(() => {
+      const tid = setTimeout(() => {
+        pendingTimeouts.delete(tid);
         if (typeof t.scrollIntoView === 'function') {
           t.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }
       }, FOCUS_SCROLL_DELAY_MS);
+      pendingTimeouts.add(tid);
     };
     document.addEventListener('focusin', onFocusIn);
 
@@ -64,6 +67,7 @@ export default function useKeyboardInset() {
       vv.removeEventListener('resize', schedule);
       vv.removeEventListener('scroll', schedule);
       document.removeEventListener('focusin', onFocusIn);
+      pendingTimeouts.forEach(clearTimeout);
       if (rafId) cancelAnimationFrame(rafId);
       root.style.removeProperty('--keyboard-inset');
     };
