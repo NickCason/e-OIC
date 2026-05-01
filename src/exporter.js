@@ -666,25 +666,25 @@ export function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-export async function shareBlob(blob, filename, title) {
+export async function shareBlob(blob, filename, _title) {
   // navigator.share consumes the user-activation token on call. Any work
   // here must stay synchronous up to the share() call; a single await is
   // fine, but never call share() twice from one gesture.
   //
-  // Filename AND title both flow through Android's content-URI / share-
-  // intent layer, so both must be ASCII-safe. An em-dash in either has
-  // been observed to reject the call with NotAllowedError on Android.
+  // Android quirks driving the choices below:
+  //   • Filename must be ASCII (em-dash / smart quotes trip MediaStore).
+  //   • application/octet-stream is accepted by far more Android share
+  //     targets than application/zip; the .zip extension on the filename
+  //     still tells receiving apps what the bytes are.
+  //   • lastModified on the File ctor has been observed to make some
+  //     older Chrome-on-Android reject. Omit.
+  //   • Bare { files: [...] } payload — no title, no text — keeps the
+  //     surface area minimal. Title is optional per spec.
   const safeName = shareSafeFilename(filename);
-  const safeTitle = shareSafeFilename(title);
-  const mime = safeName.endsWith('.xlsx')
-    ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    : 'application/zip';
-  const file = new File([blob], safeName, { type: mime, lastModified: Date.now() });
+  const file = new File([blob], safeName, { type: 'application/octet-stream' });
   if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
     return false;
   }
-  const payload = { files: [file] };
-  if (safeTitle && safeTitle !== 'unnamed') payload.title = safeTitle;
-  await navigator.share(payload);
+  await navigator.share({ files: [file] });
   return true;
 }
