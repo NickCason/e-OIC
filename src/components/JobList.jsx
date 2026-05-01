@@ -9,10 +9,14 @@ import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
 import Icon from './Icon.jsx';
 import Marquee from './Marquee.jsx';
+import PullOrNewModal from './PullOrNewModal.jsx';
+import PullDialog from './PullDialog.jsx';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
+  const [choosing, setChoosing] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [pulling, setPulling] = useState(false);
   const [editing, setEditing] = useState(null);
   const [stats, setStats] = useState({});
   const [percents, setPercents] = useState({});
@@ -187,10 +191,18 @@ export default function JobList() {
           );
         })}
       </main>
-      <button className="fab" onClick={() => setCreating(true)} aria-label="New job">
+      <button className="fab" onClick={() => setChoosing(true)} aria-label="New job">
         <Icon name="add" size={24} strokeWidth={2.25} />
       </button>
+      {choosing && (
+        <PullOrNewModal
+          onClose={() => setChoosing(false)}
+          onNew={() => { setChoosing(false); setCreating(true); }}
+          onPull={() => { setChoosing(false); setPulling(true); }}
+        />
+      )}
       {creating && <JobModal onClose={() => setCreating(false)} onSaved={refresh} />}
+      {pulling && <PullDialog onClose={() => setPulling(false)} onCreated={refresh} />}
       {editing && <JobModal job={editing} onClose={() => setEditing(null)} onSaved={refresh} />}
     </>
   );
