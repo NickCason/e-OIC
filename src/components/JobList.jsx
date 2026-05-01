@@ -27,11 +27,13 @@ export default function JobList() {
     const all = await listJobs();
     setJobs(all);
     const results = await Promise.all(
-      all.map(async (j) => [
-        j.id,
-        await getJobSizeEstimate(j.id),
-        await getJobPercent(j.id),
-      ])
+      all.map(async (j) => {
+        const [size, pct] = await Promise.all([
+          getJobSizeEstimate(j.id),
+          getJobPercent(j.id),
+        ]);
+        return [j.id, size, pct];
+      })
     );
     const s = {};
     const p = {};
