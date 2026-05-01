@@ -124,7 +124,7 @@ export default function ExportDialog({ job, onClose }) {
   async function onShare() {
     if (!result) return;
     try {
-      const shared = await shareBlob(result.blob, result.filename, job.name);
+      const shared = await shareBlob(result.blob, result.filename, job.name, result.shareFile);
       if (!shared) {
         downloadBlob(result.blob, result.filename);
         toast.show('Share not supported — saved to Downloads instead');

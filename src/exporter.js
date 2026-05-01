@@ -26,6 +26,33 @@ const SHEET_ORDER = [
 
 function pad3(n) { return String(n).padStart(3, '0'); }
 
+// Write the export to OPFS (Origin Private File System) and return a
+// File handle backed by it. OPFS is sandboxed per-origin storage but
+// the File it produces is real-disk-backed, which is what Android
+// Chrome's share-intent IPC needs to grant a content URI. In-memory
+// Files (from new File([blob], ...)) get rejected with NotAllowedError
+// on Android Chrome 147+ regardless of MIME or payload shape.
+//
+// Returns null on any failure (OPFS unsupported, quota exhausted, etc.)
+// so callers fall back to the in-memory File.
+async function materializeForShare(blob, filename) {
+  try {
+    const root = await navigator.storage?.getDirectory?.();
+    if (!root) return null;
+    const safeName = shareSafeFilename(filename);
+    const handle = await root.getFileHandle(safeName, { create: true });
+    const writable = await handle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    return await handle.getFile();
+  } catch (e) {
+    if (typeof console !== 'undefined') {
+      console.warn('OPFS materialization for share failed:', e);
+    }
+    return null;
+  }
+}
+
 function findColumnIndex(ws, headerRow, target) {
   const row = ws.getRow(headerRow);
   for (let c = 1; c <= ws.columnCount; c++) {
@@ -544,8 +571,9 @@ export async function buildExport(job, {
     onProgress({ phase: 'finalizing', percent: 95 });
     const blob = new Blob([xlsxBuf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const xlsxFilename = filenameOverride || `${safe(job.name)}.xlsx`;
+    const shareFile = await materializeForShare(blob, xlsxFilename);
     onProgress({ phase: 'done', percent: 100 });
-    return { blob, filename: xlsxFilename, sizeBytes: blob.size };
+    return { blob, filename: xlsxFilename, sizeBytes: blob.size, shareFile };
   }
 
   // 7. Build zip
@@ -658,9 +686,11 @@ export async function buildExport(job, {
     compression: 'STORE',
   });
   const zipBlob = new Blob([zipBuffer], { type: 'application/zip' });
+  const zipFilename = `${jobSafe}.zip`;
+  const shareFile = await materializeForShare(zipBlob, zipFilename);
 
   onProgress({ phase: 'done', percent: 100 });
-  return { blob: zipBlob, filename: `${jobSafe}.zip`, sizeBytes: zipBlob.size };
+  return { blob: zipBlob, filename: zipFilename, sizeBytes: zipBlob.size, shareFile };
 }
 
 export function downloadBlob(blob, filename) {
@@ -674,17 +704,23 @@ export function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-export async function shareBlob(blob, filename, title) {
+export async function shareBlob(blob, filename, title, shareFile = null) {
   // navigator.share consumes the user-activation token on call. Stay
   // synchronous up to the share() call; never call share() twice from
   // one gesture. Filename and title both need ASCII normalization for
   // Android's content-URI / share-intent layer.
+  //
+  // Prefer the OPFS-backed File (passed in via `shareFile`) over an
+  // in-memory File-from-Blob. Android Chrome's share IPC accepts
+  // filesystem-backed Files but rejects in-memory ones with
+  // NotAllowedError. OPFS write happens at export time so there is no
+  // activation cost at share time.
   const safeName = shareSafeFilename(filename);
   const safeTitle = shareSafeFilename(title);
   const mime = safeName.endsWith('.xlsx')
     ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     : 'application/zip';
-  const file = new File([blob], safeName, { type: mime });
+  const file = shareFile || new File([blob], safeName, { type: mime });
   if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
     return false;
   }
