@@ -667,29 +667,17 @@ export function downloadBlob(blob, filename) {
 }
 
 export async function shareBlob(blob, filename, title) {
+  // navigator.share consumes the user-activation token on call. Any work
+  // here must stay synchronous up to the share() call; a single await is
+  // fine, but never call share() twice from one gesture.
   const safeName = shareSafeFilename(filename);
   const mime = safeName.endsWith('.xlsx')
     ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     : 'application/zip';
-  const lastModified = Date.now();
-  const file = new File([blob], safeName, { type: mime, lastModified });
+  const file = new File([blob], safeName, { type: mime, lastModified: Date.now() });
   if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
     return false;
   }
-  try {
-    await navigator.share({ files: [file], title });
-    return true;
-  } catch (err) {
-    if (err.name === 'AbortError') throw err;
-    // Some Android share targets reject application/zip but accept
-    // application/octet-stream. One retry is cheap and safe.
-    if (err.name === 'NotAllowedError' && mime !== 'application/octet-stream') {
-      const fallback = new File([blob], safeName, { type: 'application/octet-stream', lastModified });
-      if (navigator.canShare({ files: [fallback] })) {
-        await navigator.share({ files: [fallback], title });
-        return true;
-      }
-    }
-    throw err;
-  }
+  await navigator.share({ files: [file], title });
+  return true;
 }
