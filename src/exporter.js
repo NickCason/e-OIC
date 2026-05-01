@@ -1,6 +1,7 @@
 // exporter.js — produces {jobName}.zip:
 //
 //   {jobName}.xlsx                              populated workbook (template-faithful)
+//   {jobName}.backup.json                       full re-importable backup (Settings → Restore)
 //   {jobName}_photo_metadata.csv                sidecar with GPS / timestamps for every photo
 //   Photos/{Panel}/{Item}/IMG_001.jpg           panel-level photos (Photo Checklist items)
 //   Photos/{Panel}/{Sheet}/{RowLabel}/IMG_001.jpg
@@ -12,7 +13,7 @@
 import schemaMap from './schema.json' with { type: 'json' };
 import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
-  getChecklistState, slugifyTaskLabel,
+  getChecklistState, slugifyTaskLabel, exportJobJSON,
 } from './db.js';
 import { fmtTimestamp, fmtGps } from './photoOverlay.js';
 import { safe, rowLabel } from './lib/paths.js';
@@ -472,6 +473,12 @@ export async function buildExport(job, {
   }
 
   zip.file(`${jobSafe}_photo_metadata.csv`, csvRows.join('\n'));
+
+  // Re-importable backup. Photos are embedded as base64 so Settings → Restore
+  // on another device reconstructs the job without the Photos/ folder.
+  onProgress({ phase: 'bundling', percent: 90, detail: 'backup snapshot' });
+  const backup = await exportJobJSON(job.id);
+  zip.file(`${jobSafe}.backup.json`, JSON.stringify(backup));
 
   onProgress({ phase: 'compressing', percent: 92 });
   const zipBlob = await zip.generateAsync({
