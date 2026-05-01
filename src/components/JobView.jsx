@@ -29,6 +29,8 @@ export default function JobView({ jobId }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resyncing, setResyncing] = useState(false);
   const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
+  const [duplicating, setDuplicating] = useState(null); // panel being duplicated
+  const [duplicateName, setDuplicateName] = useState('');
 
   async function refresh() {
     const j = await getJob(jobId);
@@ -83,12 +85,19 @@ export default function JobView({ jobId }) {
     });
   }
 
-  async function onDuplicate(panel) {
-    const newName = prompt(`Duplicate “${panel.name}” as:`, `${panel.name} (copy)`);
-    if (!newName?.trim()) return;
-    const dup = await duplicatePanel(panel.id, newName.trim());
+  function onDuplicate(panel) {
+    setDuplicating(panel);
+    setDuplicateName(`${panel.name} (copy)`);
+  }
+
+  async function confirmDuplicate() {
+    const newName = duplicateName.trim();
+    if (!newName || !duplicating) return;
+    const dup = await duplicatePanel(duplicating.id, newName);
+    setDuplicating(null);
+    setDuplicateName('');
     await refresh();
-    toast.show(`Duplicated as “${dup.name}” (rows copied, photos not)`);
+    toast.show(`Duplicated as “${dup.name}”`);
   }
 
   async function handleDisconnect() {
@@ -222,6 +231,28 @@ export default function JobView({ jobId }) {
           onClose={() => setResyncing(false)}
           onApplied={() => { refresh(); }}
         />
+      )}
+      {duplicating && (
+        <div className="modal-bg" onClick={() => setDuplicating(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">Duplicate panel</h2>
+            <div className="field">
+              <label>New panel name</label>
+              <input
+                value={duplicateName}
+                onChange={(e) => setDuplicateName(e.target.value)}
+                autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter') confirmDuplicate(); }}
+              />
+            </div>
+            <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+              <button className="ghost" onClick={() => setDuplicating(null)}>Cancel</button>
+              <button className="primary" onClick={confirmDuplicate} disabled={!duplicateName.trim()}>
+                Duplicate
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {confirmingDisconnect && (
         <div className="modal-bg" onClick={() => setConfirmingDisconnect(false)}>

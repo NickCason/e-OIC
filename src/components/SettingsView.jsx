@@ -16,6 +16,8 @@ export default function SettingsView() {
   const [gpsConsent, setGpsConsent] = useState(null);
   const [busy, setBusy] = useState(false);
   const [storage, setStorage] = useState(null);
+  const [pendingRestoreFile, setPendingRestoreFile] = useState(null);
+  const [confirmingReloadSample, setConfirmingReloadSample] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -77,11 +79,17 @@ export default function SettingsView() {
     }
   }
 
-  async function onRestore(e) {
+  function onRestore(e) {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!confirm('Restore this backup?\n\nMerge mode: existing jobs are kept; new ones are added.\nIf you want to overwrite duplicates, cancel and use "Replace" via the menu (advanced).')) return;
+    setPendingRestoreFile(file);
+  }
+
+  async function confirmRestore() {
+    const file = pendingRestoreFile;
+    setPendingRestoreFile(null);
+    if (!file) return;
     setBusy(true);
     try {
       const text = await file.text();
@@ -96,8 +104,12 @@ export default function SettingsView() {
     }
   }
 
-  async function onReloadSample() {
-    if (!confirm('Reload the sample job? Any local edits to the sample will be overwritten. Other jobs are untouched.')) return;
+  function onReloadSample() {
+    setConfirmingReloadSample(true);
+  }
+
+  async function confirmReloadSample() {
+    setConfirmingReloadSample(false);
     setBusy(true);
     try {
       const stats = await reloadSampleJob();
@@ -231,6 +243,36 @@ export default function SettingsView() {
           <div className="settings-footer-sub">An E Tech Group field tool.</div>
           <div className="settings-footer-sub">v{APP_VERSION}</div>
         </footer>
+        {pendingRestoreFile && (
+          <div className="modal-bg" onClick={() => setPendingRestoreFile(null)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h2 className="modal-title">Restore this backup?</h2>
+              <p style={{ color: 'var(--text-dim)', fontSize: 13 }}>
+                <strong>Merge mode:</strong> existing jobs are kept; new ones are added.
+                If you want to overwrite duplicates, cancel and use “Replace” via the menu (advanced).
+              </p>
+              <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+                <button className="ghost" onClick={() => setPendingRestoreFile(null)}>Cancel</button>
+                <button className="primary" onClick={confirmRestore}>Restore</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {confirmingReloadSample && (
+          <div className="modal-bg" onClick={() => setConfirmingReloadSample(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h2 className="modal-title">Reload the sample job?</h2>
+              <p style={{ color: 'var(--text-dim)', fontSize: 13 }}>
+                Any local edits to the sample will be overwritten. Other jobs are untouched.
+              </p>
+              <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+                <button className="ghost" onClick={() => setConfirmingReloadSample(false)}>Cancel</button>
+                <button className="primary" onClick={confirmReloadSample}>Reload sample</button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
