@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --host",
+    "lint": "eslint .",
     "test:unit": "node --test 'src/lib/*.test.js'",
     "test:e2e": "node scripts/e2e-test.mjs",
     "test": "npm run test:unit && npm run test:e2e"
@@ -20,9 +21,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "9.39.4",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "5.2.0",
     "exceljs": "^4.4.0",
     "fake-indexeddb": "^6.2.5",
+    "globals": "15.15.0",
     "jszip": "^3.10.1",
     "vite": "^5.4.11"
   }

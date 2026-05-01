@@ -101,7 +101,7 @@ function GeoPrompt({ onClose }) {
         </p>
         <ul style={{ color: 'var(--text-dim)', fontSize: 13, paddingLeft: 18 }}>
           <li>The visible overlay on each photo</li>
-          <li>The JPEG's EXIF metadata (visible to mapping apps)</li>
+          <li>The JPEG&apos;s EXIF metadata (visible to mapping apps)</li>
           <li>A sidecar CSV included in your export</li>
         </ul>
         <p style={{ color: 'var(--text-dim)', fontSize: 13 }}>

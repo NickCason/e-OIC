@@ -114,14 +114,14 @@ export default function DiffView({ diff, direction = 'pull', removedDecisions, o
       {diff.skippedSheets.length > 0 && (
         <div className="diff-skip-block">
           {diff.skippedSheets.map((s, i) => (
-            <div key={i} className="diff-skip">⊘ "{s}" sheet skipped (not in schema)</div>
+            <div key={i} className="diff-skip">⊘ &quot;{s}&quot; sheet skipped (not in schema)</div>
           ))}
         </div>
       )}
       {diff.skippedColumns.length > 0 && (
         <div className="diff-skip-block">
           {diff.skippedColumns.map((c, i) => (
-            <div key={i} className="diff-skip">⊘ "{c.columnName}" column skipped in {c.sheetName}</div>
+            <div key={i} className="diff-skip">⊘ &quot;{c.columnName}&quot; column skipped in {c.sheetName}</div>
           ))}
         </div>
       )}

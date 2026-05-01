@@ -20,6 +20,7 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
     setPhotos(await listRowPhotos(row.id));
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when row.id changes.
   useEffect(() => { refresh(); }, [row.id]);
 
   const photosWithUrls = useMemo(

@@ -69,8 +69,10 @@ export default function SheetForm({ job, panel, sheetName, onChange }) {
     setSharedValues(out);
   }
 
-  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [panel.id, sheetName]);
-  useEffect(() => { refreshSharedValues(); /* eslint-disable-next-line */ }, [job?.id, panel.id, sheetName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when panel/sheet context changes.
+  useEffect(() => { refresh(); }, [panel.id, sheetName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshSharedValues is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when job/panel/sheet context changes.
+  useEffect(() => { refreshSharedValues(); }, [job?.id, panel.id, sheetName]);
 
   async function addRow() {
     // Pre-fill any column inherited from the parent panel. Editable like

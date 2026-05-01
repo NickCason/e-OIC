@@ -50,11 +50,13 @@ export default function JobView({ jobId }) {
     setChecklistTotals({ checked: tasks.filter((t) => t.completed).length, total: tasks.length });
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when jobId changes.
   useEffect(() => { refresh(); }, [jobId]);
   useEffect(() => {
     const onFocus = () => { refresh(); };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; onFocus intentionally re-reads refresh() via closure on each focus event.
   }, [jobId]);
 
   async function onDelete(panel) {

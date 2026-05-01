@@ -43,6 +43,7 @@ export default function PanelView({ jobId, panelId }) {
       setJob(j); setPanel(pn);
       refreshProgress();
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshProgress is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when jobId/panelId change.
   }, [jobId, panelId]);
 
   if (!job || !panel) return null;
