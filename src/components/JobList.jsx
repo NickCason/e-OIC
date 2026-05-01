@@ -4,7 +4,6 @@ import { getJobPercent } from '../lib/metrics.js';
 import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
-import { BUILD_VERSION } from '../version.js';
 import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
 import Icon from './Icon.jsx';
@@ -108,7 +107,6 @@ export default function JobList() {
             {jobs.length === 0
               ? 'NO JOBS YET'
               : `${jobs.length} ${jobs.length === 1 ? 'INVESTIGATION' : 'INVESTIGATIONS'}`}
-            <span className="build-badge" title="Build version">{BUILD_VERSION}</span>
           </div>
           <h1 className="hero-title">Your jobs</h1>
         </div>
