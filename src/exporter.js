@@ -65,6 +65,8 @@ function csvEscape(v) {
 export async function buildExport(job, {
   templateUrl = './template.xlsx',
   onProgress = () => {},
+  mode = 'zip',
+  filename: filenameOverride = null,
 } = {}) {
   // Load heavy libs only at export time
   onProgress({ phase: 'loading-libs', percent: 2 });
@@ -535,6 +537,15 @@ export async function buildExport(job, {
     }
 
     xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });
+  }
+
+  // 'xlsx-only' mode: ship just the xlsx, no zip wrapper, no photos/csv/backup.
+  if (mode === 'xlsx-only') {
+    onProgress({ phase: 'finalizing', percent: 95 });
+    const blob = new Blob([xlsxBuf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const xlsxFilename = filenameOverride || `${safe(job.name)}.xlsx`;
+    onProgress({ phase: 'done', percent: 100 });
+    return { blob, filename: xlsxFilename, sizeBytes: blob.size };
   }
 
   // 7. Build zip
