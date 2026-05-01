@@ -83,7 +83,8 @@ async function save(wb) {
   const wb = await load(cleanBuf);
   const ws = wb.getWorksheet('Power');
   for (let c = 1; c <= ws.columnCount; c++) {
-    if (String(ws.getCell(2, c).value).trim() === 'Voltage') {
+    const cellVal = ws.getCell(2, c).value;
+    if (cellVal != null && String(cellVal).trim() === 'Voltage') {
       ws.getCell(2, c).value = null;
       break;
     }
