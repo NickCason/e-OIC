@@ -1158,7 +1158,7 @@ main {
 /* Toast */
 .toast-host {
   position: fixed;
-  bottom: 110px;
+  bottom: calc(110px + var(--keyboard-inset, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1350,7 +1350,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .modal h2 { margin: 0 0 12px; font-size: 17px; }
 
 .fab {
-  position: fixed; right: 18px; bottom: max(20px, env(safe-area-inset-bottom));
+  position: fixed; right: 18px; bottom: calc(max(20px, env(safe-area-inset-bottom)) + var(--keyboard-inset, 0px));
   background: var(--energy); color: white; border: none;
   width: 56px; height: 56px; border-radius: 28px;
   font-size: 24px; box-shadow: var(--shadow-md);
