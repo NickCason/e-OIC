@@ -201,8 +201,8 @@ export default function JobView({ jobId }) {
         <div className="modal-bg" onClick={() => setMenuOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h2>Job options</h2>
-            <button onClick={() => { setMenuOpen(false); onBackupJob(); }} style={{ width: '100%', textAlign: 'left' }}>⬇ Back up this job</button>
-            <button onClick={() => { setMenuOpen(false); setEditing({ ...job, _isJob: true }); }} style={{ width: '100%', textAlign: 'left', marginTop: 8 }}>✎ Edit job details</button>
+            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); onBackupJob(); }}>⬇ Back up this job</button>
+            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setEditing({ ...job, _isJob: true }); }}>✎ Edit job details</button>
             <div className="btn-row" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
               <button className="ghost" onClick={() => setMenuOpen(false)}>Close</button>
             </div>
