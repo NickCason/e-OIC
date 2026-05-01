@@ -3,9 +3,10 @@ import Icon from './Icon.jsx';
 import { usePwaInstall } from '../lib/usePwaInstall.js';
 
 const DISMISS_KEY = 'eoic-install-banner-dismissed';
+const APK_URL = 'https://github.com/NickCason/e-OIC-android-wrapper/releases/latest/download/e-OIC.apk';
 
 export default function InstallBanner() {
-  const { canInstall, isIOS, install } = usePwaInstall();
+  const { canInstall, isIOS, isAndroid, install } = usePwaInstall();
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem(DISMISS_KEY) === '1'; } catch { return false; }
   });
@@ -18,24 +19,37 @@ export default function InstallBanner() {
     try { sessionStorage.setItem(DISMISS_KEY, '1'); } catch {}
   }
 
+  // Android: link directly to the APK download. Browser handles the
+  // sideload-from-unknown-apps flow; wrapper signs every release with
+  // the same keystore so an upgrade install is also one tap.
+  // iOS: open instructions modal (existing behavior).
+  // Desktop with beforeinstallprompt: trigger the native prompt.
   async function onInstall() {
+    if (isAndroid) {
+      window.location.href = APK_URL;
+      return;
+    }
     const r = await install();
     if (r === 'ios-instructions') setIosOpen(true);
   }
+
+  const title = isAndroid ? 'Install Android app' : 'Install e-OIC';
+  const sub = isAndroid
+    ? 'Required for sharing on Android.'
+    : isIOS
+      ? 'Add to your home screen for full-screen, offline-ready use.'
+      : 'One-tap install for full-screen, offline-ready use.';
+  const ctaLabel = isAndroid ? 'Get APK' : 'Install';
 
   return (
     <>
       <div className="install-banner" role="region" aria-label="Install app">
         <div className="install-banner-icon"><Icon name="download" size={18} /></div>
         <div className="install-banner-text">
-          <div className="install-banner-title">Install e-OIC</div>
-          <div className="install-banner-sub">
-            {isIOS
-              ? 'Add to your home screen for full-screen, offline-ready use.'
-              : 'One-tap install for full-screen, offline-ready use.'}
-          </div>
+          <div className="install-banner-title">{title}</div>
+          <div className="install-banner-sub">{sub}</div>
         </div>
-        <button className="install-banner-cta" onClick={onInstall} type="button">Install</button>
+        <button className="install-banner-cta" onClick={onInstall} type="button">{ctaLabel}</button>
         <button className="install-banner-close" onClick={dismiss} aria-label="Dismiss" type="button">
           <Icon name="close" size={16} />
         </button>
