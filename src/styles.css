@@ -723,6 +723,7 @@ textarea,
   padding: 2px 0 var(--sp-2);
   margin-bottom: var(--sp-3);
   scrollbar-width: none;
+  scroll-snap-type: x proximity;
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
@@ -743,6 +744,7 @@ textarea,
   appearance: none;
   font-family: inherit;
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  scroll-snap-align: center;
 }
 .tab.active {
   background: var(--accent);

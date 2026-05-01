@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getJob, getPanel } from '../db.js';
 import { getPanelProgress } from '../lib/metrics.js';
 import { nav } from '../App.jsx';
@@ -20,6 +20,14 @@ export default function PanelView({ jobId, panelId }) {
   const [progress, setProgress] = useState({});
   const [panelPercent, setPanelPercent] = useState(0);
   const [showSheetPicker, setShowSheetPicker] = useState(false);
+
+  const tabsRef = useRef(null);
+  useEffect(() => {
+    const el = tabsRef.current?.querySelector('.tab.active');
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }
+  }, [activeSheet]);
 
   async function refreshProgress() {
     const { percent, sheetStatuses } = await getPanelProgress(panelId);
@@ -59,7 +67,7 @@ export default function PanelView({ jobId, panelId }) {
           </div>
           <h1 className="hero-title">{panel?.name || 'Panel'}</h1>
         </div>
-        <div className="tabs">
+        <div className="tabs" ref={tabsRef}>
           {SHEET_ORDER.map((s) => (
             <button
               key={s}
