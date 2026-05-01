@@ -60,7 +60,7 @@ export default function InstallBanner() {
               </li>
             </ol>
             <div className="install-ios-note">
-              Apple doesn&apos;t let websites trigger installs directly — you have to do it from the Share sheet. Sorry!
+              On iPhone, installs happen from the Share sheet — three quick taps and you&apos;re done.
             </div>
             <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
               <button className="primary" onClick={() => setIosOpen(false)}>Got it</button>
