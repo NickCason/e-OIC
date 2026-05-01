@@ -129,6 +129,22 @@ export async function buildExport(job, {
     let writeRow = schema.first_data_row;
     let wroteAnything = false;
 
+    // Capture the template's example-row cell styles BEFORE we overwrite
+    // them. Each new data row beyond the first inherits these so banding,
+    // borders, number formats, and the Photo Checklist columns' checkbox
+    // xfId all carry through.
+    const exampleStyles = {};
+    {
+      const exampleRow = ws.getRow(schema.first_data_row);
+      for (let c = 1; c <= ws.columnCount; c++) {
+        const cell = exampleRow.getCell(c);
+        if (cell.style) {
+          try { exampleStyles[c] = JSON.parse(JSON.stringify(cell.style)); }
+          catch { /* ignore non-serializable styles */ }
+        }
+      }
+    }
+
     for (const panel of panels) {
       const allRows = await listAllRows(panel.id);
       const sheetRows = allRows
@@ -149,6 +165,14 @@ export async function buildExport(job, {
       for (const row of sheetRows) {
         const r = ws.getRow(writeRow);
         for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
+
+        // Apply example-row styles so banding, borders, and the Photo
+        // Checklist's checkbox xfId carry through to new rows.
+        for (let c = 1; c <= ws.columnCount; c++) {
+          if (exampleStyles[c]) {
+            try { r.getCell(c).style = exampleStyles[c]; } catch { /* ignore */ }
+          }
+        }
 
         for (const col of schema.columns) {
           const ci = colIndex[col.header];
@@ -381,6 +405,39 @@ export async function buildExport(job, {
       let xml = await fixZip.file(f).async('string');
       xml = xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
       fixZip.file(f, xml);
+    }
+
+    // Extend each table's `ref` to cover the actual last data row in its
+    // sheet. Without this, rows beyond the template's example row sit
+    // outside the table and lose banding/totals/auto-extension.
+    for (const sheetFile of sheetFiles) {
+      const sheetXml = await fixZip.file(sheetFile).async('string');
+      const rowMatches = [...sheetXml.matchAll(/<row\s+r="(\d+)"/g)];
+      if (rowMatches.length === 0) continue;
+      const lastRow = Math.max(...rowMatches.map((m) => parseInt(m[1], 10)));
+
+      const sheetNum = sheetFile.match(/sheet(\d+)\.xml$/)?.[1];
+      if (!sheetNum) continue;
+      const relsPath = `xl/worksheets/_rels/sheet${sheetNum}.xml.rels`;
+      const relsFile = fixZip.file(relsPath);
+      if (!relsFile) continue;
+      const rels = await relsFile.async('string');
+      const tableTargets = [...rels.matchAll(/Target="([^"]*tables\/table\d+\.xml)"/g)]
+        .map((m) => m[1].replace(/^\.\.\//, ''));
+      for (const t of tableTargets) {
+        const tablePath = `xl/${t}`;
+        const tableFile = fixZip.file(tablePath);
+        if (!tableFile) continue;
+        let tableXml = await tableFile.async('string');
+        tableXml = tableXml.replace(
+          /(<table\b[^>]*?\sref=")([A-Z]+)(\d+):([A-Z]+)(\d+)(")/,
+          (m, p1, c1, r1, c2, r2, p2) => {
+            const newR2 = Math.max(parseInt(r2, 10), lastRow);
+            return `${p1}${c1}${r1}:${c2}${newR2}${p2}`;
+          },
+        );
+        fixZip.file(tablePath, tableXml);
+      }
     }
 
     // Re-attach FeaturePropertyBag from the template so cell-checkboxes work.
