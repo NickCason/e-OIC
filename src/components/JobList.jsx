@@ -11,6 +11,7 @@ import Icon from './Icon.jsx';
 import Marquee from './Marquee.jsx';
 import PullOrNewModal from './PullOrNewModal.jsx';
 import PullDialog from './PullDialog.jsx';
+import InstallBanner from './InstallBanner.jsx';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
@@ -92,6 +93,7 @@ export default function JobList() {
         }
       />
       <main>
+        <InstallBanner />
         <div className="hero">
           <div className="hero-pretitle">
             {jobs.length === 0
