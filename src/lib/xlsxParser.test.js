@@ -106,3 +106,28 @@ test('preserves cell-checkbox boolean values from PLC Slots', async () => {
   }
   assert.ok(foundBool, 'expected at least one boolean cell value in PLC Slots');
 });
+
+test('recovers job notes, row notes, and sheet notes from Notes sheet', async () => {
+  const r = await parseChecklistXlsx(readBuf('valid-seed.xlsx'));
+  // Seed has job notes — should be recovered.
+  assert.equal(typeof r.jobMeta.notes, 'string');
+  // At least one of: job notes, sheet notes, or row.notes should be non-empty.
+  const anyNotes =
+    r.jobMeta.notes.length > 0 ||
+    r.sheetNotes.length > 0 ||
+    Object.values(r.rowsBySheet).some((rows) => rows.some((row) => row.notes && row.notes.length > 0));
+  assert.ok(anyNotes, 'expected some notes recovered from valid-seed.xlsx');
+});
+
+test('parser does not throw when Notes sheet is absent', async () => {
+  const ExcelJS = (await import('exceljs')).default;
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Panels');
+  ws.getCell(2, 1).value = 'Panel Name';
+  ws.getCell(3, 1).value = 'P1';
+  const buf = Buffer.from(await wb.xlsx.writeBuffer());
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  const r = await parseChecklistXlsx(ab);
+  assert.equal(r.jobMeta.notes, '');
+  assert.deepEqual(r.sheetNotes, []);
+});

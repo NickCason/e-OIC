@@ -82,6 +82,56 @@ function parseSheetRows(ws, schema, warnings) {
   return rows;
 }
 
+function parseNotesSheet(ws) {
+  const out = { jobNotes: '', sheetNotes: [], rowNoteAssignments: [] };
+  if (!ws) return out;
+
+  let cursor = 1;
+  const r1c1 = ws.getCell(1, 1).value;
+  if (r1c1 != null && String(r1c1).trim() === 'Job Notes') {
+    const r2c1 = ws.getCell(2, 1).value;
+    out.jobNotes = r2c1 == null ? '' : String(r2c1).trim();
+    cursor = 3;
+  }
+
+  let headerR = null;
+  for (let r = cursor; r <= ws.rowCount; r++) {
+    const a = ws.getCell(r, 1).value;
+    const b = ws.getCell(r, 2).value;
+    const c = ws.getCell(r, 3).value;
+    const d = ws.getCell(r, 4).value;
+    if (
+      a != null && String(a).trim() === 'Sheet' &&
+      b != null && String(b).trim() === 'Panel' &&
+      c != null && String(c).trim() === 'Row' &&
+      d != null && String(d).trim() === 'Notes'
+    ) {
+      headerR = r;
+      break;
+    }
+  }
+  if (headerR == null) return out;
+
+  for (let r = headerR + 1; r <= ws.rowCount + 1; r++) {
+    const sheetCell = ws.getCell(r, 1).value;
+    const panelCell = ws.getCell(r, 2).value;
+    const labelCell = ws.getCell(r, 3).value;
+    const notesCell = ws.getCell(r, 4).value;
+    if (sheetCell == null && panelCell == null && labelCell == null && notesCell == null) break;
+    const sheetName = sheetCell == null ? '' : String(sheetCell).trim();
+    const panelName = panelCell == null ? '' : String(panelCell).trim();
+    const label = labelCell == null ? '' : String(labelCell).trim();
+    const text = notesCell == null ? '' : String(notesCell).trim();
+    if (!text) continue;
+    if (label === '(sheet)') {
+      out.sheetNotes.push({ panelName, sheetName, text });
+    } else {
+      out.rowNoteAssignments.push({ sheetName, panelName, label, text });
+    }
+  }
+  return out;
+}
+
 export async function parseChecklistXlsx(arrayBuffer) {
   const result = {
     jobMeta: { name: null, client: '', location: '', notes: '' },
@@ -138,6 +188,42 @@ export async function parseChecklistXlsx(arrayBuffer) {
     if (!sheetNames.includes(sn)) continue;
     const ws = wb.getWorksheet(sn);
     result.rowsBySheet[sn] = parseSheetRows(ws, schemaMap[sn], result.warnings);
+  }
+
+  // Notes sheet
+  const notesWs = wb.getWorksheet('Notes');
+  const notes = parseNotesSheet(notesWs);
+  result.jobMeta.notes = notes.jobNotes;
+  result.sheetNotes = notes.sheetNotes;
+
+  // Match row-note assignments back to parsed rows by (sheet, panelName, label).
+  const { rowDisplayLabel } = await import('./rowLabel.js');
+  for (const assignment of notes.rowNoteAssignments) {
+    const rows = result.rowsBySheet[assignment.sheetName];
+    if (!rows) {
+      result.warnings.push({
+        kind: 'notes-row-unmatched',
+        sheetName: assignment.sheetName,
+        panelName: assignment.panelName,
+        label: assignment.label,
+      });
+      continue;
+    }
+    const schema = schemaMap[assignment.sheetName];
+    const match = rows.find((row) =>
+      row.panelName === assignment.panelName &&
+      rowDisplayLabel({ data: row.data, idx: 0 }, assignment.sheetName, schema) === assignment.label,
+    );
+    if (match) {
+      match.notes = assignment.text;
+    } else {
+      result.warnings.push({
+        kind: 'notes-row-unmatched',
+        sheetName: assignment.sheetName,
+        panelName: assignment.panelName,
+        label: assignment.label,
+      });
+    }
   }
 
   return result;
