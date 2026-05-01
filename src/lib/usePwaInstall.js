@@ -5,6 +5,7 @@
 // Hides itself when the app is already running as an installed PWA.
 
 import { useEffect, useState, useCallback } from 'react';
+import { isInWrapper } from './wrapperBridge.js';
 
 function detectStandalone() {
   if (typeof window === 'undefined') return false;
@@ -18,15 +19,25 @@ function detectIOS() {
   return /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
+function detectAndroid() {
+  if (typeof navigator === 'undefined') return false;
+  return /Android/i.test(navigator.userAgent);
+}
+
 export function usePwaInstall() {
   const [installEvent, setInstallEvent] = useState(null);
   const [standalone, setStandalone] = useState(detectStandalone());
   const [installed, setInstalled] = useState(false);
   const isIOS = detectIOS();
+  const isAndroid = detectAndroid();
+  const inWrapper = isInWrapper();
 
   useEffect(() => {
     function onBeforeInstall(e) {
       e.preventDefault();
+      // On Android (out of wrapper), the wrapper-install banner takes the
+      // slot; ignore the native PWA prompt to avoid two competing CTAs.
+      if (isAndroid && !inWrapper) return;
       setInstallEvent(e);
     }
     function onInstalled() {
@@ -45,7 +56,7 @@ export function usePwaInstall() {
       window.removeEventListener('appinstalled', onInstalled);
       mq?.removeEventListener?.('change', onModeChange);
     };
-  }, []);
+  }, [isAndroid, inWrapper]);
 
   const install = useCallback(async () => {
     if (installEvent) {
@@ -58,7 +69,14 @@ export function usePwaInstall() {
     return 'unsupported';
   }, [installEvent, isIOS]);
 
-  const canInstall = !standalone && !installed && (installEvent !== null || isIOS);
+  // Banner visibility:
+  //  - Hidden inside the wrapper (no install pitch needed)
+  //  - Hidden when already standalone or installed
+  //  - Visible on Android (not in wrapper) -> wrapper-install variant
+  //  - Visible on iOS -> add-to-home-screen instructions
+  //  - Visible on desktop when beforeinstallprompt has fired
+  const canInstall =
+    !standalone && !installed && !inWrapper && (installEvent !== null || isIOS || isAndroid);
 
-  return { canInstall, isIOS, install, standalone };
+  return { canInstall, isIOS, isAndroid, inWrapper, install, standalone };
 }
