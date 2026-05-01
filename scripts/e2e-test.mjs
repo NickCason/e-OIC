@@ -170,28 +170,50 @@ const notesWs = wb.getWorksheet('Notes');
 if (!notesWs) throw new Error('Notes sheet not found');
 console.log(`  Notes sheet has ${notesWs.rowCount} rows`);
 
-// Boolean fields render as Unicode checkbox glyphs, not as TRUE/FALSE text.
-console.log('[e2e] verifying boolean -> checkbox glyph conversion…');
+// v21: checkbox cells must remain real booleans so Excel renders them as
+// native interactive cell-checkboxes. The FeaturePropertyBag part + workbook
+// relationship + Content Types override + styles.xml extLst entries must be
+// present so Excel knows to apply the Checkbox feature to those cells.
+console.log('[e2e] verifying native cell-checkbox round-trip…');
 {
-  let foundCheckbox = false;
   let foundLiteralBoolean = false;
+  let foundGlyph = false;
   for (const ws of wb.worksheets) {
     ws.eachRow((row) => {
       row.eachCell((cell) => {
         const v = cell.value;
         const text = v && typeof v === 'object' && 'text' in v ? v.text : v;
-        if (text === '☑' || text === '☐') foundCheckbox = true;
         if (text === true || text === false) foundLiteralBoolean = true;
+        if (text === '☑' || text === '☐') foundGlyph = true;
       });
     });
   }
-  if (foundLiteralBoolean) {
-    throw new Error('regression: at least one cell still holds a literal true/false (should be ☑/☐ glyph)');
+  if (!foundLiteralBoolean) {
+    throw new Error('expected at least one literal true/false cell (seed has IO List Completed flags)');
   }
-  if (!foundCheckbox) {
-    throw new Error('expected at least one ☑ or ☐ glyph in the workbook (seed has true-valued IO List Completed flags)');
+  if (foundGlyph) {
+    throw new Error('regression: workbook still contains ☑/☐ glyphs — boolean cells should stay native (v21 fix broken)');
   }
-  console.log('  found ☑/☐ glyphs, no literal true/false values ✓');
+  console.log('  boolean cells kept native (no glyph downgrade) ✓');
+
+  const xlsxZip = await JSZip.loadAsync(xlsxBuf);
+  const fpbPath = 'xl/featurePropertyBag/featurePropertyBag.xml';
+  if (!xlsxZip.file(fpbPath)) {
+    throw new Error(`regression: ${fpbPath} missing — cell-checkbox feature will be disabled in Excel`);
+  }
+  const rels = await xlsxZip.file('xl/_rels/workbook.xml.rels').async('string');
+  if (!rels.includes('schemas.microsoft.com/office/2022/11/relationships/FeaturePropertyBag')) {
+    throw new Error('regression: workbook.xml.rels missing FeaturePropertyBag relationship');
+  }
+  const ct = await xlsxZip.file('[Content_Types].xml').async('string');
+  if (!ct.includes('application/vnd.ms-excel.featurepropertybag+xml')) {
+    throw new Error('regression: [Content_Types].xml missing FeaturePropertyBag override');
+  }
+  const styles = await xlsxZip.file('xl/styles.xml').async('string');
+  if (!styles.includes('xfpb:xfComplement')) {
+    throw new Error('regression: styles.xml missing xfpb:xfComplement extLst entries');
+  }
+  console.log('  FeaturePropertyBag part + relationship + content-type override + styles extLst all present ✓');
 }
 
 console.log('\n[e2e] ✅ all checks passed');
