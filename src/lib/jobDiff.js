@@ -3,6 +3,42 @@
 
 import { rowDisplayLabel } from './rowLabel.js';
 
+function valuesEqual(a, b) {
+  // Treat '' / null / undefined as equivalent.
+  const na = (a === '' || a === undefined) ? null : a;
+  const nb = (b === '' || b === undefined) ? null : b;
+  if (na === null && nb === null) return true;
+  if (na === null || nb === null) {
+    // null ≡ false for booleans
+    if (typeof na === 'boolean' && nb === null) return na === false;
+    if (typeof nb === 'boolean' && na === null) return nb === false;
+    return false;
+  }
+  if (typeof na === 'boolean' || typeof nb === 'boolean') {
+    return Boolean(na) === Boolean(nb);
+  }
+  if (typeof na === 'number' && typeof nb === 'number') {
+    if (Number.isNaN(na) && Number.isNaN(nb)) return true;
+    return na === nb;
+  }
+  return String(na).trim() === String(nb).trim();
+}
+
+function compareRowFields(localRow, xlsxRow, sheetName, schemaMap) {
+  const schema = schemaMap[sheetName];
+  if (!schema) return [];
+  const changes = [];
+  for (const col of schema.columns) {
+    if (col.header === schema.hyperlink_column) continue;
+    const oldV = localRow.data?.[col.header] ?? null;
+    const newV = xlsxRow.data?.[col.header] ?? null;
+    if (!valuesEqual(oldV, newV)) {
+      changes.push({ field: col.header, old: oldV, new: newV });
+    }
+  }
+  return changes;
+}
+
 function labelOf(rowData, sheetName, schemaMap) {
   return rowDisplayLabel({ data: rowData, idx: 0 }, sheetName, schemaMap[sheetName]);
 }
@@ -76,8 +112,12 @@ export function diffJobs(localState, parsedXlsx, schemaMap, options = {}) {
         const local = localItems[i];
         const xlsx = xlsxItems[i];
         const label = (lg || xg).label;
-        // Field comparison comes in Task 8; for now, treat all paired as modified.
-        sheetDiff.modified.push({ local, xlsx, label, fieldChanges: [] });
+        const fieldChanges = compareRowFields(local, xlsx, sheetName, schemaMap);
+        if (fieldChanges.length === 0) {
+          sheetDiff.unchanged.push({ local, xlsx, label });
+        } else {
+          sheetDiff.modified.push({ local, xlsx, label, fieldChanges });
+        }
       }
       for (let i = pairCount; i < localItems.length; i++) sheetDiff.removed.push(localItems[i]);
       for (let i = pairCount; i < xlsxItems.length; i++) sheetDiff.added.push(xlsxItems[i]);

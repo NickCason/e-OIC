@@ -99,3 +99,71 @@ test('label collision: two locals + three xlsx of same label position-match', ()
   assert.equal(d.sheets['PLC Slots'].added.length, 1);
   assert.ok(d.sheets['PLC Slots'].labelCollisions.includes('Slot 5'));
 });
+
+test('paired rows with identical fields → unchanged', () => {
+  const local = emptyLocal();
+  local.localPanels = [{ id: 'p1', name: 'PNL-1' }];
+  local.localRowsBySheet = {
+    'PLC Slots': [{ id: 'r1', panelId: 'p1', sheet: 'PLC Slots', idx: 0, data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Part Number': '1756-OW16I' }, notes: '' }],
+  };
+  const parsed = emptyParsed();
+  parsed.panels = [{ name: 'PNL-1', sourceRowIndex: 3 }];
+  parsed.rowsBySheet = {
+    'PLC Slots': [{ panelName: 'PNL-1', data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Part Number': '1756-OW16I' }, notes: '', sourceRowIndex: 3 }],
+  };
+  const d = diffJobs(local, parsed, schemaMap);
+  assert.equal(d.sheets['PLC Slots'].unchanged.length, 1);
+  assert.equal(d.sheets['PLC Slots'].modified.length, 0);
+});
+
+test('paired rows differing in one field → modified with fieldChanges', () => {
+  const local = emptyLocal();
+  local.localPanels = [{ id: 'p1', name: 'PNL-1' }];
+  local.localRowsBySheet = {
+    'PLC Slots': [{ id: 'r1', panelId: 'p1', sheet: 'PLC Slots', idx: 0, data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Part Number': '1756-OW16I' }, notes: '' }],
+  };
+  const parsed = emptyParsed();
+  parsed.panels = [{ name: 'PNL-1', sourceRowIndex: 3 }];
+  parsed.rowsBySheet = {
+    'PLC Slots': [{ panelName: 'PNL-1', data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Part Number': '1756-IF8I' }, notes: '', sourceRowIndex: 3 }],
+  };
+  const d = diffJobs(local, parsed, schemaMap);
+  assert.equal(d.sheets['PLC Slots'].modified.length, 1);
+  assert.equal(d.sheets['PLC Slots'].unchanged.length, 0);
+  const fc = d.sheets['PLC Slots'].modified[0].fieldChanges;
+  assert.equal(fc.length, 1);
+  assert.equal(fc[0].field, 'Part Number');
+  assert.equal(fc[0].old, '1756-OW16I');
+  assert.equal(fc[0].new, '1756-IF8I');
+});
+
+test('"" ≡ null ≡ undefined for string equality', () => {
+  const local = emptyLocal();
+  local.localPanels = [{ id: 'p1', name: 'PNL-1' }];
+  local.localRowsBySheet = {
+    'PLC Slots': [{ id: 'r1', panelId: 'p1', sheet: 'PLC Slots', idx: 0, data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Notes': '' }, notes: '' }],
+  };
+  const parsed = emptyParsed();
+  parsed.panels = [{ name: 'PNL-1', sourceRowIndex: 3 }];
+  parsed.rowsBySheet = {
+    'PLC Slots': [{ panelName: 'PNL-1', data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Notes': null }, notes: '', sourceRowIndex: 3 }],
+  };
+  const d = diffJobs(local, parsed, schemaMap);
+  assert.equal(d.sheets['PLC Slots'].unchanged.length, 1);
+});
+
+test('hyperlink_column is excluded from field comparison', () => {
+  const local = emptyLocal();
+  local.localPanels = [{ id: 'p1', name: 'PNL-1' }];
+  local.localRowsBySheet = {
+    'Panels': [{ id: 'r1', panelId: 'p1', sheet: 'Panels', idx: 0, data: { 'Panel Name': 'PNL-1', 'Folder Hyperlink': 'old-path' }, notes: '' }],
+  };
+  const parsed = emptyParsed();
+  parsed.panels = [{ name: 'PNL-1', sourceRowIndex: 3 }];
+  parsed.rowsBySheet = {
+    'Panels': [{ panelName: 'PNL-1', data: { 'Panel Name': 'PNL-1', 'Folder Hyperlink': 'new-path' }, notes: '', sourceRowIndex: 3 }],
+  };
+  const d = diffJobs(local, parsed, schemaMap);
+  assert.equal(d.sheets['Panels'].modified.length, 0);
+  assert.equal(d.sheets['Panels'].unchanged.length, 1);
+});
