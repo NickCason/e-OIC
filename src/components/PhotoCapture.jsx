@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db.js';
-import { applyOverlay, fmtTimestamp, fmtGps } from '../photoOverlay.js';
+import { processIncomingPhoto } from '../lib/photoStore.js';
+import { readPhotoExif } from '../lib/photoExif.js';
 import { maybeGetGps } from '../lib/geolocation.js';
 import { toast } from '../lib/toast.js';
 import { BUILD_VERSION } from '../version.js';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
+import PhotoOverlay from './PhotoOverlay.jsx';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.
@@ -54,29 +56,34 @@ export default function PhotoCapture({
     };
   }, [photosWithUrls]);
 
-  async function handleFiles(fileList) {
+  async function handleFiles(fileList, source /* 'camera' | 'library' */) {
     const len = fileList?.length ?? 0;
     if (len === 0) {
       setError('iOS handed back zero files. This usually means the camera/library was cancelled, or a known iOS standalone-PWA bug.');
       return;
     }
-    // Snapshot the FileList to a plain array IMMEDIATELY so we don't depend
-    // on the live FileList reference (which iOS Safari can invalidate when
-    // the input's value is reset asynchronously).
     const files = Array.from(fileList);
     setBusy(true);
     setError(null);
     let savedCount = 0;
     try {
-      const gps = await maybeGetGps();
+      // Camera path: device GPS + now. Library path: photo's own EXIF only.
+      let cameraGps = null;
+      if (source === 'camera') {
+        cameraGps = await maybeGetGps();
+      }
       for (const file of files) {
-        const overlayLabel = rowId ? (rowLabelHint || 'Row') : item;
-        const lines = [
-          `${job.name} • ${panel.name}`,
-          `${sheetName} — ${overlayLabel}`,
-          fmtTimestamp() + (gps ? `  ${fmtGps(gps)}` : ''),
-        ];
-        const { blob, width, height } = await applyOverlay(file, lines, gps);
+        let gps;
+        let takenAt;
+        if (source === 'camera') {
+          gps = cameraGps;
+          takenAt = Date.now();
+        } else {
+          const exif = await readPhotoExif(file);
+          gps = exif.gps;
+          takenAt = exif.takenAt ?? file.lastModified ?? Date.now();
+        }
+        const { blob, width, height } = await processIncomingPhoto(file, { gps });
         await addPhoto({
           panelId: panel.id,
           sheet: sheetName,
@@ -86,6 +93,7 @@ export default function PhotoCapture({
           mime: 'image/jpeg',
           w: width, h: height,
           gps,
+          takenAt,
         });
         savedCount += 1;
         if (navigator.vibrate) navigator.vibrate(20);
@@ -140,9 +148,7 @@ export default function PhotoCapture({
           style={HIDDEN_INPUT_STYLE}
           onChange={(e) => {
             const input = e.target;
-            handleFiles(input.files);
-            // Defer reset — synchronous clearing has been observed to wipe
-            // the FileList before async handleFiles iterates it on iOS.
+            handleFiles(input.files, 'camera');
             setTimeout(() => { try { input.value = ''; } catch {} }, 1500);
           }}
         />
@@ -154,7 +160,7 @@ export default function PhotoCapture({
           style={HIDDEN_INPUT_STYLE}
           onChange={(e) => {
             const input = e.target;
-            handleFiles(input.files);
+            handleFiles(input.files, 'library');
             setTimeout(() => { try { input.value = ''; } catch {} }, 1500);
           }}
         />

@@ -291,14 +291,14 @@ export async function listPanelPhotos(panelId) {
 export async function addPhoto({
   panelId, sheet, item, rowId = null,
   blob, mime = 'image/jpeg',
-  w, h, gps = null,
+  w, h, gps = null, takenAt = null,
 }) {
   const db = await getDB();
   const photo = {
     id: uid(),
     panelId, sheet, item, rowId,
     blob, mime,
-    takenAt: Date.now(),
+    takenAt: takenAt ?? Date.now(),
     w, h,
     gps,
   };
