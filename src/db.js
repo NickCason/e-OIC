@@ -1,4 +1,4 @@
-// db.js — IndexedDB persistence (v2)
+// db.js — IndexedDB persistence (v4)
 //
 // v1 → v2 migrations:
 //   - photos.rowId added (null = panel-level, set = row-level)
@@ -7,7 +7,15 @@
 //   - sheetNotes     new store for (panel, sheet) scratchpads
 //   - settings       new key/value store: theme, geolocationConsent, etc.
 //
-// All v1 data is preserved during the upgrade.
+// v2 → v3 migration:
+//   - checklistState new store keyed by jobId for in-app Checklist screen
+//
+// v3 → v4 migration:
+//   - photos store cleared (overlays move from baked-in pixels to live render;
+//     existing baked photos cannot be reverted to originals).
+//
+// Job, panel, row, sheetNotes, settings, and checklistState data are
+// preserved across all upgrades.
 
 import { openDB } from 'idb';
 
@@ -15,7 +23,7 @@ import { openDB } from 'idb';
 // e-OIC. Renaming the IndexedDB would orphan every job, panel, photo, and
 // note already stored on installed devices. The internal name stays.
 const DB_NAME = 'onsite-investigation';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbPromise = null;
 
@@ -56,6 +64,15 @@ export function getDB() {
         if (oldVersion < 3) {
           if (!db.objectStoreNames.contains('checklistState')) {
             db.createObjectStore('checklistState', { keyPath: 'jobId' });
+          }
+        }
+        if (oldVersion < 4) {
+          // v4: photos store now holds *original* (un-overlaid) blobs. Live overlay
+          // is rendered in the UI; export bakes at write time. Existing baked photos
+          // cannot be recovered to originals, so we wipe the store. Job / panel /
+          // row data is untouched.
+          if (db.objectStoreNames.contains('photos')) {
+            tx.objectStore('photos').clear();
           }
         }
       },
