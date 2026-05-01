@@ -35,6 +35,9 @@
   /* type — families */
   --font-display: 'Choplin', 'Roboto Slab', 'Zilla Slab', ui-serif, Georgia, serif;
   --font-ui: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* keyboard offset — derived from keyboard inset minus safe-area bottom */
+  --keyboard-lift: max(0px, calc(var(--keyboard-inset, 0px) - env(safe-area-inset-bottom, 0px)));
 }
 
 [data-theme="light"] {
@@ -189,7 +192,7 @@ input, select, textarea { font-size: var(--fs-input); }
 main {
   flex: 1;
   padding: var(--sp-3);
-  padding-bottom: calc(110px + var(--keyboard-inset, 0px)); /* room for SaveBar + safe area + keyboard */
+  padding-bottom: calc(110px + var(--keyboard-lift, 0px)); /* room for SaveBar + safe area + keyboard */
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
@@ -590,7 +593,7 @@ textarea,
   position: fixed;
   left: 0;
   right: 0;
-  bottom: var(--keyboard-inset, 0);
+  bottom: var(--keyboard-lift, 0);
   z-index: 6;
   display: flex;
   align-items: center;
@@ -1166,7 +1169,7 @@ textarea,
 /* Toast */
 .toast-host {
   position: fixed;
-  bottom: calc(110px + var(--keyboard-inset, 0px));
+  bottom: calc(110px + var(--keyboard-lift, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1347,21 +1350,21 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
   display: flex; align-items: flex-end; justify-content: center;
   animation: fadein .15s ease;
-  bottom: var(--keyboard-inset, 0);
+  bottom: var(--keyboard-lift, 0);
   transition: bottom 180ms ease-out;
 }
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 .modal {
   background: var(--bg-2); width: 100%; max-width: 500px;
   border-radius: 16px 16px 0 0; padding: 20px 16px max(20px, env(safe-area-inset-bottom));
-  max-height: calc(90vh - var(--keyboard-inset, 0px));
+  max-height: calc(90vh - var(--keyboard-lift, 0px));
   overflow-y: auto;
   box-shadow: var(--shadow-md);
 }
 .modal h2 { margin: 0 0 12px; font-size: 17px; }
 
 .fab {
-  position: fixed; right: 18px; bottom: calc(max(20px, env(safe-area-inset-bottom)) + var(--keyboard-inset, 0px));
+  position: fixed; right: 18px; bottom: calc(max(20px, env(safe-area-inset-bottom)) + var(--keyboard-lift, 0px));
   background: var(--energy); color: white; border: none;
   width: 56px; height: 56px; border-radius: 28px;
   font-size: 24px; box-shadow: var(--shadow-md);
