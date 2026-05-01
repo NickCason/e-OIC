@@ -18,3 +18,26 @@ export function rowLabel(row, schema) {
 export function rowPhotoFolder(panelName, sheetName, row, schema) {
   return `Photos/${safe(panelName)}/${safe(sheetName)}/${rowLabel(row, schema)}/`;
 }
+
+// Aggressive ASCII-safe filename for OS share intents.
+//
+// Android Chrome's navigator.share routes files through MediaStore via a
+// content:// URI, and the MediaStore filename validator rejects Unicode
+// em-dashes/en-dashes, smart quotes, and other non-ASCII punctuation,
+// surfacing as NotAllowedError ("Permission denied") to the page. iOS
+// Safari is more permissive but still has edge cases. We sanitize once,
+// at share time, so the file inside the zip and the in-app job name stay
+// fully Unicode while the OUTER share filename is safe.
+export function shareSafeFilename(name) {
+  return String(name || 'unnamed')
+    .replace(/[—–]/g, '-')              // em/en dash → hyphen
+    .replace(/[‘’ʼ]/g, "'") // smart single quotes → straight
+    .replace(/[“”]/g, '"')    // smart double quotes → straight
+    .normalize('NFKD')                  // decompose accented chars
+    .replace(/[̀-ͯ]/g, '')    // strip combining diacritics
+    .replace(/[\\/:*?"<>|]/g, '_')      // Windows-reserved chars
+    .replace(/[^\x20-\x7E]/g, '')       // strip remaining non-ASCII
+    .replace(/\s+/g, ' ')               // collapse whitespace runs
+    .trim()
+    || 'unnamed';
+}

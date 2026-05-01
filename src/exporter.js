@@ -16,7 +16,7 @@ import {
   getChecklistState, slugifyTaskLabel, exportJobJSON,
 } from './db.js';
 import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
-import { safe, rowLabel } from './lib/paths.js';
+import { safe, rowLabel, shareSafeFilename } from './lib/paths.js';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',
@@ -667,10 +667,29 @@ export function downloadBlob(blob, filename) {
 }
 
 export async function shareBlob(blob, filename, title) {
-  const file = new File([blob], filename, { type: blob.type || 'application/zip' });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  const safeName = shareSafeFilename(filename);
+  const mime = safeName.endsWith('.xlsx')
+    ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    : 'application/zip';
+  const lastModified = Date.now();
+  const file = new File([blob], safeName, { type: mime, lastModified });
+  if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
+    return false;
+  }
+  try {
     await navigator.share({ files: [file], title });
     return true;
+  } catch (err) {
+    if (err.name === 'AbortError') throw err;
+    // Some Android share targets reject application/zip but accept
+    // application/octet-stream. One retry is cheap and safe.
+    if (err.name === 'NotAllowedError' && mime !== 'application/octet-stream') {
+      const fallback = new File([blob], safeName, { type: 'application/octet-stream', lastModified });
+      if (navigator.canShare({ files: [fallback] })) {
+        await navigator.share({ files: [fallback], title });
+        return true;
+      }
+    }
+    throw err;
   }
-  return false;
 }
