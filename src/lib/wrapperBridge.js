@@ -87,3 +87,26 @@ export async function shareViaCapacitor(file) {
     Filesystem.deleteFile({ path, directory: 'CACHE' }).catch(() => {});
   }
 }
+
+// Downloads the wrapper APK to CACHE then launches the Android system
+// package installer. Requires REQUEST_INSTALL_PACKAGES in the wrapper's
+// AndroidManifest.xml. Same-keystore APKs install over the existing
+// install without uninstall.
+export async function downloadAndInstallApk(url) {
+  const Capacitor = globalThis.Capacitor;
+  const Filesystem = Capacitor?.Plugins?.Filesystem;
+  const FileOpener = Capacitor?.Plugins?.FileOpener;
+  if (!Filesystem) throw new Error('Filesystem plugin not available');
+  if (!FileOpener) throw new Error('FileOpener plugin not available');
+  const path = 'eoic-update.apk';
+  const dl = await Filesystem.downloadFile({
+    url,
+    path,
+    directory: 'CACHE',
+  });
+  // dl.path is the absolute filesystem path of the saved APK.
+  await FileOpener.open({
+    filePath: dl.path,
+    contentType: 'application/vnd.android.package-archive',
+  });
+}
