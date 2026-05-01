@@ -46,7 +46,27 @@ export default function PanelView({ jobId, panelId }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshProgress is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when jobId/panelId change.
   }, [jobId, panelId]);
 
-  if (!job || !panel) return null;
+  if (!job || !panel) {
+    return (
+      <>
+        <AppBar onBack={() => nav(`/job/${jobId}`)} wordmark="" />
+        <main>
+          <div className="hero">
+            <div className="skeleton-bar skeleton-bar--sub skeleton-shimmer" />
+            <div className="skeleton-bar skeleton-shimmer" style={{ width: '50%', height: 28, marginTop: 8 }} />
+          </div>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="skeleton-row">
+              <div className="skeleton-grow">
+                <div className="skeleton-bar skeleton-bar--title skeleton-shimmer" />
+                <div className="skeleton-bar skeleton-bar--sub skeleton-shimmer" />
+              </div>
+            </div>
+          ))}
+        </main>
+      </>
+    );
+  }
 
   const sheetStatus = (sheet) => progress[sheet] || 'empty';
   const idx = SHEET_ORDER.indexOf(activeSheet);

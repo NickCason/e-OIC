@@ -123,7 +123,28 @@ export default function JobView({ jobId }) {
     }
   }
 
-  if (!job) return null;
+  if (!job) {
+    return (
+      <>
+        <AppBar onBack={() => nav('/')} wordmark="" />
+        <main>
+          <div className="hero">
+            <div className="skeleton-bar skeleton-bar--sub skeleton-shimmer" />
+            <div className="skeleton-bar skeleton-shimmer" style={{ width: '60%', height: 28, marginTop: 8 }} />
+          </div>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="skeleton-row">
+              <div className="skeleton-grow">
+                <div className="skeleton-bar skeleton-bar--title skeleton-shimmer" />
+                <div className="skeleton-bar skeleton-bar--sub skeleton-shimmer" />
+              </div>
+              <div className="skeleton-circle skeleton-shimmer" />
+            </div>
+          ))}
+        </main>
+      </>
+    );
+  }
 
   const crumbBits = [];
   if (job.client) crumbBits.push(job.client);

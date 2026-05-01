@@ -1805,3 +1805,37 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .install-ios-steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
 .install-ios-step-num { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 999px; background: var(--energy); color: #fff; font-weight: 700; font-size: 12px; flex: 0 0 auto; }
 .install-ios-note { color: var(--text-dim); font-size: 12px; font-style: italic; padding: 8px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+
+/* Skeleton placeholders (cold IDB read) */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-3) 0%,
+    var(--surface-alt) 50%,
+    var(--bg-3) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-2);
+}
+.skeleton-bar { height: 12px; }
+.skeleton-bar--title { width: 55%; height: 14px; margin-bottom: 6px; }
+.skeleton-bar--sub   { width: 35%; height: 11px; }
+.skeleton-circle     { width: 36px; height: 36px; border-radius: 999px; flex: 0 0 auto; }
+.skeleton-grow       { flex: 1; min-width: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; background: var(--bg-3); }
+}
