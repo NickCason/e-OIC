@@ -69,7 +69,7 @@ export default function DiffView({ diff, direction = 'pull', removedDecisions, o
               <div className="diff-section-body">
                 {sd.modified.map((m, i) => (
                   <div key={`m${i}`} className="diff-row diff-row--mod">
-                    <span className="diff-mark">~</span> {m.label || labelOrFallback(m.row || { data: {} }, sheetName, sd, 'mod', i)}
+                    <span className="diff-mark">~</span> {m.label || labelOrFallback(m.local || m.xlsx || { data: {} }, sheetName, sd, 'mod', i)}
                     {m.fieldChanges.map((fc, j) => (
                       <div key={j} className="diff-field-change">
                         {fc.field}:{' '}
