@@ -17,6 +17,7 @@ import {
 } from './db.js';
 import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
 import { safe, rowLabel, shareSafeFilename } from './lib/paths.js';
+import { isInWrapper, shareViaCapacitor } from './lib/wrapperBridge.js';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',
@@ -705,22 +706,26 @@ export function downloadBlob(blob, filename) {
 }
 
 export async function shareBlob(blob, filename, title, shareFile = null) {
-  // navigator.share consumes the user-activation token on call. Stay
-  // synchronous up to the share() call; never call share() twice from
-  // one gesture. Filename and title both need ASCII normalization for
-  // Android's content-URI / share-intent layer.
-  //
-  // Prefer the OPFS-backed File (passed in via `shareFile`) over an
-  // in-memory File-from-Blob. Android Chrome's share IPC accepts
-  // filesystem-backed Files but rejects in-memory ones with
-  // NotAllowedError. OPFS write happens at export time so there is no
-  // activation cost at share time.
   const safeName = shareSafeFilename(filename);
   const safeTitle = shareSafeFilename(title);
   const mime = safeName.endsWith('.xlsx')
     ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     : 'application/zip';
   const file = shareFile || new File([blob], safeName, { type: mime });
+
+  // Inside the Android wrapper: bypass Chrome's share allowlist by going
+  // through Android's Intent.ACTION_SEND via Capacitor. The web-side
+  // canShare() check is irrelevant here — the native share plugin
+  // accepts whatever file we hand it.
+  if (isInWrapper()) {
+    await shareViaCapacitor(file);
+    return true;
+  }
+
+  // Browser path (desktop, iOS Safari, Android Chrome out of wrapper).
+  // Stay synchronous up to the share() call; never call share() twice
+  // from one gesture. canShare gating preserves the existing
+  // download-fallback path when the browser refuses files.
   if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
     return false;
   }
