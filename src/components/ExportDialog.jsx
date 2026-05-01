@@ -130,7 +130,9 @@ export default function ExportDialog({ job, onClose }) {
         toast.show('Share not supported — downloaded instead');
       }
     } catch (e) {
-      if (e.name !== 'AbortError') toast.error(e.message || 'Share failed');
+      if (e.name === 'AbortError') return;
+      console.error('share failed:', e);
+      toast.error(`${e.name || 'Error'}: ${e.message || 'Share failed'}`);
     }
   }
 

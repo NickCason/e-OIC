@@ -670,7 +670,12 @@ export async function shareBlob(blob, filename, title) {
   // navigator.share consumes the user-activation token on call. Any work
   // here must stay synchronous up to the share() call; a single await is
   // fine, but never call share() twice from one gesture.
+  //
+  // Filename AND title both flow through Android's content-URI / share-
+  // intent layer, so both must be ASCII-safe. An em-dash in either has
+  // been observed to reject the call with NotAllowedError on Android.
   const safeName = shareSafeFilename(filename);
+  const safeTitle = shareSafeFilename(title);
   const mime = safeName.endsWith('.xlsx')
     ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     : 'application/zip';
@@ -678,6 +683,8 @@ export async function shareBlob(blob, filename, title) {
   if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
     return false;
   }
-  await navigator.share({ files: [file], title });
+  const payload = { files: [file] };
+  if (safeTitle && safeTitle !== 'unnamed') payload.title = safeTitle;
+  await navigator.share(payload);
   return true;
 }
