@@ -89,7 +89,7 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // Inject GPS EXIF tags into a JPEG blob using piexifjs.
-async function injectExifGPS(blob, gps) {
+export async function injectExifGPS(blob, gps) {
   const dataUrl = await blobToDataURL(blob);
   const gpsExif = buildGpsExif(gps);
   const exifObj = { 'GPS': gpsExif };
@@ -98,7 +98,7 @@ async function injectExifGPS(blob, gps) {
   return dataURLToBlob(newDataUrl);
 }
 
-function buildGpsExif({ lat, lng, accuracy }) {
+export function buildGpsExif({ lat, lng, accuracy }) {
   const out = {};
   out[piexif.GPSIFD.GPSLatitudeRef] = lat >= 0 ? 'N' : 'S';
   out[piexif.GPSIFD.GPSLatitude] = degToDmsRational(Math.abs(lat));
@@ -111,7 +111,7 @@ function buildGpsExif({ lat, lng, accuracy }) {
   return out;
 }
 
-function degToDmsRational(deg) {
+export function degToDmsRational(deg) {
   const d = Math.floor(deg);
   const minFloat = (deg - d) * 60;
   const m = Math.floor(minFloat);
@@ -124,12 +124,12 @@ function degToDmsRational(deg) {
   ];
 }
 
-function formatGpsDate(d) {
+export function formatGpsDate(d) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}:${pad(d.getUTCMonth() + 1)}:${pad(d.getUTCDate())}`;
 }
 
-function blobToDataURL(blob) {
+export function blobToDataURL(blob) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(r.result);
@@ -138,7 +138,7 @@ function blobToDataURL(blob) {
   });
 }
 
-function dataURLToBlob(dataUrl) {
+export function dataURLToBlob(dataUrl) {
   const [meta, data] = dataUrl.split(',');
   const mime = /:(.*?);/.exec(meta)?.[1] || 'image/jpeg';
   const bin = atob(data);
