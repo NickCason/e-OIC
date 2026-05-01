@@ -1742,6 +1742,34 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .diff-new { font-weight: 500; }
 .diff-arrow { color: var(--text-dim); }
 .diff-field-change { padding-left: 18px; color: var(--text-dim); font-size: 12px; }
+.diff-field-change--stacked {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 4px 0 4px 18px;
+  margin-bottom: 4px;
+}
+.diff-field-name {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.diff-field-old {
+  font-size: 13px;
+  color: var(--accent-del, #b14848);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  opacity: 0.85;
+  word-break: break-word;
+}
+.diff-field-new {
+  font-size: 13px;
+  color: var(--accent-add, #2e8a4f);
+  font-weight: 600;
+  word-break: break-word;
+}
 .diff-keep-drop { margin-left: 10px; display: inline-flex; gap: 6px; }
 .diff-pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); cursor: pointer; }
 .diff-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
