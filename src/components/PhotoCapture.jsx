@@ -56,6 +56,14 @@ export default function PhotoCapture({
     };
   }, [photosWithUrls]);
 
+  const overlayPhotos = useMemo(() => photosWithUrls.map((p) => ({
+    ...p,
+    jobName: job.name,
+    panelName: panel.name,
+    sheetName,
+    itemLabel: rowId ? (rowLabelHint || sheetName) : (p.item || item || sheetName),
+  })), [photosWithUrls, job.name, panel.name, sheetName, rowId, rowLabelHint, item]);
+
   async function handleFiles(fileList, source /* 'camera' | 'library' */) {
     const len = fileList?.length ?? 0;
     if (len === 0) {
@@ -168,27 +176,29 @@ export default function PhotoCapture({
         {busy && <div style={{ color: 'var(--text-dim)', marginBottom: 8 }}>Processing…</div>}
         {error && <div style={{ color: 'var(--danger)', marginBottom: 8 }}>{error}</div>}
 
-        {photosWithUrls.length === 0 && !busy && (
+        {overlayPhotos.length === 0 && !busy && (
           <div className="empty" style={{ padding: '20px 0' }}>
             <p>No photos yet for this {rowId ? 'row' : 'item'}.</p>
           </div>
         )}
 
-        {photosWithUrls.length > 0 && (
+        {overlayPhotos.length > 0 && (
           <div className="photo-grid">
-            {photosWithUrls.map((p, i) => (
+            {overlayPhotos.map((p, i) => (
               <div
                 key={p.id}
                 className="photo-tile"
                 onClick={() => setLightboxIndex(i)}
               >
-                <img src={p.blobUrl} alt="" />
-                {p.gps && (
-                  <div className="photo-tile-gps">
-                    <Icon name="gps" size={10} />
-                    <span>{p.gps.lat.toFixed(3)},{p.gps.lng.toFixed(3)}</span>
-                  </div>
-                )}
+                <PhotoOverlay
+                  src={p.blobUrl}
+                  jobName={p.jobName}
+                  panelName={p.panelName}
+                  sheetName={p.sheetName}
+                  itemLabel={p.itemLabel}
+                  takenAt={p.takenAt}
+                  gps={p.gps}
+                />
               </div>
             ))}
           </div>
@@ -199,9 +209,9 @@ export default function PhotoCapture({
           <button onClick={onClose}>Done</button>
         </div>
       </div>
-      {lightboxIndex !== null && photosWithUrls[lightboxIndex] && (
+      {lightboxIndex !== null && overlayPhotos[lightboxIndex] && (
         <Lightbox
-          photos={photosWithUrls}
+          photos={overlayPhotos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onDelete={onDelete}

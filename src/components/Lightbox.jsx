@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
+import PhotoOverlay from './PhotoOverlay.jsx';
 
 // Themed photo lightbox.
 //
 // Props:
-//   photos: [{ id, blobUrl, gps?: { lat, lng } }]
+//   photos: [{ id, blobUrl, gps?, takenAt, jobName, panelName, sheetName, itemLabel }]
 //   index: number — which photo to show first
 //   onClose: () => void
 //   onDelete?: (photo) => void  — when present, shows a trash button
@@ -55,10 +56,15 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <img
+      <PhotoOverlay
         src={cur.blobUrl}
-        alt=""
-        onClick={(e) => e.stopPropagation()}
+        jobName={cur.jobName}
+        panelName={cur.panelName}
+        sheetName={cur.sheetName}
+        itemLabel={cur.itemLabel}
+        takenAt={cur.takenAt}
+        gps={cur.gps}
+        onImgClick={(e) => e.stopPropagation()}
       />
 
       <button
@@ -69,18 +75,6 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
       >
         <Icon name="close" size={20} strokeWidth={2} />
       </button>
-
-      {cur.gps && (
-        <div
-          className="lightbox-gps"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Icon name="gps" size={14} />
-          <span>
-            {cur.gps.lat.toFixed(5)}, {cur.gps.lng.toFixed(5)}
-          </span>
-        </div>
-      )}
 
       {onDelete && (
         <button

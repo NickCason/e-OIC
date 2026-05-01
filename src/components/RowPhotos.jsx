@@ -4,6 +4,7 @@ import PhotoCapture from './PhotoCapture.jsx';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import { toast } from '../lib/toast.js';
+import PhotoOverlay from './PhotoOverlay.jsx';
 
 // Row-level photos: tied to a specific row (one PLC card, one drive, etc.).
 // Inside the export these become Photos/{Panel}/{Sheet}/{RowLabel}/IMG_001.jpg.
@@ -31,6 +32,15 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
     };
   }, [photosWithUrls]);
 
+  const itemLabel = row.data?.['Device Name'] || row.data?.['Panel Name'] || `Row ${row.idx + 1}`;
+  const overlayPhotos = useMemo(() => photosWithUrls.map((p) => ({
+    ...p,
+    jobName: job.name,
+    panelName: panel.name,
+    sheetName,
+    itemLabel,
+  })), [photosWithUrls, job.name, panel.name, sheetName, itemLabel]);
+
   async function handleDeletePhoto(p) {
     await deletePhoto(p.id);
     await refresh();
@@ -44,19 +54,21 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
         Photos attached directly to this row (not the panel).
       </div>
       <div className="photo-grid">
-        {photosWithUrls.map((p, i) => (
+        {overlayPhotos.map((p, i) => (
           <div
             key={p.id}
             className="photo-tile"
             onClick={() => setLightboxIndex(i)}
           >
-            <img src={p.blobUrl} alt="" />
-            {p.gps && (
-              <div className="photo-tile-gps">
-                <Icon name="gps" size={10} />
-                <span>{p.gps.lat.toFixed(3)},{p.gps.lng.toFixed(3)}</span>
-              </div>
-            )}
+            <PhotoOverlay
+              src={p.blobUrl}
+              jobName={p.jobName}
+              panelName={p.panelName}
+              sheetName={p.sheetName}
+              itemLabel={p.itemLabel}
+              takenAt={p.takenAt}
+              gps={p.gps}
+            />
           </div>
         ))}
         <button
@@ -79,9 +91,9 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
           onClose={() => { setOpen(false); refresh(); onChange?.(); }}
         />
       )}
-      {lightboxIndex !== null && photosWithUrls[lightboxIndex] && (
+      {lightboxIndex !== null && overlayPhotos[lightboxIndex] && (
         <Lightbox
-          photos={photosWithUrls}
+          photos={overlayPhotos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onDelete={handleDeletePhoto}
