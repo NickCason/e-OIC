@@ -76,11 +76,25 @@ main {
 }
 ```
 
-**Other fixed-bottom elements** at lines 678 and 696 (currently `bottom: max(var(--sp-4), env(safe-area-inset-bottom))`):
+**Other fixed-bottom elements:**
+
+`.toast-host` (currently `bottom: 110px`):
 
 ```css
-bottom: calc(max(var(--sp-4), env(safe-area-inset-bottom)) + var(--keyboard-inset, 0px));
+.toast-host {
+  bottom: calc(110px + var(--keyboard-inset, 0px));
+}
 ```
+
+`.fab` (currently `bottom: max(20px, env(safe-area-inset-bottom))`):
+
+```css
+.fab {
+  bottom: calc(max(20px, env(safe-area-inset-bottom)) + var(--keyboard-inset, 0px));
+}
+```
+
+The lightbox is a fullscreen image overlay with no inputs and is excluded.
 
 **Scroll-margin safety net** for inputs:
 
@@ -136,5 +150,5 @@ Very low.
 
 - `src/App.jsx` — mount the hook once.
 - `src/lib/useKeyboardInset.js` — new file (hook + focus handler).
-- `src/styles.css` — `.savebar`, `main`, two other fixed-bottom rules (lines 678, 696), input scroll-margin block.
+- `src/styles.css` — `.savebar`, `main`, `.toast-host`, `.fab`, input scroll-margin block.
 - `src/version.js`, `public/service-worker.js` — v24 bump.
