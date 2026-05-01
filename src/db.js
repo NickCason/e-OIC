@@ -104,11 +104,12 @@ export async function getJob(id) {
   const db = await getDB();
   return db.get('jobs', id);
 }
-export async function createJob({ name, client = '', location = '', notes = '' }) {
+export async function createJob({ name, client = '', location = '', notes = '', source = null }) {
   const db = await getDB();
   const job = {
     id: uid(),
     name, client, location, notes,
+    source,
     createdAt: Date.now(), updatedAt: Date.now(),
   };
   await db.put('jobs', job);
