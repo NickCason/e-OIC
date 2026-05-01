@@ -1,6 +1,7 @@
-// e-OIC (Onsite Investigation Checklist) PWA — service worker
-// Bump VERSION on each deploy to force clients to fetch fresh assets.
-const VERSION = 'v34';
+// e-OIC (Onsite Investigation Checklist) PWA — service worker.
+// VERSION is replaced at build time by the inject-sw-version plugin
+// in vite.config.js, sourced from version.json at repo root.
+const VERSION = '__BUILD_VERSION__';
 const CACHE = `eoic-${VERSION}`;
 
 const PRECACHE = [

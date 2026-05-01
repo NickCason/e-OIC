@@ -1,7 +1,7 @@
 {
   "name": "e-oic",
   "private": true,
-  "version": "1.1.0",
+  "version": "0.35.0",
   "description": "eTechGroup Onsite Investigation Checklist — mobile PWA for control system field surveys",
   "type": "module",
   "scripts": {

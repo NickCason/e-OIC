@@ -19,6 +19,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2024,
+        __BUILD_VERSION__: 'readonly',
       },
     },
     plugins: {
