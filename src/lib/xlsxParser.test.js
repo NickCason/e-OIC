@@ -92,3 +92,17 @@ test('Panels sheet produces panels list', async () => {
     assert.ok(p.name.length > 0);
   }
 });
+
+test('preserves cell-checkbox boolean values from PLC Slots', async () => {
+  const r = await parseChecklistXlsx(readBuf('cell-checkbox-states.xlsx'));
+  const slots = r.rowsBySheet['PLC Slots'];
+  assert.ok(slots.length >= 1, 'expected at least one PLC Slot row');
+  let foundBool = false;
+  for (const row of slots) {
+    for (const v of Object.values(row.data)) {
+      if (typeof v === 'boolean') { foundBool = true; break; }
+    }
+    if (foundBool) break;
+  }
+  assert.ok(foundBool, 'expected at least one boolean cell value in PLC Slots');
+});
