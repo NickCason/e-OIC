@@ -78,17 +78,20 @@ async function save(wb) {
   writeXlsx('extra-column.xlsx', await save(wb));
 }
 
-// missing-column: clear the "Voltage" header in Power.
+// missing-column: clear the "Voltage In" header in Power.
 {
   const wb = await load(cleanBuf);
   const ws = wb.getWorksheet('Power');
+  let cleared = false;
   for (let c = 1; c <= ws.columnCount; c++) {
     const cellVal = ws.getCell(2, c).value;
-    if (cellVal != null && String(cellVal).trim() === 'Voltage') {
+    if (cellVal != null && String(cellVal).trim() === 'Voltage In') {
       ws.getCell(2, c).value = null;
+      cleared = true;
       break;
     }
   }
+  if (!cleared) throw new Error('missing-column fixture: "Voltage In" header not found in Power');
   writeXlsx('missing-column.xlsx', await save(wb));
 }
 

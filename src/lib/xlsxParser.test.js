@@ -68,7 +68,7 @@ test('warns on extra column', async () => {
 
 test('warns on missing column', async () => {
   const r = await parseChecklistXlsx(readBuf('missing-column.xlsx'));
-  const w = r.warnings.find((w) => w.kind === 'missing-column' && w.sheetName === 'Power' && w.columnName === 'Voltage');
+  const w = r.warnings.find((w) => w.kind === 'missing-column' && w.sheetName === 'Power' && w.columnName === 'Voltage In');
   assert.ok(w, 'expected missing-column warning');
 });
 
