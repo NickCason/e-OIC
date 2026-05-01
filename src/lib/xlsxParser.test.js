@@ -50,3 +50,45 @@ test('does NOT warn on auxiliary sheets Rev, Checklist, Notes', async () => {
     undefined,
   );
 });
+
+test('parses Panels rows from valid-seed', async () => {
+  const r = await parseChecklistXlsx(readBuf('valid-seed.xlsx'));
+  assert.ok(Array.isArray(r.rowsBySheet['Panels']));
+  assert.ok(r.rowsBySheet['Panels'].length > 0, 'expected at least one Panel row');
+  const first = r.rowsBySheet['Panels'][0];
+  assert.ok(first.data, 'row should have data');
+  assert.ok('Panel Name' in first.data || first.panelName != null, 'row should reference a panel');
+});
+
+test('warns on extra column', async () => {
+  const r = await parseChecklistXlsx(readBuf('extra-column.xlsx'));
+  const w = r.warnings.find((w) => w.kind === 'extra-column' && w.sheetName === 'Panels' && w.columnName === 'Cost Estimate');
+  assert.ok(w, 'expected extra-column warning');
+});
+
+test('warns on missing column', async () => {
+  const r = await parseChecklistXlsx(readBuf('missing-column.xlsx'));
+  const w = r.warnings.find((w) => w.kind === 'missing-column' && w.sheetName === 'Power' && w.columnName === 'Voltage');
+  assert.ok(w, 'expected missing-column warning');
+});
+
+test('skips hyperlink_column in parsed data', async () => {
+  const r = await parseChecklistXlsx(readBuf('valid-seed.xlsx'));
+  for (const sheetName of Object.keys(r.rowsBySheet)) {
+    const schema = (await import('../schema.json', { with: { type: 'json' } })).default[sheetName];
+    if (!schema?.hyperlink_column) continue;
+    for (const row of r.rowsBySheet[sheetName]) {
+      assert.ok(!(schema.hyperlink_column in row.data),
+        `${sheetName} row should not include hyperlink_column "${schema.hyperlink_column}"`);
+    }
+  }
+});
+
+test('Panels sheet produces panels list', async () => {
+  const r = await parseChecklistXlsx(readBuf('valid-seed.xlsx'));
+  assert.ok(r.panels.length > 0, 'expected at least one panel');
+  for (const p of r.panels) {
+    assert.equal(typeof p.name, 'string');
+    assert.ok(p.name.length > 0);
+  }
+});
