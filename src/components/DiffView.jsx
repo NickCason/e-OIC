@@ -45,6 +45,36 @@ export default function DiffView({ diff, direction = 'pull', removedDecisions, o
         </div>
       )}
 
+      {(diff.sheetNotes.added.length > 0 || diff.sheetNotes.removed.length > 0 || diff.sheetNotes.modified.length > 0) && (
+        <div className="diff-section diff-section--notes">
+          <div className="diff-section-title">Sheet notes</div>
+          {diff.sheetNotes.added.map((n, i) => (
+            <div key={`sna${i}`} className="diff-row diff-row--add">
+              <span className="diff-mark">+</span>
+              <span className="diff-label">{n.panelName} · {n.sheetName}: </span>
+              <span className="diff-new">{String(n.text || '(empty)')}</span>
+            </div>
+          ))}
+          {diff.sheetNotes.removed.map((n, i) => (
+            <div key={`snr${i}`} className="diff-row diff-row--del">
+              <span className="diff-mark">−</span>
+              <span className="diff-label">{n.panelName} · {n.sheetName}: </span>
+              <span className="diff-old">{String(n.text || '(empty)')}</span>
+            </div>
+          ))}
+          {diff.sheetNotes.modified.map((n, i) => (
+            <div key={`snm${i}`} className="diff-row diff-row--mod">
+              <span className="diff-mark">~</span>
+              <span className="diff-label">{n.panelName} · {n.sheetName}</span>
+              <div className="diff-field-change diff-field-change--stacked">
+                <div className="diff-field-old">{String(n.old ?? '(empty)')}</div>
+                <div className="diff-field-new">{String(n.new ?? '(empty)')}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {Object.entries(diff.sheets).map(([sheetName, sd]) => {
         const changeCount = sd.added.length + sd.removed.length + sd.modified.length;
         const isOpen = expanded[sheetName];
