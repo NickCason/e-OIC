@@ -9,8 +9,6 @@ import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from
 import { reloadSampleJob } from '../lib/seed.js';
 import { toast } from '../lib/toast.js';
 
-const APP_VERSION = '1.1.0';
-
 export default function SettingsView() {
   const [theme, setTheme] = useState('auto');
   const [gpsConsent, setGpsConsent] = useState(null);
@@ -241,7 +239,6 @@ export default function SettingsView() {
             <strong>e-OIC</strong> · {BUILD_VERSION}
           </div>
           <div className="settings-footer-sub">An E Tech Group field tool.</div>
-          <div className="settings-footer-sub">v{APP_VERSION}</div>
         </footer>
         {pendingRestoreFile && (
           <div className="modal-bg" onClick={() => setPendingRestoreFile(null)}>
