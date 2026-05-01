@@ -117,24 +117,26 @@ test('paired rows with identical fields → unchanged', () => {
 });
 
 test('paired rows differing in one field → modified with fieldChanges', () => {
+  // Use Power sheet — its label is just "Device Name", so mutating any other
+  // field keeps the rows paired by label.
   const local = emptyLocal();
   local.localPanels = [{ id: 'p1', name: 'PNL-1' }];
   local.localRowsBySheet = {
-    'PLC Slots': [{ id: 'r1', panelId: 'p1', sheet: 'PLC Slots', idx: 0, data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Part Number': '1756-OW16I' }, notes: '' }],
+    'Power': [{ id: 'r1', panelId: 'p1', sheet: 'Power', idx: 0, data: { 'Panel Name': 'PNL-1', 'Device Name': 'PS-1', 'Voltage Out': '24' }, notes: '' }],
   };
   const parsed = emptyParsed();
   parsed.panels = [{ name: 'PNL-1', sourceRowIndex: 3 }];
   parsed.rowsBySheet = {
-    'PLC Slots': [{ panelName: 'PNL-1', data: { 'Panel Name': 'PNL-1', 'Slot': 5, 'Part Number': '1756-IF8I' }, notes: '', sourceRowIndex: 3 }],
+    'Power': [{ panelName: 'PNL-1', data: { 'Panel Name': 'PNL-1', 'Device Name': 'PS-1', 'Voltage Out': '12' }, notes: '', sourceRowIndex: 3 }],
   };
   const d = diffJobs(local, parsed, schemaMap);
-  assert.equal(d.sheets['PLC Slots'].modified.length, 1);
-  assert.equal(d.sheets['PLC Slots'].unchanged.length, 0);
-  const fc = d.sheets['PLC Slots'].modified[0].fieldChanges;
+  assert.equal(d.sheets['Power'].modified.length, 1);
+  assert.equal(d.sheets['Power'].unchanged.length, 0);
+  const fc = d.sheets['Power'].modified[0].fieldChanges;
   assert.equal(fc.length, 1);
-  assert.equal(fc[0].field, 'Part Number');
-  assert.equal(fc[0].old, '1756-OW16I');
-  assert.equal(fc[0].new, '1756-IF8I');
+  assert.equal(fc[0].field, 'Voltage Out');
+  assert.equal(fc[0].old, '24');
+  assert.equal(fc[0].new, '12');
 });
 
 test('"" ≡ null ≡ undefined for string equality', () => {
