@@ -213,9 +213,15 @@ export default function JobView({ jobId }) {
                 <span className="panel-row-ring__pct">{panelPercents[p.id] ?? 0}</span>
               </PercentRing>
               <div className="actions">
-                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); setEditing(p); }} aria-label="Edit">✎</button>
-                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); onDuplicate(p); }} aria-label="Duplicate">⧉</button>
-                <button className="ghost danger icon-btn" onClick={(e) => { e.stopPropagation(); onDelete(p); }} aria-label="Delete">✕</button>
+                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); setEditing(p); }} aria-label="Edit">
+                  <Icon name="edit" size={16} />
+                </button>
+                <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); onDuplicate(p); }} aria-label="Duplicate">
+                  <Icon name="copy" size={16} />
+                </button>
+                <button className="ghost danger icon-btn" onClick={(e) => { e.stopPropagation(); onDelete(p); }} aria-label="Delete">
+                  <Icon name="trash" size={16} />
+                </button>
               </div>
             </div>
           );
@@ -273,11 +279,19 @@ export default function JobView({ jobId }) {
         <div className="modal-bg" onClick={() => setMenuOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h2>Job options</h2>
-            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); onBackupJob(); }}>⬇ Back up this job</button>
-            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setEditing({ ...job, _isJob: true }); }}>✎ Edit job details</button>
-            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setResyncing(true); }}>↻ Re-sync from xlsx</button>
+            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); onBackupJob(); }}>
+              <Icon name="download" size={16} /><span style={{ marginLeft: 8 }}>Back up this job</span>
+            </button>
+            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setEditing({ ...job, _isJob: true }); }}>
+              <Icon name="edit" size={16} /><span style={{ marginLeft: 8 }}>Edit job details</span>
+            </button>
+            <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setResyncing(true); }}>
+              <Icon name="refresh" size={16} /><span style={{ marginLeft: 8 }}>Re-sync from xlsx</span>
+            </button>
             {job.source && (
-              <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setConfirmingDisconnect(true); }}>⛓ Disconnect from xlsx</button>
+              <button className="modal-list-btn" onClick={() => { setMenuOpen(false); setConfirmingDisconnect(true); }}>
+                <Icon name="unlink" size={16} /><span style={{ marginLeft: 8 }}>Disconnect from xlsx</span>
+              </button>
             )}
             <div className="btn-row" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
               <button className="ghost" onClick={() => setMenuOpen(false)}>Close</button>

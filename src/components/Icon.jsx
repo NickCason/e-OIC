@@ -24,6 +24,8 @@ import {
   AlertCircle,
   ChevronRight,
   RefreshCw,
+  Copy,
+  Unlink,
 } from 'lucide-react';
 
 // Curated icon set used across the app. Default size 18px, stroke width
@@ -55,6 +57,8 @@ const ICONS = {
   themeAuto: Monitor,
   warn: AlertCircle,
   refresh: RefreshCw,
+  copy: Copy,
+  unlink: Unlink,
 };
 
 export default function Icon({ name, size = 18, strokeWidth = 1.75, ...rest }) {
