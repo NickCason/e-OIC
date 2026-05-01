@@ -84,6 +84,20 @@ export function diffJobs(localState, parsedXlsx, schemaMap, options = {}) {
     if (!localPanelNames.has(xp.name)) result.panels.added.push(xp);
   }
 
+  // Job meta diff. Only `name` and `notes` round-trip via xlsx; client and
+  // location are never compared.
+  {
+    const localMeta = localJob || {};
+    const xlsxMeta = parsedXlsx.jobMeta || {};
+    for (const field of ['name', 'notes']) {
+      const oldV = (localMeta[field] ?? '').toString().trim();
+      const newV = (xlsxMeta[field] ?? '').toString().trim();
+      if (oldV !== newV) {
+        result.jobMeta.changed.push({ field, old: localMeta[field] ?? '', new: xlsxMeta[field] ?? '' });
+      }
+    }
+  }
+
   // Per-sheet row diff (matching only; field comparison stubbed → all matches go to modified)
   const allSheetNames = new Set([
     ...Object.keys(localRowsBySheet || {}),

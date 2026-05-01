@@ -169,3 +169,42 @@ test('hyperlink_column is excluded from field comparison', () => {
   assert.equal(d.sheets['Panels'].modified.length, 0);
   assert.equal(d.sheets['Panels'].unchanged.length, 1);
 });
+
+test('job-meta name change surfaces in jobMeta.changed', () => {
+  const local = emptyLocal();
+  local.localJob = { name: 'Old Name', client: '', location: '', notes: '' };
+  const parsed = emptyParsed();
+  parsed.jobMeta = { name: 'New Name', client: '', location: '', notes: '' };
+  const d = diffJobs(local, parsed, schemaMap);
+  const c = d.jobMeta.changed.find((c) => c.field === 'name');
+  assert.ok(c);
+  assert.equal(c.old, 'Old Name');
+  assert.equal(c.new, 'New Name');
+});
+
+test('job-meta notes change surfaces', () => {
+  const local = emptyLocal();
+  local.localJob = { name: 'J', client: '', location: '', notes: 'old' };
+  const parsed = emptyParsed();
+  parsed.jobMeta = { name: 'J', client: '', location: '', notes: 'new' };
+  const d = diffJobs(local, parsed, schemaMap);
+  const c = d.jobMeta.changed.find((c) => c.field === 'notes');
+  assert.ok(c);
+});
+
+test('job-meta client and location are NEVER diffed', () => {
+  const local = emptyLocal();
+  local.localJob = { name: 'J', client: 'Acme', location: 'Plant 3', notes: '' };
+  const parsed = emptyParsed();
+  parsed.jobMeta = { name: 'J', client: '', location: '', notes: '' };
+  const d = diffJobs(local, parsed, schemaMap);
+  assert.equal(d.jobMeta.changed.find((c) => c.field === 'client'), undefined);
+  assert.equal(d.jobMeta.changed.find((c) => c.field === 'location'), undefined);
+});
+
+test('direction option does not affect data structure', () => {
+  const dPull = diffJobs(emptyLocal(), emptyParsed(), schemaMap, { direction: 'pull' });
+  const dPush = diffJobs(emptyLocal(), emptyParsed(), schemaMap, { direction: 'push' });
+  assert.deepEqual(dPull.sheets, dPush.sheets);
+  assert.deepEqual(dPull.panels, dPush.panels);
+});
