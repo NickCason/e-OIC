@@ -24,29 +24,30 @@ export const PHRASES = {
     'Aligning panel labels…',
   ],
 
-  // 'export' — building the .zip / .xlsx deliverable. Photography +
-  // packaging metaphors — the export bundles photos and structured data.
+  // 'export' — building the .zip / .xlsx deliverable. Office /
+  // packaging / audit metaphors — distinct from 'photo' which owns
+  // camera/darkroom imagery.
   export: [
     'Reframing that masterpiece…',
-    'Developing the negatives…',
+    'Stamping the cover page…',
     'Packaging the deliverables…',
-    'Compressing carefully…',
     'Tying off the bow…',
     'Cataloging the audit…',
-    'Bundling photos by panel…',
-    'Glossing the cover sheet…',
-    'Polishing the schematic…',
-    'Archiving the field notes…',
-    'Crating the cabinet shots…',
-    'Photo-finishing the deliverable…',
-    'Stenciling the cover page…',
+    'Compressing carefully…',
     'Hand-binding the report…',
-    'Linking photo to row…',
-    'Geotagging the obvious…',
     'Sealing the envelope…',
     'Tagging the metadata…',
     'Boxing it up neatly…',
     'Watermarking the proofs…',
+    'Wrapping the deliverable…',
+    'Indexing the contents…',
+    'Bundling for SharePoint…',
+    'Polishing the executive summary…',
+    'Inking the project stamp…',
+    'Filing the field notes…',
+    'Drafting the table of contents…',
+    'Stapling the addendum…',
+    'Numbering the appendices…',
   ],
 
   // 'parse' — first-time read of an unknown xlsx. Translation +

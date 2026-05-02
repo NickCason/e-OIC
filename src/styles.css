@@ -1279,8 +1279,10 @@ textarea,
 }
 .percent-bar__fill.is-shimmering {
   /* Light theme: light shimmer reads on the dark navy fill.
-     Dark theme + 100% energy state override --shimmer-tone below. */
-  --shimmer-tone: rgba(255, 255, 255, 0.5);
+     Dark theme + 100% energy state override --shimmer-tone below.
+     Opacity is deliberately low (0.28) — the band is wide and slow,
+     so a subtle tone reads as a gentle pulse rather than a flash. */
+  --shimmer-tone: rgba(255, 255, 255, 0.28);
   background:
     linear-gradient(
       90deg,
@@ -1306,13 +1308,13 @@ textarea,
 /* Dark theme: --accent is white, so the shimmer needs to be DARK to
    read against it. Same gradient shape, inverted tone. */
 [data-theme="dark"] .percent-bar__fill.is-shimmering {
-  --shimmer-tone: rgba(0, 0, 0, 0.42);
+  --shimmer-tone: rgba(0, 0, 0, 0.30);
 }
 /* Energy (100%) state is orange in both themes; lighter shimmer wins
    on orange in either theme, so override only the dark-theme complete
    case to use a light tone again. */
 [data-theme="dark"] .percent-bar__fill.is-shimmering.is-complete {
-  --shimmer-tone: rgba(255, 255, 255, 0.55);
+  --shimmer-tone: rgba(255, 255, 255, 0.28);
 }
 @-webkit-keyframes percent-bar-shimmer {
   0%   { background-position: -75% 0, 0 0; }
