@@ -48,6 +48,21 @@ export default function PhotoCapture({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is a non-stable inline async fn; adding it would infinite-loop. Intent: run only when photo context IDs change.
   useEffect(() => { refresh(); }, [panel.id, sheetName, item, rowId]);
 
+  // Bottom-sheet UX: scrolling the underlying page dismisses the modal.
+  // Skip dismiss while the lightbox is mounted on top so swipes inside it
+  // don't close everything.
+  const lightboxOpenRef = useRef(false);
+  useEffect(() => { lightboxOpenRef.current = lightboxIndex !== null; }, [lightboxIndex]);
+  useEffect(() => {
+    const initialY = window.scrollY;
+    function onScroll() {
+      if (lightboxOpenRef.current) return;
+      if (Math.abs(window.scrollY - initialY) > 12) onClose();
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [onClose]);
+
   // Build blob URLs for the current photo set; revoke on change/unmount.
   const photosWithUrls = useMemo(
     () => photos.map((p) => ({ ...p, blobUrl: URL.createObjectURL(p.blob) })),

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
-import PhotoOverlay from './PhotoOverlay.jsx';
+import { fmtTimestamp, fmtGps } from '../photoOverlay.js';
 
 // Themed photo lightbox.
 //
@@ -49,6 +49,9 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
     startY.current = null;
   }
 
+  const dateStr = cur.takenAt ? fmtTimestamp(new Date(cur.takenAt)) : '';
+  const gpsStr = cur.gps ? `  ${fmtGps(cur.gps)}` : '';
+
   return (
     <div
       className="lightbox"
@@ -56,16 +59,18 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <PhotoOverlay
+      <img
+        key={cur.id}
         src={cur.blobUrl}
-        jobName={cur.jobName}
-        panelName={cur.panelName}
-        sheetName={cur.sheetName}
-        itemLabel={cur.itemLabel}
-        takenAt={cur.takenAt}
-        gps={cur.gps}
-        onImgClick={(e) => e.stopPropagation()}
+        alt=""
+        className="lightbox-img"
+        onClick={(e) => e.stopPropagation()}
       />
+      <div className="lightbox-overlay-text" aria-hidden="true">
+        <div>{cur.jobName} • {cur.panelName}</div>
+        <div>{cur.sheetName} — {cur.itemLabel}</div>
+        <div>{dateStr}{gpsStr}</div>
+      </div>
 
       <button
         className="lightbox-btn lightbox-close"
