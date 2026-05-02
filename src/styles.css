@@ -959,7 +959,7 @@ textarea,
   border-radius: var(--r-pill);
 }
 .group-body {
-  padding: 0 var(--sp-3) var(--sp-3);
+  padding: var(--sp-3);
   border-top: 1px solid var(--border);
 }
 
