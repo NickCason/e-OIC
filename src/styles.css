@@ -411,7 +411,7 @@ textarea,
   align-items: center;
   gap: var(--sp-2);
   margin-bottom: var(--sp-3);
-  padding: 2px var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
