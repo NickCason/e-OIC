@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Reusable SVG percentage ring. Honors prefers-reduced-motion (no transition).
 //
@@ -30,6 +30,19 @@ export default function PercentRing({
   const reduced = typeof window !== 'undefined'
     && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const stroked = pct === 100 ? accentColor : arcColor;
+
+  // Draw on mount: start at 0% (full dashOffset), transition to actual on
+  // next frame so the ring sweeps in lockstep with the CountUp number.
+  // Subsequent percent changes also animate via the same transition.
+  const [animatedOffset, setAnimatedOffset] = useState(reduced ? dashOffset : circumference);
+  useEffect(() => {
+    if (reduced) {
+      setAnimatedOffset(dashOffset);
+      return;
+    }
+    const raf = requestAnimationFrame(() => setAnimatedOffset(dashOffset));
+    return () => cancelAnimationFrame(raf);
+  }, [dashOffset, reduced]);
   return (
     <div
       className={`percent-ring ${className}`.trim()}
@@ -55,9 +68,9 @@ export default function PercentRing({
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
+          strokeDashoffset={animatedOffset}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          style={reduced ? undefined : { transition: 'stroke-dashoffset 280ms ease, stroke 200ms ease' }}
+          style={reduced ? undefined : { transition: 'stroke-dashoffset 600ms cubic-bezier(0.22, 1, 0.36, 1), stroke 200ms ease' }}
         />
       </svg>
       {children != null && <div className="percent-ring__center">{children}</div>}

@@ -12,6 +12,8 @@ export default function ChecklistTaskRow({ task, onToggle, onRename, onDelete })
   const [menuOpen, setMenuOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(task.label);
+  const [pulsing, setPulsing] = useState(false);
+  const prevCheckedRef = useRef(!!task.completed);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -20,6 +22,18 @@ export default function ChecklistTaskRow({ task, onToggle, onRename, onDelete })
       setTimeout(() => inputRef.current?.select(), 0);
     }
   }, [renaming, task.label]);
+
+  // Pulse when completed transitions false -> true. No pulse on uncheck or
+  // initial mount with already-completed tasks.
+  useEffect(() => {
+    if (!prevCheckedRef.current && task.completed) {
+      setPulsing(true);
+      const t = setTimeout(() => setPulsing(false), 700);
+      prevCheckedRef.current = true;
+      return () => clearTimeout(t);
+    }
+    prevCheckedRef.current = !!task.completed;
+  }, [task.completed]);
 
   function commitRename() {
     const trimmed = draft.trim();
@@ -61,7 +75,7 @@ export default function ChecklistTaskRow({ task, onToggle, onRename, onDelete })
   const isCustom = task.kind === 'custom';
 
   return (
-    <div className={`checklist-task-row ${checked ? 'is-checked' : ''} ${locked ? 'is-locked' : ''}`}>
+    <div className={`checklist-task-row ${checked ? 'is-checked' : ''} ${locked ? 'is-locked' : ''} ${pulsing ? 'pulse-on' : ''}`.trim()}>
       <button
         type="button"
         className="checklist-task-row__check"

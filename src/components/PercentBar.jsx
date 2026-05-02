@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Reusable horizontal percentage bar. Honors prefers-reduced-motion.
 //
@@ -22,10 +22,18 @@ export default function PercentBar({
   const pct = Math.max(0, Math.min(100, Math.round(percent)));
   const reduced = typeof window !== 'undefined'
     && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  // Draw on mount: 0 -> pct on next frame so it fills in lockstep with CountUp.
+  const [animatedPct, setAnimatedPct] = useState(reduced ? pct : 0);
+  useEffect(() => {
+    if (reduced) { setAnimatedPct(pct); return; }
+    const raf = requestAnimationFrame(() => setAnimatedPct(pct));
+    return () => cancelAnimationFrame(raf);
+  }, [pct, reduced]);
+
   return (
     <div
       className={`percent-bar ${className}`.trim()}
-      style={{ background: trackColor, height, borderRadius: height }}
+      style={{ background: trackColor, height, borderRadius: height, overflow: 'hidden' }}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
@@ -35,11 +43,11 @@ export default function PercentBar({
       <div
         className="percent-bar__fill"
         style={{
-          width: `${pct}%`,
+          width: `${animatedPct}%`,
           height: '100%',
           background: pct === 100 ? accentColor : fillColor,
           borderRadius: height,
-          transition: reduced ? undefined : 'width 280ms ease, background 200ms ease',
+          transition: reduced ? undefined : 'width 600ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease',
         }}
       />
     </div>
