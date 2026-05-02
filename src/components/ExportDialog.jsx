@@ -21,6 +21,7 @@ export default function ExportDialog({ job, onClose }) {
   const [targetParsed, setTargetParsed] = useState(null);
   const [targetDiff, setTargetDiff] = useState(null);
   const [targetFilename, setTargetFilename] = useState('');
+  const [sharing, setSharing] = useState(false);
   const targetInputRef = useRef(null);
 
   const hasSource = !!job.source?.filename;
@@ -122,7 +123,8 @@ export default function ExportDialog({ job, onClose }) {
   }
 
   async function onShare() {
-    if (!result) return;
+    if (!result || sharing) return;
+    setSharing(true);
     try {
       const shared = await shareBlob(result.blob, result.filename, job.name, result.shareFile);
       if (!shared) {
@@ -143,6 +145,8 @@ export default function ExportDialog({ job, onClose }) {
         console.error('download fallback also failed:', e2);
         toast.error(`${e.name || 'Error'}: ${e.message || 'Share failed'}`);
       }
+    } finally {
+      setSharing(false);
     }
   }
 
@@ -261,8 +265,8 @@ export default function ExportDialog({ job, onClose }) {
             </div>
             <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
               <button className="ghost" onClick={onClose}>Done</button>
-              <button onClick={onDownload}><Icon name="download" size={16} /><span style={{ marginLeft: 6 }}>Download</span></button>
-              <button className="primary" onClick={onShare}><Icon name="link" size={16} /><span style={{ marginLeft: 6 }}>Share / Email / Cloud</span></button>
+              <button onClick={onDownload} disabled={sharing}><Icon name="download" size={16} /><span style={{ marginLeft: 6 }}>Download</span></button>
+              <button className="primary" onClick={onShare} disabled={sharing}><Icon name="link" size={16} /><span style={{ marginLeft: 6 }}>{sharing ? 'Sharing…' : 'Share / Email / Cloud'}</span></button>
             </div>
           </>
         )}

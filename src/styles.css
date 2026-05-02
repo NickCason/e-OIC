@@ -33,7 +33,7 @@
   --fs-input: 16px;
 
   /* type — families */
-  --font-display: 'Choplin', 'Roboto Slab', 'Zilla Slab', ui-serif, Georgia, serif;
+  --font-display: 'Roboto Slab', 'Zilla Slab', ui-serif, Georgia, serif;
   --font-ui: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* keyboard offset — derived from keyboard inset minus safe-area bottom */
@@ -132,20 +132,7 @@
   font-display: swap;
   src: url('/fonts/RobotoSlab-600.woff2') format('woff2');
 }
-@font-face {
-  font-family: 'Choplin';
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-  src: url('/fonts/Choplin-500.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Choplin';
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-  src: url('/fonts/Choplin-600.woff2') format('woff2');
-}
+/* Choplin woff2 not shipped in public/fonts/ — rely on Roboto Slab fallback. */
 
 * { box-sizing: border-box; }
 

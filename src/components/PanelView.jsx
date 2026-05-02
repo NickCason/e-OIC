@@ -6,6 +6,7 @@ import SheetForm from './SheetForm.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import SheetPicker from './SheetPicker.jsx';
+import Marquee from './Marquee.jsx';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',
@@ -86,7 +87,7 @@ export default function PanelView({ jobId, panelId }) {
               ? `PANEL · ${panelPercent}% COMPLETE · ${idx + 1} OF ${total} SHEETS`
               : 'PANEL'}
           </div>
-          <h1 className="hero-title">{panel?.name || 'Panel'}</h1>
+          <h1 className="hero-title"><Marquee>{panel?.name || 'Panel'}</Marquee></h1>
         </div>
         <div className="tabs" ref={tabsRef}>
           {SHEET_ORDER.map((s) => (

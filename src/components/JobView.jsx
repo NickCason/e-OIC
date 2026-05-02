@@ -187,7 +187,7 @@ export default function JobView({ jobId }) {
           <div className="hero-pretitle">
             {`JOB · ${aggregate.jobPercent}% COMPLETE · ${aggregate.panelCount} PANEL${aggregate.panelCount === 1 ? '' : 'S'} · ${aggregate.photoCount} PHOTO${aggregate.photoCount === 1 ? '' : 'S'}`}
           </div>
-          <h1 className="hero-title">{job.name || 'Loading…'}</h1>
+          <h1 className="hero-title"><Marquee>{job.name || 'Loading…'}</Marquee></h1>
         </div>
         <button
           type="button"
