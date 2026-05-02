@@ -7,6 +7,7 @@ import { diffJobs } from '../lib/jobDiff.js';
 import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
 import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast.js';
+import { DotmSquare3 } from './dotmatrix/DotmSquare3.tsx';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -229,7 +230,7 @@ export default function ExportDialog({ job, onClose }) {
         )}
 
         {stage === 'parsing-target' && (
-          <div className="export-progress"><div className="export-spinner" /><div className="export-progress-text">Reading {targetFilename}…</div></div>
+          <div className="export-progress"><DotmSquare3 size={56} /><div className="export-progress-text">Reading {targetFilename}…</div></div>
         )}
 
         {stage === 'push-diff' && targetDiff && (
@@ -248,7 +249,7 @@ export default function ExportDialog({ job, onClose }) {
 
         {stage === 'generating' && (
           <div className="export-progress">
-            <div className="export-spinner" />
+            <DotmSquare3 size={56} />
             <div className="export-progress-text">{progressText}</div>
             <div className="progress-bar" style={{ width: '100%' }}>
               <div className="progress-bar-fill" style={{ width: `${progress.percent || 0}%` }} />
