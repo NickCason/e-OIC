@@ -213,8 +213,9 @@ export default function JobView({ jobId }) {
           <EmptyState
             icon="add"
             title="No panels yet"
-            body={`Tap the + button below to add the first panel to ${job.name || 'this job'}.`}
-            pointTo="fab"
+            body={`Add the first panel to ${job.name || 'this job'}.`}
+            onIconClick={() => setCreating(true)}
+            iconLabel="Add panel"
           />
         )}
         {panels.map((p) => {

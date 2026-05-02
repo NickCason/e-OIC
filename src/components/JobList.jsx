@@ -151,8 +151,9 @@ export default function JobList() {
           <EmptyState
             icon="add"
             title="No jobs yet"
-            body="Tap the orange + below to start your first investigation."
-            pointTo="fab"
+            body="Start your first investigation."
+            onIconClick={() => setChoosing(true)}
+            iconLabel="New job"
           />
         )}
 
