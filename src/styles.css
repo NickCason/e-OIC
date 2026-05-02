@@ -1355,12 +1355,15 @@ textarea,
 }
 
 /* PanelView sheet-form swap: snappy slide-in when activeSheet changes. */
+/* Fade only — no transform: a non-none transform on this wrapper would
+   make it a containing block for position:fixed descendants, which
+   breaks every modal and the lightbox inside the panel sheet. */
 .sheet-anim {
-  animation: sheet-slide-in 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: sheet-fade-in 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-@keyframes sheet-slide-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes sheet-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* SheetForm row groups: smooth open/close height animation via the
