@@ -25,11 +25,22 @@ export default function PanelView({ jobId, panelId }) {
   const [showSheetPicker, setShowSheetPicker] = useState(false);
 
   const tabsRef = useRef(null);
+  const [inkRect, setInkRect] = useState({ left: 0, width: 0 });
   useEffect(() => {
-    const el = tabsRef.current?.querySelector('.tab.active');
-    if (el && typeof el.scrollIntoView === 'function') {
+    const container = tabsRef.current;
+    const el = container?.querySelector('.tab.active');
+    if (!container || !el) return;
+    if (typeof el.scrollIntoView === 'function') {
       el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     }
+    // Measure relative to the scrollable container so the ink stays
+    // glued under the active tab as the user scrolls horizontally.
+    const cRect = container.getBoundingClientRect();
+    const tRect = el.getBoundingClientRect();
+    setInkRect({
+      left: tRect.left - cRect.left + container.scrollLeft,
+      width: tRect.width,
+    });
   }, [activeSheet]);
 
   async function refreshProgress() {
@@ -112,6 +123,11 @@ export default function PanelView({ jobId, panelId }) {
           >
             <Icon name="grid" size={14} />
           </button>
+          <span
+            className="tab-ink"
+            style={{ left: inkRect.left, width: inkRect.width }}
+            aria-hidden="true"
+          />
         </div>
         <div className="sheet-anim" key={activeSheet}>
           <SheetForm
