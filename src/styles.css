@@ -1259,23 +1259,68 @@ textarea,
   86%, 100% { transform: translateX(0); }
 }
 
-/* PercentBar shimmer — diagonal barber-pole stripes baked into the fill's
-   background (multi-bg). Animates the stripe layer's background-position
-   to make stripes flow across. */
-.percent-bar { position: relative; }
-.percent-bar__fill { position: relative; overflow: hidden; }
+/* PercentBar — track, fill, and shimmer all in CSS so each theme picks
+   the right contrast for the gradient pulse. Shimmer is a smooth
+   gradient band baked into the fill's background as the top layer; we
+   animate background-position to glide it across. */
+.percent-bar {
+  position: relative;
+  background: var(--bg-3);
+  overflow: hidden;
+  width: 100%;
+}
+.percent-bar__fill {
+  display: block;
+  position: relative;
+  background: var(--accent);
+}
+.percent-bar__fill.is-complete {
+  background: var(--energy);
+}
 .percent-bar__fill.is-shimmering {
-  -webkit-animation: percent-bar-stripes 1.2s linear infinite;
-  animation: percent-bar-stripes 1.2s linear infinite;
+  /* Light theme: light shimmer reads on the dark navy fill.
+     Dark theme + 100% energy state override --shimmer-tone below. */
+  --shimmer-tone: rgba(255, 255, 255, 0.5);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--shimmer-tone) 50%,
+      transparent 100%
+    ) -75% 0 / 75% 100% no-repeat,
+    var(--accent);
+  -webkit-animation: percent-bar-shimmer 2.4s ease-in-out infinite;
+  animation: percent-bar-shimmer 2.4s ease-in-out infinite;
   will-change: background-position;
 }
-@-webkit-keyframes percent-bar-stripes {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 14.14px 0, 0 0; }
+.percent-bar__fill.is-shimmering.is-complete {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--shimmer-tone) 50%,
+      transparent 100%
+    ) -75% 0 / 75% 100% no-repeat,
+    var(--energy);
 }
-@keyframes percent-bar-stripes {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 14.14px 0, 0 0; }
+/* Dark theme: --accent is white, so the shimmer needs to be DARK to
+   read against it. Same gradient shape, inverted tone. */
+[data-theme="dark"] .percent-bar__fill.is-shimmering {
+  --shimmer-tone: rgba(0, 0, 0, 0.42);
+}
+/* Energy (100%) state is orange in both themes; lighter shimmer wins
+   on orange in either theme, so override only the dark-theme complete
+   case to use a light tone again. */
+[data-theme="dark"] .percent-bar__fill.is-shimmering.is-complete {
+  --shimmer-tone: rgba(255, 255, 255, 0.55);
+}
+@-webkit-keyframes percent-bar-shimmer {
+  0%   { background-position: -75% 0, 0 0; }
+  100% { background-position: 175% 0, 0 0; }
+}
+@keyframes percent-bar-shimmer {
+  0%   { background-position: -75% 0, 0 0; }
+  100% { background-position: 175% 0, 0 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .percent-bar__fill.is-shimmering { -webkit-animation: none; animation: none; }
