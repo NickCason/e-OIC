@@ -1408,6 +1408,31 @@ textarea,
   to   { opacity: 1; }
 }
 
+/* Directional route cross-fade. Same containing-block discipline as
+   .sheet-anim: animate opacity + margin (NEVER transform), so modals
+   and the lightbox inside any route still anchor to the viewport.
+   Forward (deeper into the hierarchy) slides up from below; back
+   slides down from above; same-depth nav has no entrance to avoid
+   replay flicker on intra-page navigations. */
+.route-shell--forward {
+  animation: route-fade-forward 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.route-shell--back {
+  animation: route-fade-back 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes route-fade-forward {
+  from { opacity: 0; margin-top: 4px; }
+  to   { opacity: 1; margin-top: 0; }
+}
+@keyframes route-fade-back {
+  from { opacity: 0; margin-top: -4px; }
+  to   { opacity: 1; margin-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-shell--forward,
+  .route-shell--back { animation: none; }
+}
+
 /* SheetForm row groups: smooth open/close height animation via the
    grid-template-rows 0fr -> 1fr trick. No JS height measurement needed. */
 .group-body-wrap {

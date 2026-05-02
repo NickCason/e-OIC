@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import JobList from './components/JobList.jsx';
 import JobView from './components/JobView.jsx';
 import PanelView from './components/PanelView.jsx';
@@ -9,6 +9,17 @@ import UpdatePill from './components/UpdatePill.jsx';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation.js';
 import { maybeSeedSampleJob } from './lib/seed.js';
 import useKeyboardInset from './lib/useKeyboardInset.js';
+
+// Route depth drives the directional cue on the cross-fade. Going to a
+// deeper route reads "forward"; going back up the hierarchy reads "back".
+function routeDepth(r) {
+  if (r.name === 'panel' || r.name === 'checklist') return 2;
+  if (r.name === 'job') return 1;
+  return 0;
+}
+function routeKey(r) {
+  return `${r.name}|${r.jobId || ''}|${r.panelId || ''}`;
+}
 
 function parseHash() {
   const h = window.location.hash.replace(/^#\/?/, '');
@@ -34,12 +45,19 @@ export function nav(path) {
 export default function App() {
   useKeyboardInset();
   const [route, setRoute] = useState(parseHash());
+  const [direction, setDirection] = useState('initial');
+  const prevDepthRef = useRef(routeDepth(parseHash()));
   const [showGeoPrompt, setShowGeoPrompt] = useState(false);
 
   useEffect(() => {
     const onHash = () => {
       window.scrollTo(0, 0);
-      setRoute(parseHash());
+      const next = parseHash();
+      const nextDepth = routeDepth(next);
+      const prev = prevDepthRef.current;
+      setDirection(nextDepth > prev ? 'forward' : nextDepth < prev ? 'back' : 'same');
+      prevDepthRef.current = nextDepth;
+      setRoute(next);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -66,11 +84,13 @@ export default function App() {
 
   return (
     <div className="app">
-      {route.name === 'jobs' && <JobList />}
-      {route.name === 'job' && <JobView jobId={route.jobId} />}
-      {route.name === 'panel' && <PanelView jobId={route.jobId} panelId={route.panelId} />}
-      {route.name === 'checklist' && <ChecklistView jobId={route.jobId} />}
-      {route.name === 'settings' && <SettingsView />}
+      <div key={routeKey(route)} className={`route-shell route-shell--${direction}`}>
+        {route.name === 'jobs' && <JobList />}
+        {route.name === 'job' && <JobView jobId={route.jobId} />}
+        {route.name === 'panel' && <PanelView jobId={route.jobId} panelId={route.panelId} />}
+        {route.name === 'checklist' && <ChecklistView jobId={route.jobId} />}
+        {route.name === 'settings' && <SettingsView />}
+      </div>
       <ToastHost />
       <UpdatePill />
       {showGeoPrompt && <GeoPrompt onClose={() => setShowGeoPrompt(false)} />}
