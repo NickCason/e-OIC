@@ -35,7 +35,13 @@ export default function PhotoChecklist({ job, panel, sheetName, items }) {
           <div
             key={item}
             className={`checklist-row${done ? ' done' : ''}`}
-            onClick={() => setOpenItem(item)}
+            onClick={(e) => {
+              const row = e.currentTarget;
+              if (typeof row.scrollIntoView === 'function') {
+                row.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              }
+              setOpenItem(item);
+            }}
           >
             <span className="checklist-cb" aria-hidden="true">
               {done && <Icon name="check" size={12} strokeWidth={3} />}
