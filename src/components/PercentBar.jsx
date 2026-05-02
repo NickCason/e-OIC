@@ -30,6 +30,14 @@ export default function PercentBar({
     return () => cancelAnimationFrame(raf);
   }, [pct, reduced]);
 
+  const baseFill = pct === 100 ? accentColor : fillColor;
+  // Two backgrounds on the fill: dark diagonal stripes on top, base color
+  // beneath. backgroundSize on the gradient makes the stripe period
+  // explicit so the keyframe knows how far to translate. Stripes live on
+  // the fill itself instead of an overlay child so no absolute-positioned
+  // sibling can be lost on iOS.
+  const stripeBg = `repeating-linear-gradient(-45deg, rgba(0,0,0,0.45) 0px, rgba(0,0,0,0.45) 5px, transparent 5px, transparent 10px), ${baseFill}`;
+
   return (
     <div
       className={`percent-bar ${className}`.trim()}
@@ -41,17 +49,15 @@ export default function PercentBar({
       aria-label={ariaLabel || `${pct} percent complete`}
     >
       <div
-        className="percent-bar__fill"
+        className={`percent-bar__fill${pct > 0 ? ' is-shimmering' : ''}`}
         style={{
           width: `${animatedPct}%`,
           height: '100%',
-          background: pct === 100 ? accentColor : fillColor,
+          background: stripeBg,
           borderRadius: height,
-          transition: reduced ? undefined : 'width 600ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease',
+          transition: reduced ? undefined : 'width 600ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
-      >
-        {!reduced && pct > 0 && <span className="percent-bar__shimmer" aria-hidden="true" />}
-      </div>
+      />
     </div>
   );
 }
