@@ -9,7 +9,8 @@ import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
 import EtechLoader from './EtechLoader.jsx';
-import { holdAndFade } from '../lib/loaderHold.js';
+import LoadingPhrases from './LoadingPhrases.jsx';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.
@@ -78,44 +79,48 @@ export default function PhotoCapture({
     setBusy(true);
     setIsFading(false);
     setError(null);
-    let savedCount = 0;
     try {
-      // Camera path: device GPS + now. Library path: photo's own EXIF only.
-      let cameraGps = null;
-      if (source === 'camera') {
-        cameraGps = await maybeGetGps();
-      }
-      for (const file of files) {
-        let gps;
-        let takenAt;
+      const work = (async () => {
+        // Camera path: device GPS + now. Library path: photo's own EXIF only.
+        let cameraGps = null;
         if (source === 'camera') {
-          gps = cameraGps;
-          takenAt = Date.now();
-        } else {
-          const exif = await readPhotoExif(file);
-          gps = exif.gps;
-          takenAt = exif.takenAt ?? file.lastModified ?? Date.now();
+          cameraGps = await maybeGetGps();
         }
-        const { blob, width, height } = await processIncomingPhoto(file, { gps });
-        await addPhoto({
-          panelId: panel.id,
-          sheet: sheetName,
-          item: rowId ? (rowLabelHint || 'row') : item,
-          rowId,
-          blob,
-          mime: 'image/jpeg',
-          w: width, h: height,
-          gps,
-          takenAt,
-        });
-        savedCount += 1;
-        if (navigator.vibrate) navigator.vibrate(20);
-      }
-      await refresh();
+        let saved = 0;
+        for (const file of files) {
+          let gps;
+          let takenAt;
+          if (source === 'camera') {
+            gps = cameraGps;
+            takenAt = Date.now();
+          } else {
+            const exif = await readPhotoExif(file);
+            gps = exif.gps;
+            takenAt = exif.takenAt ?? file.lastModified ?? Date.now();
+          }
+          const { blob, width, height } = await processIncomingPhoto(file, { gps });
+          await addPhoto({
+            panelId: panel.id,
+            sheet: sheetName,
+            item: rowId ? (rowLabelHint || 'row') : item,
+            rowId,
+            blob,
+            mime: 'image/jpeg',
+            w: width, h: height,
+            gps,
+            takenAt,
+          });
+          saved += 1;
+          if (navigator.vibrate) navigator.vibrate(20);
+        }
+        await refresh();
+        return saved;
+      })();
+      const savedCount = await withMinDuration(work, 2200);
       if (savedCount === 0) {
         setError('Photo could not be saved. The file may not be a recognized image format.');
       } else {
-        await holdAndFade(setIsFading);
+        await fadeOutLoader(setIsFading);
       }
     } catch (e) {
       console.error(e);
@@ -187,7 +192,7 @@ export default function PhotoCapture({
             style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', marginBottom: 8, padding: 0 }}
           >
             <EtechLoader variant="current" size={36} />
-            <span>Processing…</span>
+            <LoadingPhrases set="photo" className="loading-phrase--inline" />
           </div>
         )}
         {error && <div style={{ color: 'var(--danger)', marginBottom: 8 }}>{error}</div>}

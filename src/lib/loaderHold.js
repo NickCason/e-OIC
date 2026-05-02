@@ -1,21 +1,21 @@
-// holdAndFade — keeps the loader visible briefly after the work completes,
-// then triggers a CSS fade-out. The caller toggles `isFading` via the
-// passed setter; the actual fade-out is realized in CSS via an
-// `.is-fading-out` class on the progress wrapper.
-//
-// Default timing: 600ms hold (so the loader's animation has time to
-// breathe past whatever frame it was on when work finished) + 300ms
-// fade-out duration. After this resolves, the caller should advance the
-// stage (which unmounts the loader) and reset `isFading` to false.
+// withMinDuration — wraps a work promise so the caller waits at least
+// `minMs` even when work resolves faster. Used to give loading flavor
+// phrases time to land before the UI snaps to the next stage.
 //
 // Usage:
-//   const [isFading, setIsFading] = useState(false);
-//   const result = await doWork();
-//   await holdAndFade(setIsFading);
+//   const r = await withMinDuration(doWork(), 4500);
+//   await fadeOutLoader(setIsFading);
 //   setStage('done');
-//   setIsFading(false);
-export async function holdAndFade(setIsFading, holdMs = 600, fadeMs = 300) {
-  await new Promise((r) => setTimeout(r, holdMs));
+export async function withMinDuration(workPromise, minMs = 4500) {
+  const minDelay = new Promise((r) => setTimeout(r, minMs));
+  const [result] = await Promise.all([workPromise, minDelay]);
+  return result;
+}
+
+// fadeOutLoader — flips the .is-fading-out class on the progress block
+// and waits for the CSS animation to finish before resolving so the
+// caller can advance the stage right after.
+export async function fadeOutLoader(setIsFading, fadeMs = 300) {
   setIsFading(true);
   await new Promise((r) => setTimeout(r, fadeMs));
 }

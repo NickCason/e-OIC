@@ -106,6 +106,30 @@
   }
 }
 
+/* Loading phrase — cycles from the loadingPhrases library while the
+   loader is visible. Each phrase swap remounts (key={phrase}) so the
+   keyframe runs fresh: a quick fade-up then settle. */
+.loading-phrase {
+  font-size: var(--fs-body);
+  color: var(--text-strong);
+  text-align: center;
+  letter-spacing: -0.005em;
+  animation: loading-phrase-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.loading-phrase--inline {
+  text-align: left;
+  font-size: 13px;
+  color: inherit;
+}
+@keyframes loading-phrase-in {
+  0%   { opacity: 0; transform: translateY(6px); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-phrase { animation: none; }
+}
+
 /* Wrapping progress blocks (.export-progress) get a graceful fade-in on
    mount and an opt-in fade-out when the dialog adds .is-fading-out
    right before transitioning away. */

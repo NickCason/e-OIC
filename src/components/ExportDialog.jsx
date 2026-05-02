@@ -8,7 +8,8 @@ import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob }
 import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast.js';
 import EtechLoader from './EtechLoader.jsx';
-import { holdAndFade } from '../lib/loaderHold.js';
+import LoadingPhrases from './LoadingPhrases.jsx';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -38,13 +39,14 @@ export default function ExportDialog({ job, onClose }) {
     setResult(null);
     setProgress({ percent: 0, phase: 'starting', detail: '' });
     try {
-      const r = await buildExport(job, {
+      const work = buildExport(job, {
         onProgress: setProgress,
         mode: buildMode,
         filename: filenameOverride,
       });
+      const r = await withMinDuration(work, 4500);
       setResult(r);
-      await holdAndFade(setIsFading);
+      await fadeOutLoader(setIsFading);
       setStage('done');
       setIsFading(false);
     } catch (e) {
@@ -73,37 +75,45 @@ export default function ExportDialog({ job, onClose }) {
     setIsFading(false);
     setTargetFilename(file.name);
     try {
-      const buf = await file.arrayBuffer();
-      const r = await parseChecklistXlsx(buf);
-      if (r.errors.length > 0) {
+      const work = (async () => {
+        const buf = await file.arrayBuffer();
+        const r = await parseChecklistXlsx(buf);
+        if (r.errors.length > 0) {
+          return { fallback: true };
+        }
+        const panels = await listPanels(job.id);
+        const localRowsBySheet = {};
+        const localSheetNotes = {};
+        for (const p of panels) {
+          const rows = await listAllRows(p.id);
+          for (const row of rows) {
+            if (!localRowsBySheet[row.sheet]) localRowsBySheet[row.sheet] = [];
+            localRowsBySheet[row.sheet].push(row);
+          }
+          for (const sn of Object.keys(schemaMap)) {
+            const text = await getSheetNotes(p.id, sn);
+            if (text) {
+              if (!localSheetNotes[p.name]) localSheetNotes[p.name] = {};
+              localSheetNotes[p.name][sn] = text;
+            }
+          }
+        }
+        const d = diffJobs(
+          { localJob: job, localPanels: panels, localRowsBySheet, localSheetNotes },
+          r, schemaMap, { direction: 'push' },
+        );
+        return { r, d };
+      })();
+      const out = await withMinDuration(work, 4500);
+      if (out.fallback) {
         toast.error('Couldn\'t read target file. Saving as new instead.');
         await generate('xlsx-only', `${stripExt(file.name)}.xlsx`);
         return;
       }
-      const panels = await listPanels(job.id);
-      const localRowsBySheet = {};
-      const localSheetNotes = {};
-      for (const p of panels) {
-        const rows = await listAllRows(p.id);
-        for (const row of rows) {
-          if (!localRowsBySheet[row.sheet]) localRowsBySheet[row.sheet] = [];
-          localRowsBySheet[row.sheet].push(row);
-        }
-        for (const sn of Object.keys(schemaMap)) {
-          const text = await getSheetNotes(p.id, sn);
-          if (text) {
-            if (!localSheetNotes[p.name]) localSheetNotes[p.name] = {};
-            localSheetNotes[p.name][sn] = text;
-          }
-        }
-      }
-      const d = diffJobs(
-        { localJob: job, localPanels: panels, localRowsBySheet, localSheetNotes },
-        r, schemaMap, { direction: 'push' },
-      );
+      const { r, d } = out;
       setTargetParsed(r);
       setTargetDiff(d);
-      await holdAndFade(setIsFading);
+      await fadeOutLoader(setIsFading);
       setStage('push-diff');
       setIsFading(false);
     } catch (err) {
@@ -240,7 +250,8 @@ export default function ExportDialog({ job, onClose }) {
         {stage === 'parsing-target' && (
           <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
             <EtechLoader variant="color" size={72} />
-            <div className="export-progress-text">Reading {targetFilename}…</div>
+            <LoadingPhrases set="diff" />
+            <div className="export-progress-sub">Reading {targetFilename}</div>
           </div>
         )}
 
@@ -261,7 +272,8 @@ export default function ExportDialog({ job, onClose }) {
         {stage === 'generating' && (
           <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
             <EtechLoader variant="color" size={72} />
-            <div className="export-progress-text">{progressText}</div>
+            <LoadingPhrases set="export" />
+            <div className="export-progress-sub">{progressText}</div>
             <div className="progress-bar" style={{ width: '100%' }}>
               <div className="progress-bar-fill" style={{ width: `${progress.percent || 0}%` }} />
             </div>

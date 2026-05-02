@@ -8,7 +8,8 @@ import schemaMap from '../schema.json' with { type: 'json' };
 import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
 import { toast } from '../lib/toast.js';
 import EtechLoader from './EtechLoader.jsx';
-import { holdAndFade } from '../lib/loaderHold.js';
+import LoadingPhrases from './LoadingPhrases.jsx';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -36,33 +37,39 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
     setIsFading(false);
     setFilename(file.name);
     try {
-      const buf = await file.arrayBuffer();
-      const r = await parseChecklistXlsx(buf);
-      if (r.errors.length > 0) {
-        setError(r.errors[0].kind === 'invalid-xlsx'
+      const work = (async () => {
+        const buf = await file.arrayBuffer();
+        const r = await parseChecklistXlsx(buf);
+        if (r.errors.length > 0) return { fallback: r.errors[0].kind };
+        const panels = await listPanels(job.id);
+        const localRowsBySheet = {};
+        const localSheetNotes = {};
+        for (const p of panels) {
+          const rows = await listAllRows(p.id);
+          for (const row of rows) {
+            if (!localRowsBySheet[row.sheet]) localRowsBySheet[row.sheet] = [];
+            localRowsBySheet[row.sheet].push(row);
+          }
+          for (const sn of Object.keys(schemaMap)) {
+            const text = await getSheetNotes(p.id, sn);
+            if (text) {
+              if (!localSheetNotes[p.name]) localSheetNotes[p.name] = {};
+              localSheetNotes[p.name][sn] = text;
+            }
+          }
+        }
+        const localState = { localJob: job, localPanels: panels, localRowsBySheet, localSheetNotes };
+        const d = diffJobs(localState, r, schemaMap, { direction: 'pull' });
+        return { r, d };
+      })();
+      const out = await withMinDuration(work, 4500);
+      if (out.fallback) {
+        setError(out.fallback === 'invalid-xlsx'
           ? 'Couldn\'t read this file.'
           : 'This .xlsx doesn\'t look like an e-OIC checklist.');
         setStage('error'); return;
       }
-      const panels = await listPanels(job.id);
-      const localRowsBySheet = {};
-      const localSheetNotes = {};
-      for (const p of panels) {
-        const rows = await listAllRows(p.id);
-        for (const row of rows) {
-          if (!localRowsBySheet[row.sheet]) localRowsBySheet[row.sheet] = [];
-          localRowsBySheet[row.sheet].push(row);
-        }
-        for (const sn of Object.keys(schemaMap)) {
-          const text = await getSheetNotes(p.id, sn);
-          if (text) {
-            if (!localSheetNotes[p.name]) localSheetNotes[p.name] = {};
-            localSheetNotes[p.name][sn] = text;
-          }
-        }
-      }
-      const localState = { localJob: job, localPanels: panels, localRowsBySheet, localSheetNotes };
-      const d = diffJobs(localState, r, schemaMap, { direction: 'pull' });
+      const { r, d } = out;
       setParsed(r);
       setDiff(d);
       const decisions = new Set();
@@ -70,7 +77,7 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         for (const rr of sd.removed) decisions.add(rr.id);
       }
       setRemovedDecisions(decisions);
-      await holdAndFade(setIsFading);
+      await fadeOutLoader(setIsFading);
       setStage('diff');
       setIsFading(false);
     } catch (err) {
@@ -92,11 +99,14 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
     setStage('applying');
     setIsFading(false);
     try {
-      await applyResyncToJob(job.id, parsed, diff, { removedRowIds: removedDecisions });
-      await updateJob(job.id, {
-        source: { kind: 'xlsx', filename, pulledAt: Date.now() },
-      });
-      await holdAndFade(setIsFading);
+      const work = (async () => {
+        await applyResyncToJob(job.id, parsed, diff, { removedRowIds: removedDecisions });
+        await updateJob(job.id, {
+          source: { kind: 'xlsx', filename, pulledAt: Date.now() },
+        });
+      })();
+      await withMinDuration(work, 4500);
+      await fadeOutLoader(setIsFading);
       toast.show('Re-sync applied');
       onApplied?.();
       onClose();
@@ -128,7 +138,8 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         {stage === 'parsing' && (
           <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
             <EtechLoader variant="color" size={72} />
-            <div className="export-progress-text">Reading {filename}…</div>
+            <LoadingPhrases set="diff" />
+            <div className="export-progress-sub">Reading {filename}</div>
           </div>
         )}
 
@@ -146,7 +157,8 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         {stage === 'applying' && (
           <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
             <EtechLoader variant="color" size={72} />
-            <div className="export-progress-text">Applying…</div>
+            <LoadingPhrases set="apply" />
+            <div className="export-progress-sub">Applying changes</div>
           </div>
         )}
 
