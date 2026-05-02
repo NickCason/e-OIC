@@ -1259,18 +1259,17 @@ textarea,
   86%, 100% { transform: translateX(0); }
 }
 
-/* PercentBar shimmer — a hard dark band sweeps slowly across the fill.
-   Plain overlay (no mix-blend-mode — was no-op in Android WebView) with
-   high opacity so it reads on energy-orange and accent fills alike. */
+/* PercentBar shimmer — a real DOM child (not a pseudo) so iOS Safari
+   reliably hits the animation. High-opacity dark band, ~3s sweep. */
 .percent-bar { position: relative; }
 .percent-bar__fill { position: relative; overflow: hidden; }
-.percent-bar__fill::after {
-  content: '';
+.percent-bar__shimmer {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   width: 60%;
+  display: block;
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -1279,9 +1278,16 @@ textarea,
     rgba(0, 0, 0, 0.55) 65%,
     transparent 100%
   );
+  -webkit-transform: translateX(-100%);
   transform: translateX(-100%);
+  -webkit-animation: percent-bar-shimmer 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   animation: percent-bar-shimmer 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform;
   pointer-events: none;
+}
+@-webkit-keyframes percent-bar-shimmer {
+  0%   { -webkit-transform: translateX(-100%); }
+  100% { -webkit-transform: translateX(200%); }
 }
 @keyframes percent-bar-shimmer {
   0%   { transform: translateX(-100%); }
@@ -1299,7 +1305,7 @@ textarea,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .percent-bar__fill::after,
+  .percent-bar__shimmer,
   .checklist-task-row.pulse-on { animation: none; }
   .job-card, .list-item { transition: none; }
 }

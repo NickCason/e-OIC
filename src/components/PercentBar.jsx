@@ -49,7 +49,9 @@ export default function PercentBar({
           borderRadius: height,
           transition: reduced ? undefined : 'width 600ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease',
         }}
-      />
+      >
+        {!reduced && pct > 0 && <span className="percent-bar__shimmer" aria-hidden="true" />}
+      </div>
     </div>
   );
 }
