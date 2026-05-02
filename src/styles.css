@@ -1259,10 +1259,9 @@ textarea,
   86%, 100% { transform: translateX(0); }
 }
 
-/* PercentBar shimmer — a hard, dark band sweeps the filled portion. The
-   band is wider than half the fill so it stays visible for most of the
-   cycle, and high-contrast (~50% black) so it reads on energy-orange and
-   accent fills alike. */
+/* PercentBar shimmer — a hard dark band sweeps slowly across the fill.
+   Plain overlay (no mix-blend-mode — was no-op in Android WebView) with
+   high opacity so it reads on energy-orange and accent fills alike. */
 .percent-bar { position: relative; }
 .percent-bar__fill { position: relative; overflow: hidden; }
 .percent-bar__fill::after {
@@ -1271,19 +1270,18 @@ textarea,
   top: 0;
   bottom: 0;
   left: 0;
-  width: 70%;
+  width: 60%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.35) 30%,
-    rgba(0, 0, 0, 0.55) 50%,
-    rgba(0, 0, 0, 0.35) 70%,
+    rgba(0, 0, 0, 0.55) 35%,
+    rgba(0, 0, 0, 0.75) 50%,
+    rgba(0, 0, 0, 0.55) 65%,
     transparent 100%
   );
   transform: translateX(-100%);
-  animation: percent-bar-shimmer 1.8s ease-in-out infinite;
+  animation: percent-bar-shimmer 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   pointer-events: none;
-  mix-blend-mode: multiply;
 }
 @keyframes percent-bar-shimmer {
   0%   { transform: translateX(-100%); }
