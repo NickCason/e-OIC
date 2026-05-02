@@ -25,6 +25,18 @@
              elapsed (so the launch beat is always perceptible).
            - Fade-out is an opacity transition (.is-out class). */
       html, body { margin: 0; }
+      /* iOS PWA standalone clips position:fixed elements at the layout
+         viewport's bottom edge, so #boot-splash's gradient cannot reach
+         into the home-indicator safe-area zone via negative `bottom`
+         insets. Instead, paint the same gradient on <body> while the
+         splash element is in the DOM — body's padding-bottom (set in
+         src/styles.css) extends its bg through the safe-area zone, and
+         the gradient there blends seamlessly with the fixed splash on
+         top. When JS removes #boot-splash, :has() stops matching and
+         body bg reverts to var(--bg). No class state to race. */
+      body:has(#boot-splash) {
+        background: linear-gradient(135deg, #EE6438 0%, #BE4829 45%, #7A2A18 100%);
+      }
       #boot-splash {
         position: fixed;
         left: 0;
