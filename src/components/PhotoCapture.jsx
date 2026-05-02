@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db.js';
 import { processIncomingPhoto } from '../lib/photoStore.js';
 import { readPhotoExif } from '../lib/photoExif.js';
@@ -37,6 +38,25 @@ export default function PhotoCapture({
   const [shutter, setShutter] = useState(false);
   const cameraRef = useRef(null);
   const libraryRef = useRef(null);
+
+  // Tile <-> lightbox shared-element transition. View Transitions API
+  // morphs the tapped tile into the lightbox frame (and back) using
+  // matching view-transition-name on each end. Falls back gracefully
+  // when the API isn't available (older Safari, anything pre-Chrome 111).
+  function openLightbox(i) {
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setLightboxIndex(i)));
+    } else {
+      setLightboxIndex(i);
+    }
+  }
+  function closeLightbox() {
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setLightboxIndex(null)));
+    } else {
+      setLightboxIndex(null);
+    }
+  }
 
   function fireShutter() {
     // Visual flash + haptic on tap. Vibrate is supported on Android
@@ -239,7 +259,8 @@ export default function PhotoCapture({
               <div
                 key={p.id}
                 className="photo-tile"
-                onClick={() => setLightboxIndex(i)}
+                style={{ viewTransitionName: lightboxIndex === null ? `photo-${p.id}` : 'none' }}
+                onClick={() => openLightbox(i)}
               >
                 <PhotoOverlay
                   src={p.blobUrl}
@@ -264,7 +285,7 @@ export default function PhotoCapture({
         <Lightbox
           photos={overlayPhotos}
           index={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
+          onClose={closeLightbox}
           onDelete={onDelete}
         />
       )}

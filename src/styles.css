@@ -1428,6 +1428,23 @@ textarea,
   to   { opacity: 1; }
 }
 
+/* Lightbox dock-stretch transition. View Transitions API morphs the
+   tapped tile into the lightbox frame and back. Both ends share a
+   per-photo view-transition-name so the browser auto-pairs them.
+   The cubic-bezier with a 1.56 y-overshoot gives the morph an
+   Apple-dock-style elastic settle instead of a flat ease. */
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 1ms;
+  }
+}
+
 /* Camera shutter beat — fires when "Take Photo" is tapped, before the
    system camera takes over. White flash overlays the viewport for a
    single frame, button does a quick scale + ring burst. Pairs with

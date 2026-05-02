@@ -64,6 +64,10 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
   const frameStyle = {
     width: `min(100vw, calc(100vh * ${w} / ${h}))`,
     aspectRatio: `${w} / ${h}`,
+    // Pair with the corresponding .photo-tile's view-transition-name so
+    // opening/closing the lightbox runs a shared-element morph instead
+    // of a hard cut.
+    viewTransitionName: `photo-${cur.id}`,
   };
 
   return (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import { listRowPhotos, deletePhoto } from '../db.js';
 import schemaMap from '../schema.json';
 import PhotoCapture from './PhotoCapture.jsx';
@@ -44,6 +45,21 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
     itemLabel,
   })), [photosWithUrls, job.name, panel.name, sheetName, itemLabel]);
 
+  function openLightbox(i) {
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setLightboxIndex(i)));
+    } else {
+      setLightboxIndex(i);
+    }
+  }
+  function closeLightbox() {
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setLightboxIndex(null)));
+    } else {
+      setLightboxIndex(null);
+    }
+  }
+
   async function handleDeletePhoto(p) {
     await deletePhoto(p.id);
     await refresh();
@@ -61,7 +77,8 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
           <div
             key={p.id}
             className="photo-tile"
-            onClick={() => setLightboxIndex(i)}
+            style={{ viewTransitionName: lightboxIndex === null ? `photo-${p.id}` : 'none' }}
+            onClick={() => openLightbox(i)}
           >
             <PhotoOverlay
               src={p.blobUrl}
@@ -98,7 +115,7 @@ export default function RowPhotos({ job, panel, sheetName, row, onChange }) {
         <Lightbox
           photos={overlayPhotos}
           index={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
+          onClose={closeLightbox}
           onDelete={handleDeletePhoto}
         />
       )}
