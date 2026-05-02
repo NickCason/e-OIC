@@ -677,12 +677,9 @@ textarea,
   -webkit-touch-callout: none;
   user-select: none;
 }
-.lightbox img {
-  max-width: 95vw;
-  max-height: 90vh;
-  object-fit: contain;
-  touch-action: pinch-zoom;
-}
+/* Image rules now live on .lightbox-img (see below); the old .lightbox img
+   rule was removed because its higher specificity capped width to 95vw,
+   pushing the image flush-left under absolute inset: 0. */
 .lightbox-btn {
   position: absolute;
   background: rgba(255, 255, 255, 0.12);
