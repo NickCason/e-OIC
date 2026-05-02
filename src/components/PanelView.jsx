@@ -20,6 +20,7 @@ export default function PanelView({ jobId, panelId }) {
   const [panel, setPanel] = useState(null);
   const [activeSheet, setActiveSheet] = useState('Panels');
   const [progress, setProgress] = useState({});
+  const [counts, setCounts] = useState({});
   const [panelPercent, setPanelPercent] = useState(0);
   const [showSheetPicker, setShowSheetPicker] = useState(false);
 
@@ -32,8 +33,9 @@ export default function PanelView({ jobId, panelId }) {
   }, [activeSheet]);
 
   async function refreshProgress() {
-    const { percent, sheetStatuses } = await getPanelProgress(panelId);
+    const { percent, sheetStatuses, sheetCounts } = await getPanelProgress(panelId);
     setProgress(sheetStatuses);
+    setCounts(sheetCounts);
     setPanelPercent(percent);
   }
 
@@ -126,7 +128,7 @@ export default function PanelView({ jobId, panelId }) {
             id: s,
             name: s,
             status: sheetStatus(s),
-            counts: { rows: 0, total: 0 },
+            counts: counts[s] || { rows: 0, photos: 0, required: 0 },
           }))}
           activeId={activeSheet}
           onPick={(id) => setActiveSheet(id)}

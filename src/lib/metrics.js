@@ -70,16 +70,19 @@ function sheetStatusFromRowsPhotos(sheet, rowCount, photoCountForSheet) {
 export async function getPanelProgress(panelId) {
   const allPhotos = await listPanelPhotos(panelId);
   const sheetStatuses = {};
+  const sheetCounts = {};
   let total = 0;
   for (const sheet of SHEET_ORDER) {
     const rows = await listRows(panelId, sheet);
     const sheetPhotos = allPhotos.filter((ph) => ph.sheet === sheet);
+    const required = (schemaMap[sheet]?.photo_checklist_columns || []).length;
     const status = sheetStatusFromRowsPhotos(sheet, rows.length, sheetPhotos.length);
     sheetStatuses[sheet] = status;
+    sheetCounts[sheet] = { rows: rows.length, photos: sheetPhotos.length, required };
     total += STATUS_WEIGHT[status];
   }
   const percent = Math.round((total / SHEET_ORDER.length) * 100);
-  return { percent, sheetStatuses };
+  return { percent, sheetStatuses, sheetCounts };
 }
 
 // Returns the merged task list for the job. Auto tasks read panel rows; manual
