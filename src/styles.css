@@ -1289,10 +1289,10 @@ textarea,
       transparent 0%,
       var(--shimmer-tone) 50%,
       transparent 100%
-    ) -75% 0 / 75% 100% no-repeat,
+    ) -300% 0 / 75% 100% no-repeat,
     var(--accent);
-  -webkit-animation: percent-bar-shimmer 2.4s ease-in-out infinite;
-  animation: percent-bar-shimmer 2.4s ease-in-out infinite;
+  -webkit-animation: percent-bar-shimmer 3s linear infinite;
+  animation: percent-bar-shimmer 3s linear infinite;
   will-change: background-position;
 }
 .percent-bar__fill.is-shimmering.is-complete {
@@ -1302,7 +1302,7 @@ textarea,
       transparent 0%,
       var(--shimmer-tone) 50%,
       transparent 100%
-    ) -75% 0 / 75% 100% no-repeat,
+    ) -300% 0 / 75% 100% no-repeat,
     var(--energy);
 }
 /* Dark theme: --accent is white, so the shimmer needs to be DARK to
@@ -1317,12 +1317,12 @@ textarea,
   --shimmer-tone: rgba(255, 255, 255, 0.28);
 }
 @-webkit-keyframes percent-bar-shimmer {
-  0%   { background-position: -75% 0, 0 0; }
-  100% { background-position: 175% 0, 0 0; }
+  0%   { background-position: -300% 0, 0 0; }
+  100% { background-position: 400% 0, 0 0; }
 }
 @keyframes percent-bar-shimmer {
-  0%   { background-position: -75% 0, 0 0; }
-  100% { background-position: 175% 0, 0 0; }
+  0%   { background-position: -300% 0, 0 0; }
+  100% { background-position: 400% 0, 0 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .percent-bar__fill.is-shimmering { -webkit-animation: none; animation: none; }
