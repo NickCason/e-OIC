@@ -156,6 +156,13 @@ body {
   -webkit-font-smoothing: antialiased;
   width: 100%;
   position: relative;
+  /* Extend body's bg through the iOS PWA home-indicator safe-area zone so
+     it paints to the very bottom of the screen instead of letting iOS's
+     system letterbox show through. Negative margin keeps content layout
+     unchanged. */
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom);
+  margin-bottom: calc(-1 * env(safe-area-inset-bottom));
 }
 
 input, select, textarea, button {

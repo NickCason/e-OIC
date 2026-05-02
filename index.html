@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="has-splash">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
@@ -16,27 +16,26 @@
     <style>
       /* Critical splash CSS — inlined so the gradient + animated mark
          paint before src/styles.css streams in.
+         The #boot-splash element is the SOLE paint surface for the
+         splash gradient. No body/html class state to manage, no race
+         where the class lingers after the element is gone — when JS
+         calls removeChild, the orange is gone the same tick.
          Dismissal is driven by JS, NOT a fixed CSS animation delay:
            - Splash holds until React mounts AND a minimum hold has
              elapsed (so the launch beat is always perceptible).
-           - Fade-out is an opacity transition (.is-out class).
-           - On full removal, .has-splash is stripped from html + body.
-         This eliminates the prior timing failures (no-animation runs,
-         splash dismissing before UI is ready, orange lingering over
-         the rendered UI). */
+           - Fade-out is an opacity transition (.is-out class). */
       html, body { margin: 0; }
-      html.has-splash, body.has-splash {
-        background: linear-gradient(135deg, #EE6438 0%, #BE4829 45%, #7A2A18 100%);
-      }
       #boot-splash {
         position: fixed;
-        top: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh;
+        /* Negative safe-area insets pull the element past the iOS PWA
+           home-indicator + status-bar zones so the gradient paints
+           edge-to-edge on the physical screen, not just the layout
+           viewport. Without this, iOS leaves a white system strip at
+           the bottom under the home pill. */
+        top: calc(-1 * env(safe-area-inset-top, 0px));
+        bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
         z-index: 9999;
         display: flex;
         align-items: center;
@@ -113,7 +112,7 @@
       }
     </style>
   </head>
-  <body class="has-splash">
+  <body>
     <div id="boot-splash" aria-hidden="true">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -141,8 +140,11 @@
       // is always perceptible, and force-dismiss after MAX_MS as a safety
       // net if main.jsx never calls in (network failure, JS error, etc.).
       (function () {
-        var MIN_MS = 800;     // minimum perceived splash duration
-        var MAX_MS = 5000;    // hard fallback timeout
+        // 2400ms = one full 2s EtechLoader cycle (corner pulses staggered
+        // through ~1.5s + bar pulses landing by ~1.92s) plus a 400ms
+        // breathing beat so the choreography doesn't feel cut off.
+        var MIN_MS = 2400;    // minimum perceived splash duration
+        var MAX_MS = 6000;    // hard fallback timeout
         var FADE_MS = 400;    // matches CSS opacity transition
         var startedAt = performance.now();
         var dismissed = false;
@@ -154,8 +156,6 @@
           if (el) el.classList.add('is-out');
           setTimeout(function () {
             if (el && el.parentNode) el.parentNode.removeChild(el);
-            document.documentElement.classList.remove('has-splash');
-            document.body.classList.remove('has-splash');
           }, FADE_MS);
         }
 
