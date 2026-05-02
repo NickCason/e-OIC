@@ -9,7 +9,35 @@ import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast.js';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
+import CountUp from './CountUp.jsx';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+
+// One-shot typewriter for the export success filename. Snaps to full
+// text under prefers-reduced-motion.
+function useTypewriter(text, { speedMs = 24, startMs = 80 } = {}) {
+  const [shown, setShown] = useState('');
+  useEffect(() => {
+    setShown('');
+    if (!text) return undefined;
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      setShown(text);
+      return undefined;
+    }
+    let i = 0;
+    let timer;
+    const tick = () => {
+      i += 1;
+      setShown(text.slice(0, i));
+      if (i < text.length) timer = setTimeout(tick, speedMs);
+    };
+    timer = setTimeout(tick, startMs);
+    return () => clearTimeout(timer);
+  }, [text, speedMs, startMs]);
+  return shown;
+}
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -280,20 +308,14 @@ export default function ExportDialog({ job, onClose }) {
           </div>
         )}
 
-        {stage === 'done' && result && (
-          <>
-            <div className="export-progress export-progress--done">
-              <div className="export-check"><Icon name="check" size={28} strokeWidth={2.5} /></div>
-              <div className="export-progress-text">Ready: {result.filename}</div>
-              <div className="export-summary-sub">{sizeMB} MB</div>
-            </div>
-            <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
-              <button className="ghost" onClick={onClose}>Done</button>
-              <button onClick={onDownload} disabled={sharing}><Icon name="download" size={16} /><span style={{ marginLeft: 6 }}>Download</span></button>
-              <button className="primary" onClick={onShare} disabled={sharing}><Icon name="link" size={16} /><span style={{ marginLeft: 6 }}>{sharing ? 'Sharing…' : 'Share / Email / Cloud'}</span></button>
-            </div>
-          </>
-        )}
+        {stage === 'done' && result && <DoneSuccess
+          result={result}
+          sizeMB={sizeMB}
+          sharing={sharing}
+          onClose={onClose}
+          onDownload={onDownload}
+          onShare={onShare}
+        />}
 
         {stage === 'error' && (
           <>
@@ -316,4 +338,40 @@ export default function ExportDialog({ job, onClose }) {
 
 function stripExt(s) {
   return s.replace(/\.[^.]+$/, '');
+}
+
+function DoneSuccess({ result, sizeMB, sharing, onClose, onDownload, onShare }) {
+  const filename = useTypewriter(result.filename, { speedMs: 22, startMs: 120 });
+  // sizeMB is a string like "4.7" — split for separate count animations
+  // so the decimal "ticks up" alongside the integer instead of jumping.
+  const [whole, decimal] = (sizeMB || '0.0').split('.');
+  return (
+    <>
+      <div className="export-progress export-progress--done">
+        <div className="export-check export-check--celebrate">
+          <Icon name="check" size={28} strokeWidth={2.5} />
+        </div>
+        <div className="export-progress-text export-progress-text--type">
+          Ready: <span className="export-filename-mono">{filename}</span><span className="type-caret" aria-hidden="true">|</span>
+        </div>
+        <div className="export-summary-sub export-size-countup">
+          <CountUp value={parseInt(whole, 10) || 0} duration={700} />.<CountUp value={parseInt(decimal, 10) || 0} duration={700} /> MB
+        </div>
+      </div>
+      <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+        <button className="ghost" onClick={onClose}>Done</button>
+        <button onClick={onDownload} disabled={sharing}>
+          <Icon name="download" size={16} /><span style={{ marginLeft: 6 }}>Download</span>
+        </button>
+        <button
+          className="primary share-btn-pulse"
+          onClick={onShare}
+          disabled={sharing}
+        >
+          <Icon name="link" size={16} />
+          <span style={{ marginLeft: 6 }}>{sharing ? 'Sharing…' : 'Share / Email / Cloud'}</span>
+        </button>
+      </div>
+    </>
+  );
 }
