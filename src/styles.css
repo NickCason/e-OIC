@@ -458,6 +458,9 @@ textarea,
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .stat-val {
   font-family: var(--font-display);
@@ -1619,7 +1622,12 @@ button.primary { background: var(--energy); border-color: var(--energy); color: 
 button.primary:hover { filter: brightness(1.08); }
 button.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
 button.ghost { background: transparent; }
-button.icon-btn { padding: 8px 10px; }
+button.icon-btn {
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 

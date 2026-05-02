@@ -140,7 +140,7 @@ export default function JobList() {
                 <div className="stat-val">{totals.photos}</div>
               </div>
               <div className="stat-tile">
-                <div className="stat-label">% Complete</div>
+                <div className="stat-label">Average</div>
                 <div className="stat-val">{totals.avgPercent}%</div>
               </div>
             </div>
