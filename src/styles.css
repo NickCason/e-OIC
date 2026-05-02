@@ -422,7 +422,11 @@ textarea,
   color: var(--text-dim);
   flex-shrink: 0;
 }
-.search-bar--with-icon {
+/* Combined selector (specificity 0,2,0) so these resets beat the later
+   .search-bar block (0,1,0). Without the bump, .search-bar's
+   margin-bottom: 10px stuck and pushed the input off-center beside
+   the icon. */
+.search-bar.search-bar--with-icon {
   flex: 1;
   min-width: 0;
   background: transparent;
@@ -433,7 +437,7 @@ textarea,
   outline: none;
   color: var(--text);
 }
-.search-bar--with-icon::placeholder { color: var(--text-dim); }
+.search-bar.search-bar--with-icon::placeholder { color: var(--text-dim); }
 
 /* Stat tiles */
 .stat-row {
