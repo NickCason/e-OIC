@@ -4,7 +4,7 @@ import { parseChecklistXlsx } from '../lib/xlsxParser.js';
 import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip.js';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
-import { DotmSquare3 } from './dotmatrix/DotmSquare3.tsx';
+import { RandomDotmSquare } from './dotmatrix/RandomDotmSquare.tsx';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -120,7 +120,7 @@ export default function PullDialog({ onClose, onCreated }) {
 
         {stage === 'parsing' && (
           <div className="export-progress">
-            <DotmSquare3 size={56} />
+            <RandomDotmSquare size={56} />
             <div className="export-progress-text">{progressLabel(progress, filename)}</div>
           </div>
         )}
@@ -174,7 +174,7 @@ export default function PullDialog({ onClose, onCreated }) {
 
         {stage === 'creating' && (
           <div className="export-progress">
-            <DotmSquare3 size={56} />
+            <RandomDotmSquare size={56} />
             <div className="export-progress-text">Creating job…</div>
           </div>
         )}
