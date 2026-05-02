@@ -14,19 +14,16 @@
     <meta name="apple-mobile-web-app-title" content="e-OIC" />
     <title>e-OIC — Onsite Investigation Checklist</title>
     <style>
-      /* Critical splash CSS. Inlined so it paints before src/styles.css
-         streams in and before main.jsx mounts React. Three layers cover
-         iOS PWA's quirks together:
-           1. <html>.has-splash gets the gradient on the root element —
-              this is the layer iOS paints in the bottom safe area under
-              the home indicator, regardless of body extents.
-           2. body.has-splash repeats the gradient so descendants that
-              consult body's bg (or any iOS path that prefers body) also
-              read orange.
-           3. #boot-splash is the fixed-position animated overlay.
-         Once main.jsx (and a fallback inline timer) remove the .has-splash
-         class from both html and body, both root elements return to their
-         normal backgrounds from the main stylesheet. */
+      /* Critical splash CSS — inlined so the gradient + animated mark
+         paint before src/styles.css streams in.
+         Dismissal is driven by JS, NOT a fixed CSS animation delay:
+           - Splash holds until React mounts AND a minimum hold has
+             elapsed (so the launch beat is always perceptible).
+           - Fade-out is an opacity transition (.is-out class).
+           - On full removal, .has-splash is stripped from html + body.
+         This eliminates the prior timing failures (no-animation runs,
+         splash dismissing before UI is ready, orange lingering over
+         the rendered UI). */
       html, body { margin: 0; }
       html.has-splash, body.has-splash {
         background: linear-gradient(135deg, #EE6438 0%, #BE4829 45%, #7A2A18 100%);
@@ -45,9 +42,11 @@
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #EE6438 0%, #BE4829 45%, #7A2A18 100%);
-        animation: boot-splash-out 380ms ease 800ms forwards;
+        opacity: 1;
+        transition: opacity 380ms ease;
         pointer-events: none;
       }
+      #boot-splash.is-out { opacity: 0; }
       #boot-splash svg {
         width: 38vmin;
         max-width: 220px;
@@ -60,13 +59,8 @@
       @keyframes boot-mark-in {
         to { opacity: 1; transform: scale(1); }
       }
-      @keyframes boot-splash-out {
-        to { opacity: 0; visibility: hidden; }
-      }
-      /* EtechLoader animation rules — duplicated here so the splash
-         animates BEFORE the main stylesheet loads. The loader uses
-         currentColor for all fills, so #boot-splash svg's color: white
-         flows through. */
+      /* EtechLoader animations — continuous loops, so the mark is alive
+         for the entire splash duration regardless of dismissal timing. */
       #boot-splash .etech-loader { --etech-dur: 2s; --etech-idle: 0.46; }
       #boot-splash .etech-loader .corner,
       #boot-splash .etech-loader .bar,
@@ -141,13 +135,39 @@
     </div>
     <div id="root"></div>
     <script>
-      // Strip the gradient backdrop class from both html and body once
-      // the splash fade finishes (380ms fade starting at 800ms == 1180ms
-      // total). Tiny inline so it runs even if main.jsx is slow to load.
-      setTimeout(function () {
-        document.documentElement.classList.remove('has-splash');
-        document.body.classList.remove('has-splash');
-      }, 1200);
+      // Splash dismissal coordinator. main.jsx (or any other code) calls
+      // window.__dismissSplash() when the app is mounted and ready to be
+      // shown. We hold the splash for at least MIN_MS so the launch beat
+      // is always perceptible, and force-dismiss after MAX_MS as a safety
+      // net if main.jsx never calls in (network failure, JS error, etc.).
+      (function () {
+        var MIN_MS = 800;     // minimum perceived splash duration
+        var MAX_MS = 5000;    // hard fallback timeout
+        var FADE_MS = 400;    // matches CSS opacity transition
+        var startedAt = performance.now();
+        var dismissed = false;
+
+        function commit() {
+          if (dismissed) return;
+          dismissed = true;
+          var el = document.getElementById('boot-splash');
+          if (el) el.classList.add('is-out');
+          setTimeout(function () {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+            document.documentElement.classList.remove('has-splash');
+            document.body.classList.remove('has-splash');
+          }, FADE_MS);
+        }
+
+        window.__dismissSplash = function () {
+          var elapsed = performance.now() - startedAt;
+          if (elapsed >= MIN_MS) commit();
+          else setTimeout(commit, MIN_MS - elapsed);
+        };
+
+        // Hard fallback. Independent of __dismissSplash being called.
+        setTimeout(function () { commit(); }, MAX_MS);
+      })();
     </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
