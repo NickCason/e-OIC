@@ -13,31 +13,43 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="e-OIC" />
     <title>e-OIC — Onsite Investigation Checklist</title>
-    <link rel="preload" as="image" href="./splash-mark.png" />
     <style>
-      /* Critical splash CSS — inlined so the orange gradient and mark
-         paint instantly, before src/styles.css streams in. The splash
-         auto-fades out 800ms after page render. matches the wrapper's
-         energy-orange branding. */
-      html, body { margin: 0; background: #BE4829; }
+      /* Critical splash CSS. Inlined so it paints before src/styles.css
+         streams in and before main.jsx mounts React. Two layers cooperate:
+           1. body.has-splash gets the gradient as its own background, so
+              the iOS PWA bottom safe area (under the home indicator) — which
+              shows BODY's bg, not the splash's fixed-position bg — is also
+              orange instead of the theme color.
+           2. #boot-splash is a fixed-position overlay carrying the
+              animated EtechLoader SVG. Fades out at the end of the launch
+              beat. Once main.jsx removes the .has-splash class, body
+              returns to var(--bg) from the main stylesheet. */
+      html, body { margin: 0; }
+      body.has-splash {
+        background: linear-gradient(135deg, #D6532F 0%, #BE4829 50%, #9C3A22 100%);
+      }
       #boot-splash {
         position: fixed;
-        inset: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         z-index: 9999;
         display: flex;
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #D6532F 0%, #BE4829 50%, #9C3A22 100%);
-        animation: boot-splash-out 380ms ease 700ms forwards;
+        animation: boot-splash-out 380ms ease 800ms forwards;
         pointer-events: none;
       }
-      #boot-splash img {
-        width: 38vmin;
-        max-width: 220px;
+      #boot-splash svg {
+        width: 30vmin;
+        max-width: 180px;
         height: auto;
+        color: #ffffff; /* loader uses currentColor for fills */
         opacity: 0;
         transform: scale(0.94);
-        animation: boot-mark-in 520ms cubic-bezier(0.22, 1, 0.36, 1) 60ms forwards;
+        animation: boot-mark-in 540ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
       }
       @keyframes boot-mark-in {
         to { opacity: 1; transform: scale(1); }
@@ -45,16 +57,91 @@
       @keyframes boot-splash-out {
         to { opacity: 0; visibility: hidden; }
       }
+      /* EtechLoader animation rules — duplicated here so the splash
+         animates BEFORE the main stylesheet loads. The loader uses
+         currentColor for all fills, so #boot-splash svg's color: white
+         flows through. */
+      #boot-splash .etech-loader { --etech-dur: 2s; --etech-idle: 0.46; }
+      #boot-splash .etech-loader .corner,
+      #boot-splash .etech-loader .bar,
+      #boot-splash .etech-loader .dot {
+        transform-box: fill-box;
+        transform-origin: center;
+        fill: currentColor;
+      }
+      #boot-splash .etech-loader .corner {
+        opacity: var(--etech-idle);
+        animation: boot-corner-pulse var(--etech-dur) cubic-bezier(0.37, 0, 0.22, 1) infinite both;
+      }
+      #boot-splash .etech-loader .corner.tl { animation-delay: 0s; }
+      #boot-splash .etech-loader .corner.tr { animation-delay: calc(var(--etech-dur) * 0.25); }
+      #boot-splash .etech-loader .corner.br { animation-delay: calc(var(--etech-dur) * 0.5); }
+      #boot-splash .etech-loader .bar {
+        opacity: var(--etech-idle);
+        animation: boot-bar-pulse var(--etech-dur) cubic-bezier(0.37, 0, 0.22, 1) infinite both;
+      }
+      #boot-splash .etech-loader .bar.b1 { animation-delay: calc(var(--etech-dur) * 0.75); }
+      #boot-splash .etech-loader .bar.b2 { animation-delay: calc(var(--etech-dur) * 0.833333); }
+      #boot-splash .etech-loader .bar.b3 { animation-delay: calc(var(--etech-dur) * 0.916667); }
+      #boot-splash .etech-loader .dot {
+        opacity: 0.48;
+        animation: boot-dot-breathe var(--etech-dur) cubic-bezier(0.37, 0, 0.63, 1) infinite both;
+      }
+      @keyframes boot-corner-pulse {
+        0%, 100% { transform: scale(1);     opacity: var(--etech-idle); }
+        8%       { transform: scale(1.02);  opacity: 0.58; }
+        14%      { transform: scale(1.065); opacity: 0.92; }
+        20%      { transform: scale(1.03);  opacity: 0.72; }
+        25%      { transform: scale(1);     opacity: var(--etech-idle); }
+      }
+      @keyframes boot-bar-pulse {
+        0%, 100% { transform: scale(1);     opacity: var(--etech-idle); }
+        2.5%     { transform: scale(1.02);  opacity: 0.58; }
+        4.5%     { transform: scale(1.075); opacity: 0.94; }
+        6.5%     { transform: scale(1.035); opacity: 0.72; }
+        8.333%   { transform: scale(1);     opacity: var(--etech-idle); }
+      }
+      @keyframes boot-dot-breathe {
+        0%, 100% { transform: scale(1);     opacity: 0.46; }
+        50%      { transform: scale(1.045); opacity: 0.9; }
+      }
       @media (prefers-reduced-motion: reduce) {
-        #boot-splash, #boot-splash img { animation-duration: 1ms; }
+        #boot-splash, #boot-splash svg,
+        #boot-splash .corner, #boot-splash .bar, #boot-splash .dot {
+          animation-duration: 1ms !important;
+        }
       }
     </style>
   </head>
-  <body>
+  <body class="has-splash">
     <div id="boot-splash" aria-hidden="true">
-      <img src="./splash-mark.png" alt="" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        class="etech-loader"
+        aria-hidden="true"
+        shape-rendering="geometricPrecision"
+      >
+        <g class="corner tl"><path d="M144.12,236.1h31.03c11.9,0,17.86-14.39,9.45-22.81l-80.72-80.72,28.85-28.85,81.03,81.03c8.06,8.06,21.84,2.35,21.84-9.04v-103.24h-163.13v91.98l71.65,71.65Z"/></g>
+        <g class="corner tr"><path d="M439.6,72.47h-163.13v71.51l-.07.07v31.83c0,11.61,14.04,17.43,22.25,9.22l80.61-80.61,28.51,28.51-80.3,80.3c-8.42,8.42-2.46,22.81,9.45,22.81h102.62v-71.58l.07-.07v-91.98Z"/></g>
+        <g class="corner br"><path d="M408.11,379.1l-28.85,28.85-80.61-80.61c-8.21-8.21-22.25-2.4-22.25,9.22v31.83l71.15,71.15h91.98v-162.63h-103.25c-11.21,0-16.82,13.55-8.9,21.48l80.72,80.72Z"/></g>
+        <g class="dot"><circle cx="255.94" cy="255.94" r="25.46"/></g>
+        <g>
+          <g transform="translate(-163.13 675.13) rotate(-90)"><g class="bar b1"><rect x="235.6" y="398.73" width="40.8" height="40.8"/></g></g>
+          <g transform="translate(-209.29 213.19) rotate(-45)"><g class="bar b2"><rect x="103.98" y="338.83" width="97.44" height="40.8"/></g></g>
+          <g transform="translate(-163.13 348.87) rotate(-90)"><g class="bar b3"><rect x="72.47" y="235.6" width="40.8" height="40.8"/></g></g>
+        </g>
+      </svg>
     </div>
     <div id="root"></div>
+    <script>
+      // Strip the gradient backdrop class once the splash animation
+      // finishes (380ms fade starting at 800ms == 1180ms total).
+      // Tiny inline so it runs even if main.jsx is slow to load.
+      setTimeout(function () {
+        document.body.classList.remove('has-splash');
+      }, 1200);
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

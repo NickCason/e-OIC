@@ -12,7 +12,6 @@ const PRECACHE = [
   './seed.json',
   './brand/mark-color.png',
   './brand/mark-white.png',
-  './splash-mark.png',
   './fonts/Montserrat-400.woff2',
   './fonts/Montserrat-500.woff2',
   './fonts/Montserrat-600.woff2',
