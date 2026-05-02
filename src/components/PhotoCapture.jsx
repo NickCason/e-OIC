@@ -9,6 +9,7 @@ import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
 import EtechLoader from './EtechLoader.jsx';
+import { holdAndFade } from '../lib/loaderHold.js';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.
@@ -29,6 +30,7 @@ export default function PhotoCapture({
 }) {
   const [photos, setPhotos] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [isFading, setIsFading] = useState(false);
   const [error, setError] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const cameraRef = useRef(null);
@@ -74,6 +76,7 @@ export default function PhotoCapture({
     }
     const files = Array.from(fileList);
     setBusy(true);
+    setIsFading(false);
     setError(null);
     let savedCount = 0;
     try {
@@ -111,12 +114,15 @@ export default function PhotoCapture({
       await refresh();
       if (savedCount === 0) {
         setError('Photo could not be saved. The file may not be a recognized image format.');
+      } else {
+        await holdAndFade(setIsFading);
       }
     } catch (e) {
       console.error(e);
       setError(e.message || 'Could not save photo');
     } finally {
       setBusy(false);
+      setIsFading(false);
     }
   }
 
@@ -176,8 +182,11 @@ export default function PhotoCapture({
         />
 
         {busy && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', marginBottom: 8 }}>
-            <EtechLoader variant="current" size={28} />
+          <div
+            className={`export-progress${isFading ? ' is-fading-out' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', marginBottom: 8, padding: 0 }}
+          >
+            <EtechLoader variant="current" size={36} />
             <span>Processing…</span>
           </div>
         )}

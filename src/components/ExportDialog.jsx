@@ -8,6 +8,7 @@ import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob }
 import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast.js';
 import EtechLoader from './EtechLoader.jsx';
+import { holdAndFade } from '../lib/loaderHold.js';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -23,6 +24,7 @@ export default function ExportDialog({ job, onClose }) {
   const [targetDiff, setTargetDiff] = useState(null);
   const [targetFilename, setTargetFilename] = useState('');
   const [sharing, setSharing] = useState(false);
+  const [isFading, setIsFading] = useState(false);
   const targetInputRef = useRef(null);
 
   const hasSource = !!job.source?.filename;
@@ -31,6 +33,7 @@ export default function ExportDialog({ job, onClose }) {
 
   async function generate(buildMode, filenameOverride) {
     setStage('generating');
+    setIsFading(false);
     setError(null);
     setResult(null);
     setProgress({ percent: 0, phase: 'starting', detail: '' });
@@ -41,7 +44,9 @@ export default function ExportDialog({ job, onClose }) {
         filename: filenameOverride,
       });
       setResult(r);
+      await holdAndFade(setIsFading);
       setStage('done');
+      setIsFading(false);
     } catch (e) {
       console.error(e);
       let msg = e.message || 'Export failed';
@@ -65,6 +70,7 @@ export default function ExportDialog({ job, onClose }) {
     if (!/\.xlsx?$/i.test(file.name)) { toast.error('Pick a .xlsx file.'); return; }
     if (file.size > MAX_FILE_BYTES) { toast.error('File looks too large (>50 MB).'); return; }
     setStage('parsing-target');
+    setIsFading(false);
     setTargetFilename(file.name);
     try {
       const buf = await file.arrayBuffer();
@@ -97,7 +103,9 @@ export default function ExportDialog({ job, onClose }) {
       );
       setTargetParsed(r);
       setTargetDiff(d);
+      await holdAndFade(setIsFading);
       setStage('push-diff');
+      setIsFading(false);
     } catch (err) {
       console.error(err);
       toast.error(err.message || 'Failed to read target file');
@@ -230,7 +238,10 @@ export default function ExportDialog({ job, onClose }) {
         )}
 
         {stage === 'parsing-target' && (
-          <div className="export-progress"><EtechLoader variant="color" size={56} /><div className="export-progress-text">Reading {targetFilename}…</div></div>
+          <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
+            <EtechLoader variant="color" size={72} />
+            <div className="export-progress-text">Reading {targetFilename}…</div>
+          </div>
         )}
 
         {stage === 'push-diff' && targetDiff && (
@@ -248,8 +259,8 @@ export default function ExportDialog({ job, onClose }) {
         )}
 
         {stage === 'generating' && (
-          <div className="export-progress">
-            <EtechLoader variant="color" size={56} />
+          <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
+            <EtechLoader variant="color" size={72} />
             <div className="export-progress-text">{progressText}</div>
             <div className="progress-bar" style={{ width: '100%' }}>
               <div className="progress-bar-fill" style={{ width: `${progress.percent || 0}%` }} />

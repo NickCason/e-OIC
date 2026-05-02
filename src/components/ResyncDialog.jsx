@@ -8,6 +8,7 @@ import schemaMap from '../schema.json' with { type: 'json' };
 import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
 import { toast } from '../lib/toast.js';
 import EtechLoader from './EtechLoader.jsx';
+import { holdAndFade } from '../lib/loaderHold.js';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -18,6 +19,7 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
   const [diff, setDiff] = useState(null);
   const [filename, setFilename] = useState('');
   const [removedDecisions, setRemovedDecisions] = useState(new Set());
+  const [isFading, setIsFading] = useState(false);
   const inputRef = useRef(null);
 
   const sourceHint = job.source?.filename;
@@ -31,6 +33,7 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
     if (!/\.xlsx?$/i.test(file.name)) { toast.error('Pick a .xlsx file.'); return; }
     if (file.size > MAX_FILE_BYTES) { toast.error('File looks too large (>50 MB).'); return; }
     setStage('parsing');
+    setIsFading(false);
     setFilename(file.name);
     try {
       const buf = await file.arrayBuffer();
@@ -67,7 +70,9 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         for (const rr of sd.removed) decisions.add(rr.id);
       }
       setRemovedDecisions(decisions);
+      await holdAndFade(setIsFading);
       setStage('diff');
+      setIsFading(false);
     } catch (err) {
       console.error(err);
       setError(err.message || String(err));
@@ -85,11 +90,13 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
 
   async function apply() {
     setStage('applying');
+    setIsFading(false);
     try {
       await applyResyncToJob(job.id, parsed, diff, { removedRowIds: removedDecisions });
       await updateJob(job.id, {
         source: { kind: 'xlsx', filename, pulledAt: Date.now() },
       });
+      await holdAndFade(setIsFading);
       toast.show('Re-sync applied');
       onApplied?.();
       onClose();
@@ -119,8 +126,8 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         )}
 
         {stage === 'parsing' && (
-          <div className="export-progress">
-            <EtechLoader variant="color" size={56} />
+          <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
+            <EtechLoader variant="color" size={72} />
             <div className="export-progress-text">Reading {filename}…</div>
           </div>
         )}
@@ -137,7 +144,10 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         )}
 
         {stage === 'applying' && (
-          <div className="export-progress"><EtechLoader variant="color" size={56} /><div className="export-progress-text">Applying…</div></div>
+          <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
+            <EtechLoader variant="color" size={72} />
+            <div className="export-progress-text">Applying…</div>
+          </div>
         )}
 
         {stage === 'error' && (

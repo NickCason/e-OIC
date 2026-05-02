@@ -5,6 +5,7 @@ import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip.js';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import EtechLoader from './EtechLoader.jsx';
+import { holdAndFade } from '../lib/loaderHold.js';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -22,6 +23,7 @@ export default function PullDialog({ onClose, onCreated }) {
   const [location, setLocation] = useState('');
   const [showAllWarnings, setShowAllWarnings] = useState(false);
   const [progress, setProgress] = useState({ phase: 'loading', detail: '' });
+  const [isFading, setIsFading] = useState(false);
   const inputRef = useRef(null);
 
   function pick() {
@@ -41,6 +43,7 @@ export default function PullDialog({ onClose, onCreated }) {
       return;
     }
     setStage('parsing');
+    setIsFading(false);
     setError(null);
     setFilename(file.name);
     try {
@@ -56,7 +59,9 @@ export default function PullDialog({ onClose, onCreated }) {
       }
       setParsed(r);
       setName(nameFromFilename(file.name));
+      await holdAndFade(setIsFading);
       setStage('confirm');
+      setIsFading(false);
     } catch (err) {
       console.error(err);
       setError(err.message || String(err));
@@ -67,6 +72,7 @@ export default function PullDialog({ onClose, onCreated }) {
   async function create() {
     if (!name.trim() || !parsed) return;
     setStage('creating');
+    setIsFading(false);
     try {
       const jobId = await applyParsedXlsxToNewJob(parsed, {
         name: name.trim(),
@@ -74,6 +80,7 @@ export default function PullDialog({ onClose, onCreated }) {
         location: location.trim(),
         source: { kind: 'xlsx', filename, pulledAt: Date.now() },
       });
+      await holdAndFade(setIsFading);
       toast.show(`Imported from ${filename}`);
       onCreated?.();
       nav(`/job/${jobId}`);
@@ -119,8 +126,8 @@ export default function PullDialog({ onClose, onCreated }) {
         )}
 
         {stage === 'parsing' && (
-          <div className="export-progress">
-            <EtechLoader variant="color" size={56} />
+          <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
+            <EtechLoader variant="color" size={72} />
             <div className="export-progress-text">{progressLabel(progress, filename)}</div>
           </div>
         )}
@@ -173,8 +180,8 @@ export default function PullDialog({ onClose, onCreated }) {
         )}
 
         {stage === 'creating' && (
-          <div className="export-progress">
-            <EtechLoader variant="color" size={56} />
+          <div className={`export-progress${isFading ? ' is-fading-out' : ''}`}>
+            <EtechLoader variant="color" size={72} />
             <div className="export-progress-text">Creating job…</div>
           </div>
         )}
