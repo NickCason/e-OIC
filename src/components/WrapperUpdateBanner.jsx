@@ -4,7 +4,9 @@ import { isInWrapper, getWrapperVersion, compareWrapperVersions, downloadAndInst
 import { toast } from '../lib/toast.js';
 
 const DISMISS_KEY = 'eoic-wrapper-update-dismissed';
-const VERSION_URL = '/wrapper-version.json';
+// Relative path so it resolves under the deployed base
+// (`/e-OIC/wrapper-version.json` on GH Pages, root on local preview).
+const VERSION_URL = './wrapper-version.json';
 const TROUBLE_URL = 'https://github.com/NickCason/e-OIC-android-wrapper/blob/main/docs/install.md';
 
 export default function WrapperUpdateBanner() {
