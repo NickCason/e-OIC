@@ -1,0 +1,99 @@
+/* EtechLoader — eTechGroup "T" mark with pulsing corners, sweeping bars,
+   and a breathing center dot. One set of keyframes; variants swap fill
+   color via CSS variables. */
+
+.etech-loader {
+  --etech-dur: 2s;
+  --etech-idle: 0.46;
+  --etech-soft-ease: cubic-bezier(0.37, 0, 0.22, 1);
+  --etech-breathe-ease: cubic-bezier(0.37, 0, 0.63, 1);
+  /* Defaults — overridden by variant classes below. */
+  --etech-corner-fill: currentColor;
+  --etech-bar-fill: currentColor;
+  --etech-dot-fill: currentColor;
+}
+
+.etech-loader--current {
+  --etech-corner-fill: currentColor;
+  --etech-bar-fill: currentColor;
+  --etech-dot-fill: currentColor;
+}
+
+.etech-loader--color {
+  --etech-corner-fill: #2b66b0;
+  --etech-bar-fill: #c74c27;
+  --etech-dot-fill: #2b66b0;
+}
+
+.etech-loader--white {
+  --etech-corner-fill: #fff;
+  --etech-bar-fill: #fff;
+  --etech-dot-fill: #fff;
+}
+
+.etech-loader--black {
+  --etech-corner-fill: #000;
+  --etech-bar-fill: #000;
+  --etech-dot-fill: #000;
+}
+
+.etech-loader .corner,
+.etech-loader .bar,
+.etech-loader .dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.etech-loader .corner {
+  fill: var(--etech-corner-fill);
+  opacity: var(--etech-idle);
+  animation: etech-corner-pulse var(--etech-dur) var(--etech-soft-ease) infinite both;
+}
+.etech-loader .corner.tl { animation-delay: 0s; }
+.etech-loader .corner.tr { animation-delay: calc(var(--etech-dur) * 0.25); }
+.etech-loader .corner.br { animation-delay: calc(var(--etech-dur) * 0.5); }
+
+.etech-loader .bar {
+  fill: var(--etech-bar-fill);
+  opacity: var(--etech-idle);
+  animation: etech-bar-pulse var(--etech-dur) var(--etech-soft-ease) infinite both;
+}
+.etech-loader .bar.b1 { animation-delay: calc(var(--etech-dur) * 0.75); }
+.etech-loader .bar.b2 { animation-delay: calc(var(--etech-dur) * 0.833333); }
+.etech-loader .bar.b3 { animation-delay: calc(var(--etech-dur) * 0.916667); }
+
+.etech-loader .dot {
+  fill: var(--etech-dot-fill);
+  opacity: 0.48;
+  animation: etech-dot-breathe var(--etech-dur) var(--etech-breathe-ease) infinite both;
+}
+
+@keyframes etech-corner-pulse {
+  0%, 100% { transform: scale(1);     opacity: var(--etech-idle); }
+  8%       { transform: scale(1.02);  opacity: 0.58; }
+  14%      { transform: scale(1.065); opacity: 0.92; }
+  20%      { transform: scale(1.03);  opacity: 0.72; }
+  25%      { transform: scale(1);     opacity: var(--etech-idle); }
+}
+@keyframes etech-bar-pulse {
+  0%, 100% { transform: scale(1);     opacity: var(--etech-idle); }
+  2.5%     { transform: scale(1.02);  opacity: 0.58; }
+  4.5%     { transform: scale(1.075); opacity: 0.94; }
+  6.5%     { transform: scale(1.035); opacity: 0.72; }
+  8.333%   { transform: scale(1);     opacity: var(--etech-idle); }
+}
+@keyframes etech-dot-breathe {
+  0%, 100% { transform: scale(1);     opacity: 0.46; }
+  50%      { transform: scale(1.045); opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .etech-loader .corner,
+  .etech-loader .bar,
+  .etech-loader .dot {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}

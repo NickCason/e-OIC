@@ -7,7 +7,7 @@ import { applyResyncToJob } from '../lib/xlsxRoundTrip.js';
 import schemaMap from '../schema.json' with { type: 'json' };
 import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
 import { toast } from '../lib/toast.js';
-import { RandomDotmSquare } from './dotmatrix/RandomDotmSquare.tsx';
+import EtechLoader from './EtechLoader.jsx';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -120,7 +120,7 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
 
         {stage === 'parsing' && (
           <div className="export-progress">
-            <RandomDotmSquare size={56} />
+            <EtechLoader variant="color" size={56} />
             <div className="export-progress-text">Reading {filename}…</div>
           </div>
         )}
@@ -137,7 +137,7 @@ export default function ResyncDialog({ job, onClose, onApplied }) {
         )}
 
         {stage === 'applying' && (
-          <div className="export-progress"><RandomDotmSquare size={56} /><div className="export-progress-text">Applying…</div></div>
+          <div className="export-progress"><EtechLoader variant="color" size={56} /><div className="export-progress-text">Applying…</div></div>
         )}
 
         {stage === 'error' && (
