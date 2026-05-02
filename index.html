@@ -112,7 +112,7 @@
       }
     </style>
   </head>
-  <body style="background: linear-gradient(135deg, #EE6438 0%, #BE4829 45%, #7A2A18 100%);">
+  <body style="background-color: #7A2A18;">
     <div id="boot-splash" aria-hidden="true">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -154,13 +154,14 @@
           dismissed = true;
           var el = document.getElementById('boot-splash');
           if (el) el.classList.add('is-out');
+          // Clear the inline body bg AT THE START of fade, not the end —
+          // during the 400ms opacity transition the splash is going 1→0
+          // over the rendered JobView, and any non-cream body bg would
+          // show as a transient dark flash through the gaps. By cleaning
+          // up now, the fade resolves smoothly into the real app bg.
+          document.body.removeAttribute('style');
           setTimeout(function () {
             if (el && el.parentNode) el.parentNode.removeChild(el);
-            // Clear the inline gradient on <body> set in static HTML so the
-            // safe-area-inset-bottom strip reverts to var(--bg) for normal
-            // app views. Inline style is the only thing that reliably
-            // overrides every theme/specificity case on iOS PWA.
-            document.body.style.background = '';
           }, FADE_MS);
         }
 
