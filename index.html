@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b5cad" />
+    <meta name="theme-color" content="#BE4829" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180.png" />
     <link rel="apple-touch-icon" href="./icon-192.png" />
@@ -13,8 +13,47 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="e-OIC" />
     <title>e-OIC — Onsite Investigation Checklist</title>
+    <link rel="preload" as="image" href="./splash-mark.png" />
+    <style>
+      /* Critical splash CSS — inlined so the orange gradient and mark
+         paint instantly, before src/styles.css streams in. The splash
+         auto-fades out 800ms after page render. matches the wrapper's
+         energy-orange branding. */
+      html, body { margin: 0; background: #BE4829; }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #D6532F 0%, #BE4829 50%, #9C3A22 100%);
+        animation: boot-splash-out 380ms ease 700ms forwards;
+        pointer-events: none;
+      }
+      #boot-splash img {
+        width: 38vmin;
+        max-width: 220px;
+        height: auto;
+        opacity: 0;
+        transform: scale(0.94);
+        animation: boot-mark-in 520ms cubic-bezier(0.22, 1, 0.36, 1) 60ms forwards;
+      }
+      @keyframes boot-mark-in {
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes boot-splash-out {
+        to { opacity: 0; visibility: hidden; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-splash, #boot-splash img { animation-duration: 1ms; }
+      }
+    </style>
   </head>
   <body>
+    <div id="boot-splash" aria-hidden="true">
+      <img src="./splash-mark.png" alt="" />
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

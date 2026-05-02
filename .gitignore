@@ -12,3 +12,8 @@ dist/
 # may contain real plant data we don't want in source control.
 Investigation Checklist*.xlsx
 .superpowers/
+
+# Local-only icon/asset generator scripts. The generated PNGs in
+# public/ are committed; the script stays out so we don't ship sharp
+# into the project's deps and can iterate freely.
+scripts/_local/
