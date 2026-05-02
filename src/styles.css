@@ -1259,29 +1259,35 @@ textarea,
   86%, 100% { transform: translateX(0); }
 }
 
-/* PercentBar darker-shimmer — slides a translucent dark band across the
-   filled portion to suggest activity even at steady state. */
+/* PercentBar shimmer — a hard, dark band sweeps the filled portion. The
+   band is wider than half the fill so it stays visible for most of the
+   cycle, and high-contrast (~50% black) so it reads on energy-orange and
+   accent fills alike. */
 .percent-bar { position: relative; }
 .percent-bar__fill { position: relative; overflow: hidden; }
 .percent-bar__fill::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 70%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.18) 45%,
-    rgba(0, 0, 0, 0.28) 50%,
-    rgba(0, 0, 0, 0.18) 55%,
+    rgba(0, 0, 0, 0.35) 30%,
+    rgba(0, 0, 0, 0.55) 50%,
+    rgba(0, 0, 0, 0.35) 70%,
     transparent 100%
   );
   transform: translateX(-100%);
-  animation: percent-bar-shimmer 2.2s linear infinite;
+  animation: percent-bar-shimmer 1.8s ease-in-out infinite;
   pointer-events: none;
+  mix-blend-mode: multiply;
 }
 @keyframes percent-bar-shimmer {
   0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  100% { transform: translateX(200%); }
 }
 
 /* Checklist task pulse — flares on uncompleted -> completed transition. */
