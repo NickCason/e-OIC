@@ -206,7 +206,7 @@ function SheetNotes({ panelId, sheet, panelName }) {
         <div className="name">📝 Sheet notes {text && <span style={{ color: 'var(--text-dim)', fontSize: 12, fontWeight: 400 }}>({text.length} chars)</span>}</div>
         <div className="count">{open ? '▾' : '▸'}</div>
       </div>
-      {open && (
+      <div className={`group-body-wrap${open ? ' open' : ''}`}>
         <div className="group-body">
           <textarea
             value={text}
@@ -215,7 +215,7 @@ function SheetNotes({ panelId, sheet, panelName }) {
             style={{ minHeight: 80 }}
           />
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -380,7 +380,9 @@ function Group({ name, count, children }) {
         <div className="name">{name}</div>
         <div className="count">{open ? '▾' : '▸'}</div>
       </div>
-      {open && <div className="group-body">{children}</div>}
+      <div className={`group-body-wrap${open ? ' open' : ''}`}>
+        <div className="group-body">{children}</div>
+      </div>
     </div>
   );
 }

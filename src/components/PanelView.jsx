@@ -7,6 +7,7 @@ import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import SheetPicker from './SheetPicker.jsx';
 import Marquee from './Marquee.jsx';
+import CountUp from './CountUp.jsx';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',
@@ -84,7 +85,7 @@ export default function PanelView({ jobId, panelId }) {
         <div className="hero">
           <div className="hero-pretitle">
             {idx >= 0
-              ? `PANEL · ${panelPercent}% COMPLETE · ${idx + 1} OF ${total} SHEETS`
+              ? <>PANEL · <CountUp value={panelPercent} />% COMPLETE · <CountUp value={idx + 1} /> OF <CountUp value={total} /> SHEETS</>
               : 'PANEL'}
           </div>
           <h1 className="hero-title"><Marquee>{panel?.name || 'Panel'}</Marquee></h1>
@@ -110,12 +111,14 @@ export default function PanelView({ jobId, panelId }) {
             <Icon name="grid" size={14} />
           </button>
         </div>
-        <SheetForm
-          job={job}
-          panel={panel}
-          sheetName={activeSheet}
-          onChange={refreshProgress}
-        />
+        <div className="sheet-anim" key={activeSheet}>
+          <SheetForm
+            job={job}
+            panel={panel}
+            sheetName={activeSheet}
+            onChange={refreshProgress}
+          />
+        </div>
       </main>
       {showSheetPicker && (
         <SheetPicker

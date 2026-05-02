@@ -6,6 +6,7 @@ import { nav } from '../App.jsx';
 import { toast } from '../lib/toast.js';
 import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
+import CountUp from './CountUp.jsx';
 import Icon from './Icon.jsx';
 import Marquee from './Marquee.jsx';
 import PullOrNewModal from './PullOrNewModal.jsx';
@@ -174,7 +175,7 @@ export default function JobList() {
                   <Marquee>
                     {j.client && <>{j.client} · </>}
                     {s
-                      ? `${s.panels} ${pl(s.panels, 'panel')} · ${s.photos} ${pl(s.photos, 'photo')}`
+                      ? <><CountUp value={s.panels} /> {pl(s.panels, 'panel')} · <CountUp value={s.photos} /> {pl(s.photos, 'photo')}</>
                       : '…'}
                     {j.updatedAt ? <> · {fmtRelative(j.updatedAt)}</> : null}
                   </Marquee>

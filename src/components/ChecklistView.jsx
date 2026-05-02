@@ -10,6 +10,7 @@ import AppBar from './AppBar.jsx';
 import PercentBar from './PercentBar.jsx';
 import ChecklistTaskRow from './ChecklistTaskRow.jsx';
 import Icon from './Icon.jsx';
+import CountUp from './CountUp.jsx';
 
 export default function ChecklistView({ jobId }) {
   const [job, setJob] = useState(null);
@@ -94,8 +95,8 @@ export default function ChecklistView({ jobId }) {
       <main>
         <div className="hero">
           <div className="hero-pretitle">JOB CHECKLIST</div>
-          <h1 className="hero-title">{percent}% complete</h1>
-          <div className="hero-sub">{totalChecked} of {total} tasks</div>
+          <h1 className="hero-title"><CountUp value={percent} />% complete</h1>
+          <div className="hero-sub"><CountUp value={totalChecked} /> of <CountUp value={total} /> tasks</div>
           <div className="hero-bar">
             <PercentBar percent={percent} height={8} ariaLabel={`${percent}% complete`} />
           </div>
@@ -109,7 +110,7 @@ export default function ChecklistView({ jobId }) {
             <section key={section} className="checklist-section">
               <header className="checklist-section__header">
                 <span className="checklist-section__label">{section}</span>
-                <span className="checklist-section__count">{checked}/{list.length}</span>
+                <span className="checklist-section__count"><CountUp value={checked} />/<CountUp value={list.length} /></span>
               </header>
               <div className="checklist-section__rows">
                 {list.map((t) => (

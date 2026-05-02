@@ -14,6 +14,7 @@ import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import EmptyState from './EmptyState.jsx';
 import Marquee from './Marquee.jsx';
+import CountUp from './CountUp.jsx';
 import PercentRing from './PercentRing.jsx';
 import PercentBar from './PercentBar.jsx';
 
@@ -185,7 +186,9 @@ export default function JobView({ jobId }) {
       <main>
         <div className="hero">
           <div className="hero-pretitle">
-            {`JOB · ${aggregate.jobPercent}% COMPLETE · ${aggregate.panelCount} PANEL${aggregate.panelCount === 1 ? '' : 'S'} · ${aggregate.photoCount} PHOTO${aggregate.photoCount === 1 ? '' : 'S'}`}
+            JOB · <CountUp value={aggregate.jobPercent} />% COMPLETE
+            {' · '}<CountUp value={aggregate.panelCount} /> PANEL{aggregate.panelCount === 1 ? '' : 'S'}
+            {' · '}<CountUp value={aggregate.photoCount} /> PHOTO{aggregate.photoCount === 1 ? '' : 'S'}
           </div>
           <h1 className="hero-title"><Marquee>{job.name || 'Loading…'}</Marquee></h1>
         </div>
@@ -197,7 +200,7 @@ export default function JobView({ jobId }) {
           <div className="checklist-cta__top">
             <span className="checklist-cta__title">Checklist</span>
             <span className="checklist-cta__count">
-              {checklistTotals.checked} / {checklistTotals.total} · {aggregate.jobPercent}%
+              <CountUp value={checklistTotals.checked} /> / <CountUp value={checklistTotals.total} /> · <CountUp value={aggregate.jobPercent} />%
             </span>
           </div>
           <PercentBar
@@ -221,7 +224,7 @@ export default function JobView({ jobId }) {
               <div className="grow">
                 <div className="title"><Marquee>{p.name}</Marquee></div>
                 <div className="subtitle">
-                  {s.rows} row{s.rows !== 1 ? 's' : ''} · {s.photos} photo{s.photos !== 1 ? 's' : ''}
+                  <CountUp value={s.rows} /> row{s.rows !== 1 ? 's' : ''} · <CountUp value={s.photos} /> photo{s.photos !== 1 ? 's' : ''}
                   {p.updatedAt && <> · {fmtRelative(p.updatedAt)}</>}
                 </div>
               </div>
@@ -232,7 +235,7 @@ export default function JobView({ jobId }) {
                 className="panel-row-ring"
                 ariaLabel={`${panelPercents[p.id] ?? 0}% complete`}
               >
-                <span className="panel-row-ring__pct">{panelPercents[p.id] ?? 0}</span>
+                <span className="panel-row-ring__pct"><CountUp value={panelPercents[p.id] ?? 0} /></span>
               </PercentRing>
               <div className="actions">
                 <button className="ghost icon-btn" onClick={(e) => { e.stopPropagation(); setEditing(p); }} aria-label="Edit">

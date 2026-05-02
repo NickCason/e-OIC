@@ -1229,6 +1229,52 @@ textarea,
   86%, 100% { transform: translateX(0); }
 }
 
+/* Cycling dot-matrix in EmptyState — fade in fresh on each variant. */
+.empty-state-matrix {
+  display: flex;
+  justify-content: center;
+  margin: var(--sp-2) 0 var(--sp-3);
+  opacity: 0.7;
+}
+.cycling-dotmatrix {
+  display: inline-flex;
+  animation: cycling-matrix-fade 480ms ease-out both;
+}
+@keyframes cycling-matrix-fade {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* PanelView sheet-form swap: snappy slide-in when activeSheet changes. */
+.sheet-anim {
+  animation: sheet-slide-in 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes sheet-slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* SheetForm row groups: smooth open/close height animation via the
+   grid-template-rows 0fr -> 1fr trick. No JS height measurement needed. */
+.group-body-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 180ms ease-out;
+  opacity: 0;
+}
+.group-body-wrap.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.group-body-wrap > .group-body {
+  overflow: hidden;
+  min-height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cycling-dotmatrix, .sheet-anim, .group-body-wrap { animation: none; transition: none; }
+}
+
 /* UpdatePill (sticky "new version available") */
 .update-pill {
   position: fixed;
