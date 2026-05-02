@@ -479,13 +479,54 @@ textarea,
   align-items: center;
   gap: var(--sp-3);
   cursor: pointer;
-  transition: border-color .15s, box-shadow .15s, transform .12s ease, filter .12s ease, background .15s ease;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color .15s,
+    box-shadow .2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform .14s cubic-bezier(0.4, 0, 0.2, 1),
+    filter .12s ease,
+    background .15s ease;
 }
-.job-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+.job-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
 .job-card:active {
-  transform: scale(0.985);
+  transform: translateY(0) scale(0.985);
   filter: brightness(1.08);
   background: var(--bg-3);
+  box-shadow: var(--shadow-lg);
+}
+/* One-shot conic sheen on the monogram ring on first paint of the
+   list. Sized just outside the ring so the sweep grazes the edge.
+   Both themes: cream-on-navy in light mode, white-on-navy in dark
+   mode — a subtle 14% white tint reads on both ground colors. */
+.job-card .percent-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.18) 24deg,
+    transparent 64deg,
+    transparent 360deg
+  );
+  opacity: 0;
+  pointer-events: none;
+  animation: job-ring-sheen 720ms cubic-bezier(0.4, 0, 0.2, 1) 220ms 1 both;
+  z-index: 1;
+}
+@keyframes job-ring-sheen {
+  0%   { opacity: 0; transform: rotate(-30deg); }
+  20%  { opacity: 1; }
+  90%  { opacity: 0.4; }
+  100% { opacity: 0; transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .job-card .percent-ring::before { animation: none; opacity: 0; }
 }
 .job-monogram {
   width: 40px;
