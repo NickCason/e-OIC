@@ -4,8 +4,13 @@ import { fmtTimestamp, fmtGps } from '../photoOverlay.js';
 
 // Themed photo lightbox.
 //
+// Each photo is shown inside a .lightbox-frame sized to the image's stored
+// aspect ratio so the live overlay sits ON the image (matching the
+// burned-in overlay produced by applyOverlay() at export time), not at
+// some viewport corner.
+//
 // Props:
-//   photos: [{ id, blobUrl, gps?, takenAt, jobName, panelName, sheetName, itemLabel }]
+//   photos: [{ id, blobUrl, w, h, gps?, takenAt, jobName, panelName, sheetName, itemLabel }]
 //   index: number — which photo to show first
 //   onClose: () => void
 //   onDelete?: (photo) => void  — when present, shows a trash button
@@ -52,6 +57,15 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
   const dateStr = cur.takenAt ? fmtTimestamp(new Date(cur.takenAt)) : '';
   const gpsStr = cur.gps ? `  ${fmtGps(cur.gps)}` : '';
 
+  // Frame fits the image inside the viewport while preserving aspect ratio.
+  // width = min(100vw, 100vh * w/h); aspect-ratio handles the height.
+  const w = cur.w || 1;
+  const h = cur.h || 1;
+  const frameStyle = {
+    width: `min(100vw, calc(100vh * ${w} / ${h}))`,
+    aspectRatio: `${w} / ${h}`,
+  };
+
   return (
     <div
       className="lightbox"
@@ -59,17 +73,22 @@ export default function Lightbox({ photos, index: initialIndex, onClose, onDelet
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <img
-        key={cur.id}
-        src={cur.blobUrl}
-        alt=""
-        className="lightbox-img"
+      <div
+        className="lightbox-frame"
+        style={frameStyle}
         onClick={(e) => e.stopPropagation()}
-      />
-      <div className="lightbox-overlay-text" aria-hidden="true">
-        <div>{cur.jobName} • {cur.panelName}</div>
-        <div>{cur.sheetName} — {cur.itemLabel}</div>
-        <div>{dateStr}{gpsStr}</div>
+      >
+        <img
+          key={cur.id}
+          src={cur.blobUrl}
+          alt=""
+          className="lightbox-img"
+        />
+        <div className="photo-overlay" aria-hidden="true">
+          <div>{cur.jobName} • {cur.panelName}</div>
+          <div>{cur.sheetName} — {cur.itemLabel}</div>
+          <div>{dateStr}{gpsStr}</div>
+        </div>
       </div>
 
       <button

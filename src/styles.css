@@ -1886,31 +1886,21 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Frame matches the photo's stored aspect ratio (set inline) so the
+   .photo-overlay inside it lands on the image's bottom-right corner —
+   the same place applyOverlay() bakes it for the export. */
+.lightbox-frame {
+  position: relative;
+  max-width: 100vw;
+  max-height: 100vh;
+  container-type: inline-size;
+}
 .lightbox-img {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   touch-action: pinch-zoom;
-}
-.lightbox-overlay-text {
-  position: absolute;
-  right: max(var(--sp-4), env(safe-area-inset-right));
-  bottom: calc(max(var(--sp-4), env(safe-area-inset-bottom)) + 56px);
-  max-width: min(420px, 80vw);
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.62);
-  color: #fff;
-  font: 600 12px/1.35 -apple-system, "Segoe UI", Roboto, sans-serif;
-  border-radius: 8px;
-  pointer-events: none;
-  text-align: left;
-}
-.lightbox-overlay-text > div {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* DiffView */
