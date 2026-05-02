@@ -1428,6 +1428,49 @@ textarea,
   to   { opacity: 1; }
 }
 
+/* Camera shutter beat — fires when "Take Photo" is tapped, before the
+   system camera takes over. White flash overlays the viewport for a
+   single frame, button does a quick scale + ring burst. Pairs with
+   navigator.vibrate(15) on supported devices (Android wrapper). */
+.shutter-flash {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  z-index: 9998;
+  pointer-events: none;
+  animation: shutter-flash 220ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes shutter-flash {
+  0%   { opacity: 0; }
+  18%  { opacity: 0.78; }
+  100% { opacity: 0; }
+}
+.shutter-btn { position: relative; overflow: hidden; }
+.shutter-btn.is-firing { transform: scale(0.96); transition: transform 90ms ease-out; }
+.shutter-btn.is-firing::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%) scale(0);
+  animation: shutter-ring 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+@keyframes shutter-ring {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(28); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shutter-flash { animation-duration: 1ms; }
+  .shutter-btn.is-firing { transform: none; }
+  .shutter-btn.is-firing::after { animation: none; opacity: 0; }
+}
+
 /* Directional route cross-fade. Same containing-block discipline as
    .sheet-anim: animate opacity + margin (NEVER transform), so modals
    and the lightbox inside any route still anchor to the viewport.

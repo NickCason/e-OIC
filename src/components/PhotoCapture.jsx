@@ -34,8 +34,19 @@ export default function PhotoCapture({
   const [isFading, setIsFading] = useState(false);
   const [error, setError] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [shutter, setShutter] = useState(false);
   const cameraRef = useRef(null);
   const libraryRef = useRef(null);
+
+  function fireShutter() {
+    // Visual flash + haptic on tap. Vibrate is supported on Android
+    // Chrome/Firefox/wrapper but no-op on iOS Safari, which is fine —
+    // the flash carries the moment on iOS.
+    setShutter(true);
+    if (navigator.vibrate) navigator.vibrate(15);
+    setTimeout(() => setShutter(false), 220);
+    cameraRef.current?.click();
+  }
 
   async function refresh() {
     if (rowId) {
@@ -169,7 +180,11 @@ export default function PhotoCapture({
         </div>
 
         <div className="btn-row" style={{ marginBottom: 12 }}>
-          <button className="primary" onClick={() => cameraRef.current?.click()} disabled={busy}>
+          <button
+            className={`primary shutter-btn${shutter ? ' is-firing' : ''}`}
+            onClick={fireShutter}
+            disabled={busy}
+          >
             <Icon name="camera" size={16} strokeWidth={2} /> Take Photo
           </button>
           <button onClick={() => libraryRef.current?.click()} disabled={busy}>
@@ -253,6 +268,7 @@ export default function PhotoCapture({
           onDelete={onDelete}
         />
       )}
+      {shutter && <div className="shutter-flash" aria-hidden="true" />}
     </div>
   );
 }
