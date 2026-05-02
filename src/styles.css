@@ -1504,6 +1504,34 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .progress-bar-fill { height: 100%; background: var(--ok); transition: width .25s; }
 
+/* Paced variant — when a parent has .progress-bar--paced, the fill
+   animates 0->100% via a deterministic CSS keyframe (no JS, no
+   transition wars). Used on the export-generating stage so the bar
+   matches the 4.5s phrase-cycling dwell instead of the actual work
+   time, which is usually much faster. */
+.progress-bar--paced .progress-bar-fill {
+  width: 0%;
+  -webkit-animation: progress-bar-pace 4500ms linear forwards;
+  animation: progress-bar-pace 4500ms linear forwards;
+  transition: none;
+  will-change: width;
+}
+@-webkit-keyframes progress-bar-pace {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+@keyframes progress-bar-pace {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar--paced .progress-bar-fill {
+    -webkit-animation: none;
+    animation: none;
+    width: 100%;
+  }
+}
+
 .modal-bg {
   position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
   display: flex; align-items: flex-end; justify-content: center;

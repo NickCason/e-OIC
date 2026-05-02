@@ -26,33 +26,11 @@ export default function ExportDialog({ job, onClose }) {
   const [targetFilename, setTargetFilename] = useState('');
   const [sharing, setSharing] = useState(false);
   const [isFading, setIsFading] = useState(false);
-  const [dwellPct, setDwellPct] = useState(0);
   const targetInputRef = useRef(null);
 
   const hasSource = !!job.source?.filename;
 
   useEffect(() => { getJobSizeEstimate(job.id).then(setStats); }, [job.id]);
-
-  // Paced progress bar — fills 0->100% over the full dwell duration so
-  // the bar matches the loader's airtime instead of racing ahead and
-  // sitting at 100% while phrases finish cycling.
-  const PACE_MS = 4500;
-  useEffect(() => {
-    if (stage !== 'generating' && stage !== 'parsing-target') {
-      setDwellPct(0);
-      return undefined;
-    }
-    const start = performance.now();
-    let raf;
-    const tick = () => {
-      const elapsed = performance.now() - start;
-      const pct = Math.min(100, (elapsed / PACE_MS) * 100);
-      setDwellPct(pct);
-      if (elapsed < PACE_MS) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => { if (raf) cancelAnimationFrame(raf); };
-  }, [stage]);
 
   async function generate(buildMode, filenameOverride) {
     setStage('generating');
@@ -296,8 +274,8 @@ export default function ExportDialog({ job, onClose }) {
             <EtechLoader variant="color" size={72} />
             <LoadingPhrases set="export" />
             <div className="export-progress-sub">{progressText}</div>
-            <div className="progress-bar" style={{ width: '100%' }}>
-              <div className="progress-bar-fill" style={{ width: `${dwellPct}%` }} />
+            <div className="progress-bar progress-bar--paced" style={{ width: '100%' }}>
+              <div className="progress-bar-fill" />
             </div>
           </div>
         )}
