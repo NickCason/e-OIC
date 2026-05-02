@@ -25,6 +25,14 @@
   --etech-dot-fill: #2b66b0;
 }
 
+/* On dark backgrounds the navy corners get muddy. Snap the branded
+   variant to all-white so it stays readable in dark theme. */
+[data-theme="dark"] .etech-loader--color {
+  --etech-corner-fill: #fff;
+  --etech-bar-fill: #fff;
+  --etech-dot-fill: #fff;
+}
+
 .etech-loader--white {
   --etech-corner-fill: #fff;
   --etech-bar-fill: #fff;
