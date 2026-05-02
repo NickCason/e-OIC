@@ -1207,6 +1207,10 @@ textarea,
   overflow: hidden;
   white-space: nowrap;
   vertical-align: bottom;
+  /* Extend the clip box so descenders (g/j/p/q/y) aren't sliced by overflow:hidden,
+     then absorb the visual height with a matching negative margin so layout stays put. */
+  padding-bottom: 0.22em;
+  margin-bottom: -0.22em;
 }
 .marquee-inner {
   display: inline-block;
