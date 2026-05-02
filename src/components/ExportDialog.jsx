@@ -170,12 +170,12 @@ export default function ExportDialog({ job, onClose }) {
               <button
                 type="button"
                 className={mode === 'zip' ? 'primary' : 'ghost'}
-                onClick={() => setMode('zip')}
+                onClick={() => mode === 'zip' ? generate('zip') : setMode('zip')}
               >Build Export (zip)</button>
               <button
                 type="button"
                 className={mode === 'xlsx-only' ? 'primary' : 'ghost'}
-                onClick={() => setMode('xlsx-only')}
+                onClick={() => mode === 'xlsx-only' ? pickTarget() : setMode('xlsx-only')}
               >Push to xlsx</button>
             </div>
 

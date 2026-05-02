@@ -8,6 +8,7 @@ import { BUILD_VERSION } from '../version.js';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
+import { DotmSquare3 } from './dotmatrix/DotmSquare3.tsx';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.
@@ -174,7 +175,12 @@ export default function PhotoCapture({
           }}
         />
 
-        {busy && <div style={{ color: 'var(--text-dim)', marginBottom: 8 }}>Processing…</div>}
+        {busy && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', marginBottom: 8 }}>
+            <DotmSquare3 size={28} />
+            <span>Processing…</span>
+          </div>
+        )}
         {error && <div style={{ color: 'var(--danger)', marginBottom: 8 }}>{error}</div>}
 
         {overlayPhotos.length === 0 && !busy && (
