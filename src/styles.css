@@ -1259,39 +1259,38 @@ textarea,
   86%, 100% { transform: translateX(0); }
 }
 
-/* PercentBar shimmer — a real DOM child (not a pseudo) so iOS Safari
-   reliably hits the animation. High-opacity dark band, ~3s sweep. */
+/* PercentBar shimmer — animated diagonal stripes ("barber pole") inside
+   the filled portion. Visible at any bar height including 6px because
+   it's a repeating pattern, not a single sweep. */
 .percent-bar { position: relative; }
 .percent-bar__fill { position: relative; overflow: hidden; }
 .percent-bar__shimmer {
   position: absolute;
   top: 0;
+  right: 0;
   bottom: 0;
   left: 0;
-  width: 60%;
   display: block;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.55) 35%,
-    rgba(0, 0, 0, 0.75) 50%,
-    rgba(0, 0, 0, 0.55) 65%,
-    transparent 100%
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 5px,
+    rgba(0, 0, 0, 0.4) 5px,
+    rgba(0, 0, 0, 0.4) 10px
   );
-  -webkit-transform: translateX(-100%);
-  transform: translateX(-100%);
-  -webkit-animation: percent-bar-shimmer 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  animation: percent-bar-shimmer 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  will-change: transform;
+  background-size: 200% 100%;
+  -webkit-animation: percent-bar-stripes 1.2s linear infinite;
+  animation: percent-bar-stripes 1.2s linear infinite;
+  will-change: background-position;
   pointer-events: none;
 }
-@-webkit-keyframes percent-bar-shimmer {
-  0%   { -webkit-transform: translateX(-100%); }
-  100% { -webkit-transform: translateX(200%); }
+@-webkit-keyframes percent-bar-stripes {
+  from { background-position: 0 0; }
+  to   { background-position: 14.14px 0; }
 }
-@keyframes percent-bar-shimmer {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+@keyframes percent-bar-stripes {
+  from { background-position: 0 0; }
+  to   { background-position: 14.14px 0; }
 }
 
 /* Checklist task pulse — flares on uncompleted -> completed transition. */
