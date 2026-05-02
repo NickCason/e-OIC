@@ -42,8 +42,13 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== location.origin) return;
 
   if (req.mode === 'navigate') {
+    // cache: 'no-store' bypasses the OS-level WebKit HTTP cache for the
+    // HTML shell, which on iOS PWA standalone is separate from the SW
+    // cache and can serve stale index.html across launches even after
+    // the SW updates. We still mirror the fresh response into the SW
+    // cache for offline fallback.
     e.respondWith(
-      fetch(req).then((r) => {
+      fetch(req, { cache: 'no-store' }).then((r) => {
         const copy = r.clone();
         caches.open(CACHE).then((c) => c.put(req, copy));
         return r;
