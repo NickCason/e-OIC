@@ -18,6 +18,12 @@ export interface IBeforeInstallPromptEvent extends Event {
     prompt(): Promise<void>;
 }
 
+/* eslint-disable @typescript-eslint/naming-convention, no-underscore-dangle --
+ * Augmenting built-in DOM interfaces (Window, Navigator, WindowEventMap)
+ * requires their exact names — they can't carry the I-prefix the standards
+ * apply to interfaces we own. __BUILD_VERSION__ is the literal Vite
+ * `define` token; its name is fixed by vite.config.js.
+ */
 declare global {
     /** Injected by Vite's `define` (see vite.config.js) from version.json
      *  at build time. Consumed via src/version.ts → BUILD_VERSION. */
@@ -41,6 +47,7 @@ declare global {
         readonly MSStream?: unknown;
     }
 }
+/* eslint-enable @typescript-eslint/naming-convention, no-underscore-dangle */
 
 // Module marker — required for the `declare global` block above to be
 // treated as an augmentation rather than a script file.
