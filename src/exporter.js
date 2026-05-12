@@ -17,7 +17,7 @@ import {
 } from './db.js';
 import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
 import { safe, rowLabel, shareSafeFilename } from './lib/paths';
-import { isInWrapper, shareViaCapacitor } from './lib/wrapperBridge.js';
+import { isInWrapper, shareViaCapacitor } from './lib/wrapperBridge';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',

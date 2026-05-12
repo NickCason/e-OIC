@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Icon from './Icon.jsx';
-import { isInWrapper, getWrapperVersion, compareWrapperVersions, downloadAndInstallApk } from '../lib/wrapperBridge.js';
+import { isInWrapper, getWrapperVersion, compareWrapperVersions, downloadAndInstallApk } from '../lib/wrapperBridge';
 import { toast } from '../lib/toast';
 
 const DISMISS_KEY = 'eoic-wrapper-update-dismissed';
