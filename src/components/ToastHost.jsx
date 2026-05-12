@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { subscribe, dismiss } from '../lib/toast.js';
+import { subscribe, dismiss } from '../lib/toast';
 import Icon from './Icon.jsx';
 
 export default function ToastHost() {

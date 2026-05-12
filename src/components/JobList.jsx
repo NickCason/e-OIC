@@ -3,7 +3,7 @@ import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJo
 import { getJobPercent } from '../lib/metrics.js';
 import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
 import CountUp from './CountUp.jsx';

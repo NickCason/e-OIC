@@ -5,7 +5,7 @@ import {
 } from '../db.js';
 import { getJobChecklist, getJobPercent, CHECKLIST_SECTIONS } from '../lib/metrics.js';
 import { nav } from '../App.jsx';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
 import PercentBar from './PercentBar.jsx';
 import ChecklistTaskRow from './ChecklistTaskRow.jsx';

@@ -7,7 +7,7 @@ import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
 import { applyTheme, saveTheme } from '../lib/theme';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation.js';
 import { reloadSampleJob } from '../lib/seed.js';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 
 export default function SettingsView() {
   const [theme, setTheme] = useState('auto');

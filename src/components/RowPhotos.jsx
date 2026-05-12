@@ -5,7 +5,7 @@ import schemaMap from '../schema.json';
 import PhotoCapture from './PhotoCapture.jsx';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import PhotoOverlay from './PhotoOverlay.jsx';
 import { rowDisplayLabel } from '../lib/rowLabel';
 

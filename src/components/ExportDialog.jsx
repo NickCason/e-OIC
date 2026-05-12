@@ -6,7 +6,7 @@ import { parseChecklistXlsx } from '../lib/xlsxParser.js';
 import { diffJobs } from '../lib/jobDiff.js';
 import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
 import schemaMap from '../schema.json' with { type: 'json' };
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
 import CountUp from './CountUp.jsx';

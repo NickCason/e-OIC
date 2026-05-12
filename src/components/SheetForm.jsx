@@ -5,7 +5,7 @@ import {
   getSheetNotes, setSheetNotes, listRowPhotos, exportJobJSON, importJSON,
   listPanels, listAllRows,
 } from '../db.js';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import { rowPhotoFolder } from '../lib/paths';
 import { rowDisplayLabel } from '../lib/rowLabel';
 import {
