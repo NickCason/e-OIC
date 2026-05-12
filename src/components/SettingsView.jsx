@@ -5,7 +5,7 @@ import { nav } from '../App.jsx';
 import { BUILD_VERSION } from '../version.js';
 import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
 import { applyTheme, saveTheme } from '../lib/theme';
-import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation.js';
+import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation';
 import { reloadSampleJob } from '../lib/seed.js';
 import { toast } from '../lib/toast';
 

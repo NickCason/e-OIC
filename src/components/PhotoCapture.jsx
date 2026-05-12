@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db.js';
 import { processIncomingPhoto } from '../lib/photoStore.js';
 import { readPhotoExif } from '../lib/photoExif.js';
-import { maybeGetGps } from '../lib/geolocation.js';
+import { maybeGetGps } from '../lib/geolocation';
 import { toast } from '../lib/toast';
 import { BUILD_VERSION } from '../version.js';
 import Icon from './Icon.jsx';
