@@ -6,7 +6,7 @@ import { BUILD_VERSION } from '../version';
 import { getSetting, setSetting, exportAllJSON, importJSON } from '../db';
 import { applyTheme, saveTheme } from '../lib/theme';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation';
-import { reloadSampleJob } from '../lib/seed.js';
+import { reloadSampleJob } from '../lib/seed';
 import { toast } from '../lib/toast';
 
 export default function SettingsView() {
