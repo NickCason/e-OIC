@@ -69,7 +69,7 @@ jobs:
       - run: npm ci
       - run: npm run test:unit
 
-  lint:
+  lint-and-typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,10 +78,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run lint
 
   deploy:
-    needs: [build, e2e-export, unit-test, lint]
+    needs: [build, e2e-export, unit-test, lint-and-typecheck]
     if: startsWith(github.ref, 'refs/heads/releases/v')
     runs-on: ubuntu-latest
     environment:

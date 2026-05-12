@@ -3,6 +3,13 @@ dist/
 .DS_Store
 *.log
 .vite/
+
+# TypeScript composite-project artifacts. tsc --build emits these for the
+# referenced node project (tsconfig.node.json); CI uses --noEmit so they
+# never appear in CI, but local --build invocations create them.
+*.tsbuildinfo
+scripts/placeholder.mjs
+scripts/placeholder.d.mts
 .env
 .env.local
 .idea/
