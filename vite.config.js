@@ -51,4 +51,8 @@ export default defineConfig({
   server: {
     host: true,
   },
+  preview: {
+    host: true,
+    allowedHosts: ['nicks-macbook-air.taild99f50.ts.net'],
+  },
 });
