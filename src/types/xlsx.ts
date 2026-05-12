@@ -3,11 +3,13 @@
 // src/lib/xlsxRoundTrip.js. The parser writes a single result object whose
 // shape these interfaces describe; jobDiff consumes that shape directly.
 
-import type { RowData } from './job';
+import type { IJob, IPanel, IRow, RowData } from './job';
 
 // ===== Parser output =====
 
 export interface IParsedJobMeta {
+    /** null when the Panels sheet has no 'Job Name' cell. Consumers must
+     *  coalesce: `parsed.jobMeta.name ?? existingJob.name`. */
     name: string | null;
     client: string;
     location: string;
@@ -100,28 +102,28 @@ export interface IPanelsDiff {
     matched: IPanelMatch[];
 }
 
-export interface IRowFieldChange {
-    field: string;
-    old: RowValueOld;
-    new: RowValueOld;
-}
-
 // Values flowing through jobDiff may be anything that round-tripped through
 // xlsx (number, string, boolean, null) plus possibly undefined when read off
 // a sparse data map. Keep this loose.
-export type RowValueOld = string | number | boolean | null | undefined;
+export type DiffCellValue = string | number | boolean | null | undefined;
+
+export interface IRowFieldChange {
+    field: string;
+    old: DiffCellValue;
+    new: DiffCellValue;
+}
 
 export interface ISheetRowDiff {
     added: IParsedRow[];
-    removed: Array<{ id: string; data: RowData; notes: string }>;
+    removed: IRow[];
     modified: Array<{
-        local: { id: string; data: RowData; notes: string };
+        local: IRow;
         xlsx: IParsedRow;
         label: string;
         fieldChanges: IRowFieldChange[];
     }>;
     unchanged: Array<{
-        local: { id: string; data: RowData };
+        local: IRow;
         xlsx: IParsedRow;
         label: string;
     }>;
@@ -147,6 +149,13 @@ export interface IJobDiff {
     skippedSheets: Array<string | undefined>;
     skippedColumns: Array<{ sheetName: string | undefined; columnName: string | undefined }>;
     missingSheets: Array<string | undefined>;
+}
+
+export interface IDiffJobsLocalState {
+    localJob: IJob | null;
+    localPanels: IPanel[];
+    localRowsBySheet: Record<string, IRow[]>;
+    localSheetNotes: Record<string, Record<string, string>>;
 }
 
 // ===== Re-sync decisions (xlsxRoundTrip.applyResyncToJob) =====
