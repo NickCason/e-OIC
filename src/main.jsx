@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './styles.css';
-import { loadInitialTheme } from './lib/theme.js';
+import { loadInitialTheme } from './lib/theme';
 import { registerServiceWorker } from './lib/swUpdate.js';
 
 // Apply theme as early as possible to avoid a flash. We don't await this

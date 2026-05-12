@@ -4,7 +4,7 @@ import Icon from './Icon.jsx';
 import { nav } from '../App.jsx';
 import { BUILD_VERSION } from '../version.js';
 import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
-import { applyTheme, saveTheme } from '../lib/theme.js';
+import { applyTheme, saveTheme } from '../lib/theme';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation.js';
 import { reloadSampleJob } from '../lib/seed.js';
 import { toast } from '../lib/toast.js';
