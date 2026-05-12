@@ -17,15 +17,21 @@
 
 ## Prerequisites verified
 
-- [ ] `tsconfig.json` and `tsconfig.node.json` exist with strict + tightening flags.
-- [ ] `eslint.config.js` encodes eTech standards verbatim (FlatCompat + Airbnb + Airbnb-TS + jsx-a11y + react-hooks + ts-eslint).
-- [ ] `tsx`, `@typescript-eslint/*`, Airbnb config packages installed.
-- [ ] `src/types/piexifjs.d.ts` present.
-- [ ] `src/types/placeholder.ts` exists (this plan deletes it).
-- [ ] CI workflow has `typecheck` step in `lint-and-typecheck` job.
-- [ ] Plan B merge SHA recorded: `<filled in by Plan B handoff>`.
+- [x] `tsconfig.json` and `tsconfig.node.json` exist with strict + tightening flags. **Note:** `tsconfig.node.json` does NOT have `noEmit: true` (composite-project rules forbid it). The node config also has `composite: true`, so `tsc --build` emits `.d.mts`/`.mjs`/`.tsbuildinfo` artifacts gitignored under `*.tsbuildinfo` + `scripts/placeholder.{mjs,d.mts}`.
+- [x] `eslint.config.js` encodes eTech standards verbatim (FlatCompat + Airbnb + Airbnb-TS + jsx-a11y + react-hooks + ts-eslint).
+- [x] `tsx`, `@typescript-eslint/*`, Airbnb config packages installed. Also installed: `eslint-import-resolver-typescript` (was missing from Plan B's spec but required by the flat config's `import/resolver` block).
+- [x] `src/types/piexifjs.d.ts` present (narrow surface — `load` only; default + named export shape).
+- [ ] ~~`src/types/placeholder.ts` exists (this plan deletes it).~~ **Plan B did NOT create this file** — there were already 24 `.tsx` files under `src/components/dotmatrix/` matching tsconfig's include glob, so TS18003 never fired. Instead, Plan B created `scripts/placeholder.mts` for the *node* tsconfig (whose include matches no on-disk files until Plan D). **Plan D** must delete `scripts/placeholder.mts` when it adds `vite.config.ts` + `scripts/**/*.mts`.
+- [x] CI workflow has `typecheck` step in `lint-and-typecheck` job.
+- [x] Plan B merge SHA recorded: `5858a91d08c6d02723faecde21ae837702bb9dee`.
 - [ ] Spec reviewed: `docs/superpowers/specs/2026-05-12-etech-standards-and-typescript-strict-design.md`.
 - [ ] Memory `project_eoic_etech_migration.md` shows Plans A and B complete.
+
+### Deferrals inherited from Plan B (Plan C/D must resolve)
+
+- `tsconfig.json` `exclude` list contains `src/components/dotmatrix` because those 24 pre-existing `.tsx` files fail `exactOptionalPropertyTypes` + `noUncheckedIndexedAccess`. Same dir is also in `eslint.config.js` global ignores. Plan C should not touch these (they belong to Plan D — components). When Plan D fixes them, remove BOTH excludes.
+- `eslint.config.js` has a block that turns off 16 stylistic `@typescript-eslint/*` rules (`brace-style`, `comma-dangle`, `comma-spacing`, `func-call-spacing`, `indent`, `keyword-spacing`, `lines-between-class-members`, `no-extra-parens`, `no-extra-semi`, `no-throw-literal`, `object-curly-spacing`, `quotes`, `semi`, `space-before-blocks`, `space-before-function-paren`, `space-infix-ops`) because `airbnb-typescript@18` references them but TS-ESLint v8 moved them to `@stylistic/eslint-plugin`. Same root cause: `@typescript-eslint/member-delimiter-style` from the standards source is omitted with a NOTE comment. **Plan D** should install `@stylistic/eslint-plugin`, replace the disable-block with proper re-bindings, and re-enable `member-delimiter-style` under the `@stylistic` namespace.
+- `.npmrc` with `legacy-peer-deps=true` exists because `eslint-config-airbnb@19` peer-depends on `eslint ^7/^8` while the spec pins `eslint@9`. Can be removed if airbnb config is replaced with `@stylistic`-based alternatives (also a Plan D candidate).
 
 ---
 
