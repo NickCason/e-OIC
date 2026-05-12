@@ -7,7 +7,7 @@ import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import { toast } from '../lib/toast.js';
 import PhotoOverlay from './PhotoOverlay.jsx';
-import { rowDisplayLabel } from '../lib/rowLabel.js';
+import { rowDisplayLabel } from '../lib/rowLabel';
 
 // Row-level photos: tied to a specific row (one PLC card, one drive, etc.).
 // Inside the export these become Photos/{Panel}/{Sheet}/{RowLabel}/IMG_001.jpg.

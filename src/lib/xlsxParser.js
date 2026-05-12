@@ -226,7 +226,7 @@ export async function parseChecklistXlsx(arrayBuffer, { onProgress } = {}) {
 
   // Match row-note assignments back to parsed rows by (sheet, panelName, label).
   emit('matching', 'Matching notes to rows');
-  const { rowDisplayLabel } = await import('./rowLabel.js');
+  const { rowDisplayLabel } = await import('./rowLabel');
   for (const assignment of notes.rowNoteAssignments) {
     const rows = result.rowsBySheet[assignment.sheetName];
     if (!rows) {

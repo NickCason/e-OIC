@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Icon from './Icon.jsx';
-import { rowDisplayLabel } from '../lib/rowLabel.js';
+import { rowDisplayLabel } from '../lib/rowLabel';
 import schemaMap from '../schema.json' with { type: 'json' };
 
 export default function DiffView({ diff, direction = 'pull', removedDecisions, onToggleRemoved }) {

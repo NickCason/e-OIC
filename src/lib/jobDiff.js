@@ -1,7 +1,7 @@
 // jobDiff.js — pure-function diff between a local job's IndexedDB state and
 // a parsed xlsx. Used by Re-sync (direction='pull') and Push (direction='push').
 
-import { rowDisplayLabel } from './rowLabel.js';
+import { rowDisplayLabel } from './rowLabel';
 
 function valuesEqual(a, b) {
   // Treat '' / null / undefined as equivalent.

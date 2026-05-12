@@ -5,6 +5,26 @@
 
 import type { IJob, IPanel, IRow, RowData } from './job';
 
+// ===== Schema (src/schema.json) =====
+//
+// Minimal shape consumed by the rest of the codebase. The JSON has more
+// fields (sheet_name, header_row, first_data_row, groups), but the only
+// surface used today is the per-column header. Plan C/D fills out as needed.
+
+export interface ISheetSchemaColumn {
+    index: number;
+    group: string;
+    header: string;
+}
+
+export interface ISheetSchema {
+    sheet_name?: string;
+    header_row?: number;
+    first_data_row?: number;
+    columns: ISheetSchemaColumn[];
+    photo_checklist_columns?: string[];
+}
+
 // ===== Parser output =====
 
 export interface IParsedJobMeta {
