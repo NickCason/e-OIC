@@ -20,14 +20,26 @@ npm run preview      # serve dist/ locally
 
 ## Deploy to GitHub Pages
 
-This repo includes a GitHub Actions workflow that auto-deploys to Pages on
-every push to `develop`.
+This repo includes a GitHub Actions workflow that gates CI on every push and
+auto-deploys to Pages **only from release branches** (`releases/vX.Y.Z`).
+
+`develop` is the trunk. Pushes to `develop` or any `feature_*/**` branch run
+the four gating jobs (`build`, `e2e-export`, `unit-test`, `lint`) but do not
+deploy.
 
 **One-time setup:**
 1. Push the repo to GitHub.
 2. Repo Settings → Pages → **Build and deployment** → **Source: GitHub Actions**.
-3. Push to `develop` (or run the workflow manually). The site appears at
-   `https://<username>.github.io/<repo-name>/`.
+
+**To deploy a release:**
+1. Bump `version.json` on `develop`.
+2. Cut a release branch from `develop`:
+   ```bash
+   git checkout -b releases/v$(node -p "require('./version.json').version")
+   git push -u origin "$(git branch --show-current)"
+   ```
+3. CI runs the four gates, then the `deploy` job publishes to Pages. The site
+   appears at `https://<username>.github.io/<repo-name>/`.
 
 That's it. There's no Apple Developer account, no Play Store, no Xcode involved.
 
