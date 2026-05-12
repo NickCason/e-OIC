@@ -10,7 +10,7 @@
     "preview": "vite preview --host",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:unit": "node --import tsx --test src/lib/*.test.js",
+    "test:unit": "node --import tsx --test src/lib/*.test.js src/lib/*.test.ts",
     "test:e2e": "node --import tsx scripts/e2e-test.mjs",
     "test": "npm run typecheck && npm run lint && npm run test:unit && npm run test:e2e"
   },
