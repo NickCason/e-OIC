@@ -8,9 +8,70 @@
 // stays untyped here — Task 4 introduces the real types.
 
 declare module '*/db' {
-    import type {
-        IJob, IPanel, IRow, IPhoto, ISheetNote, IChecklistState, RowData,
-    } from './job';
+    type RowValue = string | number | boolean | null;
+    type RowData = Record<string, RowValue>;
+
+    interface IJobSource {
+        kind: 'xlsx';
+        filename: string;
+        pulledAt: number;
+    }
+    interface IJob {
+        id: string;
+        name: string;
+        client: string;
+        location: string;
+        notes: string;
+        source: IJobSource | null;
+        createdAt: number;
+        updatedAt: number;
+    }
+    interface IPanel {
+        id: string;
+        jobId: string;
+        name: string;
+        createdAt: number;
+        updatedAt: number;
+    }
+    interface IRow {
+        id: string;
+        panelId: string;
+        sheet: string;
+        idx: number;
+        data: RowData;
+        notes: string;
+        updatedAt: number;
+    }
+    interface IPhotoGps {
+        lat: number;
+        lng: number;
+        accuracy?: number;
+        capturedAt?: number;
+    }
+    interface IPhoto {
+        id: string;
+        panelId: string;
+        sheet: string;
+        item: string;
+        rowId: string | null;
+        blob: Blob;
+        mime: string;
+        takenAt: number;
+        w: number;
+        h: number;
+        gps: IPhotoGps | null;
+    }
+    interface IChecklistCustomTask {
+        id: string;
+        label: string;
+        completed: boolean;
+        createdAt: number;
+    }
+    interface IChecklistState {
+        jobId: string;
+        manualTasks: Record<string, boolean>;
+        customTasks: IChecklistCustomTask[];
+    }
 
     export function getSetting<T = unknown>(key: string, fallback?: T | null): Promise<T | null>;
     export function setSetting(key: string, value: unknown): Promise<void>;
@@ -23,9 +84,4 @@ declare module '*/db' {
 
     export function getChecklistState(jobId: string): Promise<IChecklistState>;
     export function slugifyTaskLabel(label: string): string;
-
-    // Catch-all for utilities that don't need precise types here. Plan C
-    // Task 4 replaces this whole file with the real db.ts module surface.
-    const _default: Record<string, unknown>;
-    export default _default;
 }

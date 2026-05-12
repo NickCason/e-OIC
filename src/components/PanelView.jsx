@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getJob, getPanel } from '../db.js';
-import { getPanelProgress } from '../lib/metrics.js';
+import { getPanelProgress } from '../lib/metrics';
 import { nav } from '../App.jsx';
 import SheetForm from './SheetForm.jsx';
 import AppBar from './AppBar.jsx';

@@ -4,7 +4,7 @@ import {
   listAllRows, listPanelPhotos, exportJobJSON, updateJob,
   exportPanelRaw, restorePanelRaw,
 } from '../db.js';
-import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics.js';
+import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import ExportDialog from './ExportDialog.jsx';
