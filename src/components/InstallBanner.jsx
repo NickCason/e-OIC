@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Icon from './Icon.jsx';
-import { usePwaInstall } from '../lib/usePwaInstall.js';
+import { usePwaInstall } from '../lib/usePwaInstall';
 
 const DISMISS_KEY = 'eoic-install-banner-dismissed';
 const APK_URL = 'https://github.com/NickCason/e-OIC-android-wrapper/releases/latest/download/e-OIC.apk';
