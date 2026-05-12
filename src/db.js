@@ -27,54 +27,65 @@ const DB_VERSION = 4;
 
 let dbPromise = null;
 
+function initialSchema(db) {
+  db.createObjectStore('jobs', { keyPath: 'id' });
+
+  const panels = db.createObjectStore('panels', { keyPath: 'id' });
+  panels.createIndex('jobId', 'jobId');
+
+  const rows = db.createObjectStore('rows', { keyPath: 'id' });
+  rows.createIndex('panelId', 'panelId');
+  rows.createIndex('panelId_sheet', ['panelId', 'sheet']);
+
+  const photos = db.createObjectStore('photos', { keyPath: 'id' });
+  photos.createIndex('panelId', 'panelId');
+  photos.createIndex('panelId_sheet_item', ['panelId', 'sheet', 'item']);
+}
+
+function ensurePhotosRowIdIndex(db, tx) {
+  if (!db.objectStoreNames.contains('photos')) return;
+  const photos = tx.objectStore('photos');
+  if (!photos.indexNames.contains('rowId')) {
+    photos.createIndex('rowId', 'rowId');
+  }
+}
+
+function upgradeToV2(db, tx) {
+  ensurePhotosRowIdIndex(db, tx);
+  if (!db.objectStoreNames.contains('sheetNotes')) {
+    const sn = db.createObjectStore('sheetNotes', { keyPath: 'id' });
+    sn.createIndex('panelId', 'panelId');
+    sn.createIndex('panelId_sheet', ['panelId', 'sheet'], { unique: true });
+  }
+  if (!db.objectStoreNames.contains('settings')) {
+    db.createObjectStore('settings', { keyPath: 'key' });
+  }
+}
+
+function upgradeToV3(db) {
+  if (!db.objectStoreNames.contains('checklistState')) {
+    db.createObjectStore('checklistState', { keyPath: 'jobId' });
+  }
+}
+
+function upgradeToV4(db, tx) {
+  // v4: photos store now holds *original* (un-overlaid) blobs. Live overlay
+  // is rendered in the UI; export bakes at write time. Existing baked photos
+  // cannot be recovered to originals, so we wipe the store. Job / panel /
+  // row data is untouched.
+  if (db.objectStoreNames.contains('photos')) {
+    tx.objectStore('photos').clear();
+  }
+}
+
 export function getDB() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
       upgrade(db, oldVersion, newVersion, tx) {
-        if (oldVersion < 1) {
-          db.createObjectStore('jobs', { keyPath: 'id' });
-
-          const panels = db.createObjectStore('panels', { keyPath: 'id' });
-          panels.createIndex('jobId', 'jobId');
-
-          const rows = db.createObjectStore('rows', { keyPath: 'id' });
-          rows.createIndex('panelId', 'panelId');
-          rows.createIndex('panelId_sheet', ['panelId', 'sheet']);
-
-          const photos = db.createObjectStore('photos', { keyPath: 'id' });
-          photos.createIndex('panelId', 'panelId');
-          photos.createIndex('panelId_sheet_item', ['panelId', 'sheet', 'item']);
-        }
-        if (oldVersion < 2) {
-          if (db.objectStoreNames.contains('photos')) {
-            const photos = tx.objectStore('photos');
-            if (!photos.indexNames.contains('rowId')) {
-              photos.createIndex('rowId', 'rowId');
-            }
-          }
-          if (!db.objectStoreNames.contains('sheetNotes')) {
-            const sn = db.createObjectStore('sheetNotes', { keyPath: 'id' });
-            sn.createIndex('panelId', 'panelId');
-            sn.createIndex('panelId_sheet', ['panelId', 'sheet'], { unique: true });
-          }
-          if (!db.objectStoreNames.contains('settings')) {
-            db.createObjectStore('settings', { keyPath: 'key' });
-          }
-        }
-        if (oldVersion < 3) {
-          if (!db.objectStoreNames.contains('checklistState')) {
-            db.createObjectStore('checklistState', { keyPath: 'jobId' });
-          }
-        }
-        if (oldVersion < 4) {
-          // v4: photos store now holds *original* (un-overlaid) blobs. Live overlay
-          // is rendered in the UI; export bakes at write time. Existing baked photos
-          // cannot be recovered to originals, so we wipe the store. Job / panel /
-          // row data is untouched.
-          if (db.objectStoreNames.contains('photos')) {
-            tx.objectStore('photos').clear();
-          }
-        }
+        if (oldVersion < 1) initialSchema(db);
+        if (oldVersion < 2) upgradeToV2(db, tx);
+        if (oldVersion < 3) upgradeToV3(db);
+        if (oldVersion < 4) upgradeToV4(db, tx);
       },
     });
   }
@@ -484,6 +495,13 @@ export async function exportJobJSON(jobId) {
   };
 }
 
+async function deleteExistingJobs(db, jobs) {
+  for (const j of jobs) {
+    const existing = await db.get('jobs', j.id);
+    if (existing) await deleteJob(j.id);
+  }
+}
+
 export async function importJSON(snapshot, { mode = 'merge' } = {}) {
   if (!snapshot || snapshot.backupVersion !== BACKUP_VERSION) {
     throw new Error('Backup file format is not compatible with this app version.');
@@ -491,10 +509,7 @@ export async function importJSON(snapshot, { mode = 'merge' } = {}) {
   const db = await getDB();
 
   if (mode === 'replace') {
-    for (const j of snapshot.jobs) {
-      const existing = await db.get('jobs', j.id);
-      if (existing) await deleteJob(j.id);
-    }
+    await deleteExistingJobs(db, snapshot.jobs);
   }
 
   const tx = db.transaction(
