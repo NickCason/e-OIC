@@ -11,7 +11,7 @@ import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
-import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.

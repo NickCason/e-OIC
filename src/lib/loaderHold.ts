@@ -6,16 +6,19 @@
 //   const r = await withMinDuration(doWork(), 4500);
 //   await fadeOutLoader(setIsFading);
 //   setStage('done');
-export async function withMinDuration(workPromise, minMs = 4500) {
-  const minDelay = new Promise((r) => setTimeout(r, minMs));
-  const [result] = await Promise.all([workPromise, minDelay]);
-  return result;
+export async function withMinDuration<T>(workPromise: Promise<T>, minMs = 4500): Promise<T> {
+    const minDelay = new Promise<void>((r) => { setTimeout(r, minMs); });
+    const [result] = await Promise.all([workPromise, minDelay]);
+    return result;
 }
 
 // fadeOutLoader — flips the .is-fading-out class on the progress block
 // and waits for the CSS animation to finish before resolving so the
 // caller can advance the stage right after.
-export async function fadeOutLoader(setIsFading, fadeMs = 300) {
-  setIsFading(true);
-  await new Promise((r) => setTimeout(r, fadeMs));
+export async function fadeOutLoader(
+    setIsFading: (fading: boolean) => void,
+    fadeMs = 300,
+): Promise<void> {
+    setIsFading(true);
+    await new Promise<void>((r) => { setTimeout(r, fadeMs); });
 }

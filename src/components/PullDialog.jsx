@@ -6,7 +6,7 @@ import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
-import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
