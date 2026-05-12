@@ -10,7 +10,7 @@ import { rowPhotoFolder } from '../lib/paths';
 import { rowDisplayLabel } from '../lib/rowLabel';
 import {
   getHint, getEnumOptions, isSharedHeader, slugForId,
-} from '../lib/fieldHints.js';
+} from '../lib/fieldHints';
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
 import SaveBar from './SaveBar.jsx';
