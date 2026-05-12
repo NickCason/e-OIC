@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import { nav } from '../App.jsx';
-import { BUILD_VERSION } from '../version.js';
+import { BUILD_VERSION } from '../version';
 import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
 import { applyTheme, saveTheme } from '../lib/theme';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation';

@@ -5,7 +5,7 @@ import { processIncomingPhoto } from '../lib/photoStore.js';
 import { readPhotoExif } from '../lib/photoExif.js';
 import { maybeGetGps } from '../lib/geolocation';
 import { toast } from '../lib/toast';
-import { BUILD_VERSION } from '../version.js';
+import { BUILD_VERSION } from '../version';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';

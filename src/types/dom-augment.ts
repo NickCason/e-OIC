@@ -19,6 +19,10 @@ export interface IBeforeInstallPromptEvent extends Event {
 }
 
 declare global {
+    /** Injected by Vite's `define` (see vite.config.js) from version.json
+     *  at build time. Consumed via src/version.ts → BUILD_VERSION. */
+    const __BUILD_VERSION__: string;
+
     interface WindowEventMap {
         beforeinstallprompt: IBeforeInstallPromptEvent;
         appinstalled: Event;
