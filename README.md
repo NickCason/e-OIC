@@ -131,3 +131,4 @@ the new template.
   the DB on every keystroke.
 - Deletes (jobs, panels, rows) snapshot the relevant state and offer 5s undo
   via toast.
+
