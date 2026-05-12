@@ -33,7 +33,7 @@ export const SHEET_LABEL_CONFIG: Record<string, SheetLabelCfg> = {
             const pn = data?.['Part Number'] || data?.['Slot Part Number'];
             const slotStr = slot != null && slot !== '' ? `Slot ${String(slot)}` : '';
             if (slotStr && pn) return `${slotStr} · ${String(pn)}`;
-            return slotStr || (pn == null ? null : String(pn));
+            return slotStr || (pn ? String(pn) : null);
         },
     },
     'Fieldbus IO': { fields: ['Device Name'] },
