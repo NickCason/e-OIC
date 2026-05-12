@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './styles.css';
 import { loadInitialTheme } from './lib/theme';
-import { registerServiceWorker } from './lib/swUpdate.js';
+import { registerServiceWorker } from './lib/swUpdate';
 
 // Apply theme as early as possible to avoid a flash. We don't await this
 // for the render — the default dark theme is already in CSS, and applyTheme

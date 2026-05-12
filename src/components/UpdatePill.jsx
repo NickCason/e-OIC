@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from './Icon.jsx';
-import { useUpdateState, applyUpdate } from '../lib/swUpdate.js';
+import { useUpdateState, applyUpdate } from '../lib/swUpdate';
 
 // Floating "Update ready" pill. Renders only when a newer service worker
 // has installed and is waiting to take over. Tapping it posts skipWaiting
