@@ -16,7 +16,7 @@ import {
   getChecklistState, slugifyTaskLabel, exportJobJSON,
 } from './db.js';
 import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
-import { safe, rowLabel, shareSafeFilename } from './lib/paths.js';
+import { safe, rowLabel, shareSafeFilename } from './lib/paths';
 import { isInWrapper, shareViaCapacitor } from './lib/wrapperBridge.js';
 
 const SHEET_ORDER = [
