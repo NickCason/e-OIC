@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { flushSync } from 'react-dom';
-import { listRowPhotos, deletePhoto } from '../db.js';
+import { listRowPhotos, deletePhoto } from '../db';
 import schemaMap from '../schema.json';
 import PhotoCapture from './PhotoCapture.jsx';
 import Icon from './Icon.jsx';

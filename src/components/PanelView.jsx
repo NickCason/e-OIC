@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getJob, getPanel } from '../db.js';
+import { getJob, getPanel } from '../db';
 import { getPanelProgress } from '../lib/metrics';
 import { nav } from '../App.jsx';
 import SheetForm from './SheetForm.jsx';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db.js';
+import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db';
 import { getJobPercent } from '../lib/metrics';
 import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';

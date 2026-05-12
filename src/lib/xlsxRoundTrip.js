@@ -6,7 +6,7 @@
 //
 // Both run in single idb transactions so a failure leaves no partial state.
 
-import { getDB } from '../db.js';
+import { getDB } from '../db';
 
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 

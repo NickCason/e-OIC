@@ -5,7 +5,7 @@ import { parseChecklistXlsx } from '../lib/xlsxParser.js';
 import { diffJobs } from '../lib/jobDiff.js';
 import { applyResyncToJob } from '../lib/xlsxRoundTrip.js';
 import schemaMap from '../schema.json' with { type: 'json' };
-import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
+import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';

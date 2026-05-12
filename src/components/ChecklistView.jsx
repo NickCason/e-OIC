@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   getJob, setManualTaskCompleted, addCustomTask, renameCustomTask,
   setCustomTaskCompleted, deleteCustomTask, getChecklistState, setChecklistState,
-} from '../db.js';
+} from '../db';
 import { getJobChecklist, getJobPercent, CHECKLIST_SECTIONS } from '../lib/metrics';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';

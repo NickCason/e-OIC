@@ -2,7 +2,7 @@
 // Idempotent: uses a settings flag so the import only runs once per device,
 // and the seed itself uses stable IDs so a re-import in merge mode is a no-op.
 
-import { getSetting, setSetting, importJSON } from '../db.js';
+import { getSetting, setSetting, importJSON } from '../db';
 
 const FLAG = 'sampleSeeded';
 

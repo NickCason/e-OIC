@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db.js';
+import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db';
 import { processIncomingPhoto } from '../lib/photoStore.js';
 import { readPhotoExif } from '../lib/photoExif.js';
 import { maybeGetGps } from '../lib/geolocation';

@@ -3,7 +3,7 @@ import {
   getJob, listPanels, createPanel, updatePanel, deletePanel, duplicatePanel,
   listAllRows, listPanelPhotos, exportJobJSON, updateJob,
   exportPanelRaw, restorePanelRaw,
-} from '../db.js';
+} from '../db';
 import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';

@@ -4,7 +4,7 @@ import {
   listRows, createRow, updateRow, deleteRow, reorderRow,
   getSheetNotes, setSheetNotes, listRowPhotos, exportJobJSON, importJSON,
   listPanels, listAllRows,
-} from '../db.js';
+} from '../db';
 import { toast } from '../lib/toast';
 import { rowPhotoFolder } from '../lib/paths';
 import { rowDisplayLabel } from '../lib/rowLabel';

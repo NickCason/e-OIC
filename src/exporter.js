@@ -14,7 +14,7 @@ import schemaMap from './schema.json' with { type: 'json' };
 import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
   getChecklistState, slugifyTaskLabel, exportJobJSON,
-} from './db.js';
+} from './db';
 import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
 import { safe, rowLabel, shareSafeFilename } from './lib/paths';
 import { isInWrapper, shareViaCapacitor } from './lib/wrapperBridge';
