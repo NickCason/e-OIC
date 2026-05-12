@@ -10,6 +10,6 @@ declare module 'piexifjs' {
 
     export function load(jpegBinary: string): IExifData
 
-    const piexif: { load: typeof load }
-    export default piexif
+    const piexif: { load: typeof load };
+    export default piexif;
 }
