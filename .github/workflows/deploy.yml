@@ -1,11 +1,18 @@
-name: Deploy PWA to GitHub Pages
+name: e-OIC CI + Pages Deploy
 
-# Auto-deploys on every push to main. The first time you run this you also
-# need to enable Pages in the repo Settings → Pages → "Build and deployment"
-# → Source: "GitHub Actions".
+# Gating jobs run on develop and releases/v*. Deploy fires only from releases/v*.
+# Per eTech standards: develop is the trunk; releases/vX.Y.Z branches are cut
+# from develop and trigger production deploys.
 on:
   push:
-    branches: [main]
+    branches:
+      - develop
+      - 'releases/v*'
+      - 'feature_*/**'
+  pull_request:
+    branches:
+      - develop
+      - 'feature_*/main'
   workflow_dispatch:
 
 permissions:
@@ -13,9 +20,8 @@ permissions:
   pages: write
   id-token: write
 
-# Don't run two deploys at once
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -76,6 +82,7 @@ jobs:
 
   deploy:
     needs: [build, e2e-export, unit-test, lint]
+    if: startsWith(github.ref, 'refs/heads/releases/v')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
