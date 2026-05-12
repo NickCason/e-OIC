@@ -21,12 +21,12 @@ npm run preview      # serve dist/ locally
 ## Deploy to GitHub Pages
 
 This repo includes a GitHub Actions workflow that auto-deploys to Pages on
-every push to `main`.
+every push to `develop`.
 
 **One-time setup:**
 1. Push the repo to GitHub.
 2. Repo Settings → Pages → **Build and deployment** → **Source: GitHub Actions**.
-3. Push to `main` (or run the workflow manually). The site appears at
+3. Push to `develop` (or run the workflow manually). The site appears at
    `https://<username>.github.io/<repo-name>/`.
 
 That's it. There's no Apple Developer account, no Play Store, no Xcode involved.
