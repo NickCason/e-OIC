@@ -1,0 +1,156 @@
+// Types for the parsed-xlsx pipeline (parser → diff → round-trip).
+// Extracted from src/lib/xlsxParser.js, src/lib/jobDiff.js, and
+// src/lib/xlsxRoundTrip.js. The parser writes a single result object whose
+// shape these interfaces describe; jobDiff consumes that shape directly.
+
+import type { RowData } from './job';
+
+// ===== Parser output =====
+
+export interface IParsedJobMeta {
+    name: string | null;
+    client: string;
+    location: string;
+    notes: string;
+}
+
+export interface IParsedPanel {
+    name: string;
+    sourceRowIndex: number;
+}
+
+// One parsed-xlsx row. panelName is the value of the 'Panel Name' cell (or
+// null if absent). data is keyed by schema column header. notes is populated
+// later by the Notes-sheet matching pass.
+export interface IParsedRow {
+    panelName: string | null;
+    data: RowData;
+    notes: string;
+    sourceRowIndex: number;
+}
+
+export interface IParsedSheetNote {
+    panelName: string;
+    sheetName: string;
+    text: string;
+}
+
+export type XlsxParserErrorKind = 'invalid-xlsx' | 'no-recognized-sheets';
+
+export interface IXlsxParserError {
+    kind: XlsxParserErrorKind;
+    message?: string;
+}
+
+export type XlsxParserWarningKind =
+    | 'missing-column'
+    | 'extra-column'
+    | 'unknown-sheet'
+    | 'missing-sheet'
+    | 'unknown-panel-reference'
+    | 'notes-row-unmatched';
+
+// Warning shape is permissive on purpose: different `kind`s populate
+// different fields (column, row, panel, etc.) and the parser doesn't yet
+// discriminate by kind. Keep optionals explicit so consumers can read
+// whichever fields the kind implies.
+export interface IXlsxParserWarning {
+    kind: XlsxParserWarningKind;
+    sheetName?: string;
+    columnName?: string;
+    panelName?: string;
+    label?: string;
+    rowCount?: number;
+}
+
+export interface IParsedXlsx {
+    jobMeta: IParsedJobMeta;
+    panels: IParsedPanel[];
+    rowsBySheet: Record<string, IParsedRow[]>;
+    sheetNotes: IParsedSheetNote[];
+    warnings: IXlsxParserWarning[];
+    errors: IXlsxParserError[];
+}
+
+export interface IXlsxParseProgress {
+    phase: 'loading' | 'panels' | 'rows' | 'matching';
+    detail: string;
+}
+
+// ===== Diff output (jobDiff.js) =====
+
+export interface IJobMetaFieldChange {
+    field: 'name' | 'notes';
+    old: string;
+    new: string;
+}
+
+export interface IJobMetaDiff {
+    changed: IJobMetaFieldChange[];
+}
+
+export interface IPanelMatch {
+    local: { id: string; name: string };
+    xlsx: IParsedPanel;
+}
+
+export interface IPanelsDiff {
+    added: IParsedPanel[];
+    removed: Array<{ id: string; name: string }>;
+    matched: IPanelMatch[];
+}
+
+export interface IRowFieldChange {
+    field: string;
+    old: RowValueOld;
+    new: RowValueOld;
+}
+
+// Values flowing through jobDiff may be anything that round-tripped through
+// xlsx (number, string, boolean, null) plus possibly undefined when read off
+// a sparse data map. Keep this loose.
+export type RowValueOld = string | number | boolean | null | undefined;
+
+export interface ISheetRowDiff {
+    added: IParsedRow[];
+    removed: Array<{ id: string; data: RowData; notes: string }>;
+    modified: Array<{
+        local: { id: string; data: RowData; notes: string };
+        xlsx: IParsedRow;
+        label: string;
+        fieldChanges: IRowFieldChange[];
+    }>;
+    unchanged: Array<{
+        local: { id: string; data: RowData };
+        xlsx: IParsedRow;
+        label: string;
+    }>;
+    labelCollisions: string[];
+}
+
+export interface ISheetNoteDiff {
+    added: IParsedSheetNote[];
+    removed: Array<{ panelName: string; sheetName: string; text: string }>;
+    modified: Array<{
+        panelName: string;
+        sheetName: string;
+        old: string;
+        new: string;
+    }>;
+}
+
+export interface IJobDiff {
+    jobMeta: IJobMetaDiff;
+    panels: IPanelsDiff;
+    sheets: Record<string, ISheetRowDiff>;
+    sheetNotes: ISheetNoteDiff;
+    skippedSheets: Array<string | undefined>;
+    skippedColumns: Array<{ sheetName: string | undefined; columnName: string | undefined }>;
+    missingSheets: Array<string | undefined>;
+}
+
+// ===== Re-sync decisions (xlsxRoundTrip.applyResyncToJob) =====
+
+export interface IResyncDecisions {
+    removedRowIds: Set<string>;
+}
