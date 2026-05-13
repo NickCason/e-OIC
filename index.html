@@ -134,11 +134,11 @@
     </div>
     <div id="root"></div>
     <script>
-      // Splash dismissal coordinator. main.jsx (or any other code) calls
+      // Splash dismissal coordinator. main.tsx (or any other code) calls
       // window.__dismissSplash() when the app is mounted and ready to be
       // shown. We hold the splash for at least MIN_MS so the launch beat
       // is always perceptible, and force-dismiss after MAX_MS as a safety
-      // net if main.jsx never calls in (network failure, JS error, etc.).
+      // net if main.tsx never calls in (network failure, JS error, etc.).
       (function () {
         // 2400ms = one full 2s EtechLoader cycle (corner pulses staggered
         // through ~1.5s + bar pulses landing by ~1.92s) plus a 400ms
@@ -175,6 +175,6 @@
         setTimeout(function () { commit(); }, MAX_MS);
       })();
     </script>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

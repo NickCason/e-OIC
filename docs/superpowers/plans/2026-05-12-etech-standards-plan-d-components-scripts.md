@@ -17,14 +17,28 @@
 
 ## Prerequisites verified
 
-- [ ] All `src/lib/*` converted to `.ts` with strict typing.
-- [ ] `src/db.ts`, `src/photoOverlay.ts`, `src/exporter.ts`, `src/version.ts` converted.
-- [ ] Domain types present: `src/types/{db,job,xlsx,sharepoint,wrapper}.ts`, `src/types/piexifjs.d.ts`.
-- [ ] Unit-test runner is `tsx --test`.
-- [ ] `max-depth: 2` refactors complete in lib/exporter (any disables documented).
-- [ ] Plan C merge SHA recorded: `<filled in by Plan C handoff>`.
+- [x] All `src/lib/*` converted to `.ts` with strict typing.
+- [x] `src/db.ts`, `src/photoOverlay.ts`, `src/exporter.ts`, `src/version.ts` converted.
+- [x] Domain types present: `src/types/{db,job,xlsx,sharepoint,wrapper}.ts`, `src/types/piexifjs.d.ts`.
+- [x] `src/types/dom-augment.ts` added in Plan C Task 3 (DOM augmentations: `IBeforeInstallPromptEvent`, `__BUILD_VERSION__`, `WindowEventMap` for install events, `Navigator.standalone`, `Window.MSStream`). Preserve through Plan D.
+- [x] Unit-test runner is `tsx --test` (Plan C Task 10 — full switch, no intermediate bridge).
+- [x] `max-depth: 2` refactors complete across xlsxParser/exporter/jobDiff/xlsxRoundTrip/photoOverlay/db. **Zero eslint-disable max-depth comments remain.** 5 narrow `no-param-reassign` disables in `exporter.ts` for ExcelJS cell mutations (justified inline).
+- [x] Plan C merge SHA recorded: `4e288f1154e7e81fa1fad65db883120f23ca5c55`.
 - [ ] Spec reviewed: `docs/superpowers/specs/2026-05-12-etech-standards-and-typescript-strict-design.md`.
 - [ ] Memory `project_eoic_etech_migration.md` shows Plans A, B, C complete.
+
+### Plan D must additionally resolve (carried from Plan C handoff)
+
+- Install `@stylistic/eslint-plugin`, replace the 16-rule disable block in `eslint.config.js` with proper `@stylistic/*` re-bindings, and re-enable `member-delimiter-style` under the `@stylistic` namespace.
+- Fix `src/components/dotmatrix/*.tsx` (24 files) for `exactOptionalPropertyTypes` + `noUncheckedIndexedAccess` and remove BOTH excludes (in `tsconfig.json` AND `eslint.config.js` `ignores`).
+- Delete `scripts/placeholder.mts` when adding `vite.config.ts` + real `scripts/**/*.mts`.
+- Convert `scripts/e2e-test.mjs` + `scripts/gen-fixtures.mjs` to `.mts`. Once converted, drop the `--import tsx` bridge from `test:e2e` script (Plan C Task 3's bridge — now redundant).
+- Preserve `preview.allowedHosts: ['nicks-macbook-air.taild99f50.ts.net']` through the `vite.config.js` → `vite.config.ts` conversion.
+- `exceljs` + `jszip` are now in `dependencies` (Plan C moved them from devDependencies — keep them there).
+- `tsconfig.json` `types` array is `["vite/client", "node"]` (Plan C Task 3 added `"node"`). Keep it.
+- `eslint.config.js` `import/extensions` rule has `{ json: 'always' }` exception (Plan C Task 3 — allows `'../schema.json'` imports). Keep it.
+- `.npmrc` `legacy-peer-deps=true` exists for `eslint-config-airbnb@19` peer-dep conflict. Plan D may be able to remove it once airbnb is replaced with `@stylistic`-based alternatives.
+- 11 pre-existing `no-unused-vars` warnings remain in `.jsx` files (SettingsView, SheetForm, etc.) — these clear naturally during Plan D conversion. CI uses `eslint .` (no `--max-warnings 0`), so warnings don't fail builds today; tighten if needed at end of Plan D.
 
 ---
 

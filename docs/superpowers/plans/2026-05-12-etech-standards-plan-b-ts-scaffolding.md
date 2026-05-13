@@ -17,11 +17,11 @@
 
 ## Prerequisites verified
 
-- [ ] `develop` is the remote default branch (set by Plan A).
-- [ ] `feature_1/main` exists on remote at SHA `<filled in by Plan A handoff>`.
-- [ ] CI workflow `.github/workflows/deploy.yml` gates deploy on `releases/v*` (set by Plan A).
-- [ ] `.github/pull_request_template.md` present (set by Plan A).
-- [ ] Plan A merge SHA recorded: `<filled in by Plan A handoff>`.
+- [x] `develop` is the remote default branch (set by Plan A).
+- [x] `feature_1/main` exists on remote at SHA `a7a9b58af96a88d7ed17d65e949fd56cf94460bd`.
+- [x] CI workflow `.github/workflows/deploy.yml` gates deploy on `releases/v*` (set by Plan A).
+- [x] `.github/pull_request_template.md` present (set by Plan A).
+- [x] Plan A merge SHA recorded: `a7a9b58af96a88d7ed17d65e949fd56cf94460bd`.
 - [ ] Spec reviewed: `docs/superpowers/specs/2026-05-12-etech-standards-and-typescript-strict-design.md`.
 - [ ] Memory `project_eoic_etech_migration.md` shows Plan A complete.
 
@@ -615,30 +615,18 @@ npm run build
 ```
 Expected: all six exit 0.
 
-- [ ] **Step 2: Smoke test the running app (Tailscale preview)**
+- [ ] **Step 2: Smoke test the running app**
 
 ```bash
 npm run build
-npm run preview -- --host &
+npm run preview -- --host 127.0.0.1 --port 4173 &
 PREVIEW_PID=$!
 sleep 3
-tailscale serve --bg https+insecure://localhost:4173
-tailscale serve status
+curl -sf http://127.0.0.1:4173/ > /dev/null && echo "preview serves HTTP 200" || echo "preview FAILED"
+kill $PREVIEW_PID 2>/dev/null
 ```
 
-Post the resulting Tailscale URL.
-
-Hands-on items (agent runs in-browser locally OR delegates to user):
-- App loads, version stamp visible.
-- Create a job, add a panel, save, reload page — data persists (IDB unchanged).
-- xlsx export still works (zip + xlsx-only modes).
-- No console errors.
-
-Stop preview after handoff:
-```bash
-kill $PREVIEW_PID
-tailscale serve reset
-```
+Expected: `preview serves HTTP 200`. (User-side hands-on QA is deferred to Plan D's final gate per `project_eoic_etech_migration.md` decisions.)
 
 - [ ] **Step 3: Push branch + open PR**
 
@@ -671,14 +659,8 @@ Wait for all five CI jobs green.
 
 ```
 Confidence: NN%
-Automated: lint ✅ | tsc ✅ (placeholder only) | unit (n/n) ✅ | e2e ✅ | build ✅
-Hands-on:
-- App loads at Tailscale URL with identical behavior to pre-change.
-- IDB job/panel CRUD unaffected.
-- xlsx export both modes unaffected.
-- No console errors.
+Automated: lint ✅ | tsc ✅ (placeholder only) | unit (n/n) ✅ | e2e ✅ | build ✅ | preview HTTP 200 ✅
 Known gaps/risks: <list or "none">
-Tailscale URL: https://...
 ```
 
 If < 95%, fix and re-test.

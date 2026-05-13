@@ -2,67 +2,67 @@
 
 import type { CSSProperties } from "react";
 
-import { DotMatrixBase } from "./core";
-import { useDotMatrixPhases } from "./hooks";
-import { trBlPathNormFromIndex } from "./core";
-import { usePrefersReducedMotion } from "./hooks";
-import type { DotAnimationResolver } from "./core";
-import type { DotMatrixCommonProps } from "./core";
+import { DotMatrixBase , trBlPathNormFromIndex } from "./core";
+import { useDotMatrixPhases , usePrefersReducedMotion } from "./hooks";
+import type { DotAnimationResolver , IDotMatrixCommonProps } from "./core";
 
-export type DotmSquare1Props = DotMatrixCommonProps;
+export type DotmSquare1Props = IDotMatrixCommonProps;
 
-const animationResolver: DotAnimationResolver = ({ isActive, index, row, col, reducedMotion, phase }) => {
-  if (!isActive) {
-    return { className: "dmx-inactive" };
-  }
+const animationResolver: DotAnimationResolver = ({
+    isActive, index, row, col, reducedMotion, phase
+}) => {
+    if (!isActive) {
+        return { className: "dmx-inactive" };
+    }
 
-  const path = trBlPathNormFromIndex(index);
-  const slice = row + (4 - col);
-  const parity = slice % 2;
-  const style = {
-    "--dmx-path": path,
-    "--dmx-diagonal-parity": parity
-  } as CSSProperties;
+    const path = trBlPathNormFromIndex(index);
+    const slice = row + (4 - col);
+    const parity = slice % 2;
+    const style = {
+        "--dmx-path": path,
+        "--dmx-diagonal-parity": parity
+    } as CSSProperties;
 
-  if (reducedMotion || phase === "idle") {
-    return {
-      style: {
-        ...style,
-        opacity: parity === 0 ? 0.88 : 0.14
-      }
-    };
-  }
+    if (reducedMotion || phase === "idle") {
+        return {
+            style: {
+                ...style,
+                opacity: parity === 0 ? 0.88 : 0.14
+            }
+        };
+    }
 
-  return { className: "dmx-diagonal-alt-sweep", style };
+    return { className: "dmx-diagonal-alt-sweep", style };
 };
 
-export function DotmSquare1({
-  speed = 1.1,
-  pattern = "full",
-  animated = true,
-  hoverAnimated = false,
-  ...rest
-}: DotmSquare1Props) {
-  const reducedMotion = usePrefersReducedMotion();
-  const { phase: matrixPhase, onMouseEnter, onMouseLeave } = useDotMatrixPhases({
-    animated: Boolean(animated && !reducedMotion),
-    hoverAnimated: Boolean(hoverAnimated && !reducedMotion),
-    speed
-  });
+export const DotmSquare1 = ({
+    speed = 1.1,
+    pattern = "full",
+    animated = true,
+    hoverAnimated = false,
+    ...rest
+}: DotmSquare1Props) => {
+    const reducedMotion = usePrefersReducedMotion();
+    const { phase: matrixPhase, onMouseEnter, onMouseLeave } = useDotMatrixPhases({
+        animated: Boolean(animated && !reducedMotion),
+        hoverAnimated: Boolean(hoverAnimated && !reducedMotion),
+        speed
+    });
 
-  return (
-    <DotMatrixBase
-      {...rest}
-      size={rest.size ?? 36}
-      dotSize={rest.dotSize ?? 5}
-      speed={speed}
-      pattern={pattern}
-      animated={animated}
-      phase={matrixPhase}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      reducedMotion={reducedMotion}
-      animationResolver={animationResolver}
-    />
-  );
-}
+    return (
+        <DotMatrixBase
+            // eslint-disable-next-line react/jsx-props-no-spreading -- forward presentational props to DotMatrixBase
+            {...rest}
+            size={rest.size ?? 36}
+            dotSize={rest.dotSize ?? 5}
+            speed={speed}
+            pattern={pattern}
+            animated={animated}
+            phase={matrixPhase}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            reducedMotion={reducedMotion}
+            animationResolver={animationResolver}
+        />
+    );
+};

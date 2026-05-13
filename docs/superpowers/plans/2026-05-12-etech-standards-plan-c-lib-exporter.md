@@ -17,15 +17,21 @@
 
 ## Prerequisites verified
 
-- [ ] `tsconfig.json` and `tsconfig.node.json` exist with strict + tightening flags.
-- [ ] `eslint.config.js` encodes eTech standards verbatim (FlatCompat + Airbnb + Airbnb-TS + jsx-a11y + react-hooks + ts-eslint).
-- [ ] `tsx`, `@typescript-eslint/*`, Airbnb config packages installed.
-- [ ] `src/types/piexifjs.d.ts` present.
-- [ ] `src/types/placeholder.ts` exists (this plan deletes it).
-- [ ] CI workflow has `typecheck` step in `lint-and-typecheck` job.
-- [ ] Plan B merge SHA recorded: `<filled in by Plan B handoff>`.
+- [x] `tsconfig.json` and `tsconfig.node.json` exist with strict + tightening flags. **Note:** `tsconfig.node.json` does NOT have `noEmit: true` (composite-project rules forbid it). The node config also has `composite: true`, so `tsc --build` emits `.d.mts`/`.mjs`/`.tsbuildinfo` artifacts gitignored under `*.tsbuildinfo` + `scripts/placeholder.{mjs,d.mts}`.
+- [x] `eslint.config.js` encodes eTech standards verbatim (FlatCompat + Airbnb + Airbnb-TS + jsx-a11y + react-hooks + ts-eslint).
+- [x] `tsx`, `@typescript-eslint/*`, Airbnb config packages installed. Also installed: `eslint-import-resolver-typescript` (was missing from Plan B's spec but required by the flat config's `import/resolver` block).
+- [x] `src/types/piexifjs.d.ts` present (narrow surface — `load` only; default + named export shape).
+- [ ] ~~`src/types/placeholder.ts` exists (this plan deletes it).~~ **Plan B did NOT create this file** — there were already 24 `.tsx` files under `src/components/dotmatrix/` matching tsconfig's include glob, so TS18003 never fired. Instead, Plan B created `scripts/placeholder.mts` for the *node* tsconfig (whose include matches no on-disk files until Plan D). **Plan D** must delete `scripts/placeholder.mts` when it adds `vite.config.ts` + `scripts/**/*.mts`.
+- [x] CI workflow has `typecheck` step in `lint-and-typecheck` job.
+- [x] Plan B merge SHA recorded: `5858a91d08c6d02723faecde21ae837702bb9dee`.
 - [ ] Spec reviewed: `docs/superpowers/specs/2026-05-12-etech-standards-and-typescript-strict-design.md`.
 - [ ] Memory `project_eoic_etech_migration.md` shows Plans A and B complete.
+
+### Deferrals inherited from Plan B (Plan C/D must resolve)
+
+- `tsconfig.json` `exclude` list contains `src/components/dotmatrix` because those 24 pre-existing `.tsx` files fail `exactOptionalPropertyTypes` + `noUncheckedIndexedAccess`. Same dir is also in `eslint.config.js` global ignores. Plan C should not touch these (they belong to Plan D — components). When Plan D fixes them, remove BOTH excludes.
+- `eslint.config.js` has a block that turns off 16 stylistic `@typescript-eslint/*` rules (`brace-style`, `comma-dangle`, `comma-spacing`, `func-call-spacing`, `indent`, `keyword-spacing`, `lines-between-class-members`, `no-extra-parens`, `no-extra-semi`, `no-throw-literal`, `object-curly-spacing`, `quotes`, `semi`, `space-before-blocks`, `space-before-function-paren`, `space-infix-ops`) because `airbnb-typescript@18` references them but TS-ESLint v8 moved them to `@stylistic/eslint-plugin`. Same root cause: `@typescript-eslint/member-delimiter-style` from the standards source is omitted with a NOTE comment. **Plan D** should install `@stylistic/eslint-plugin`, replace the disable-block with proper re-bindings, and re-enable `member-delimiter-style` under the `@stylistic` namespace.
+- `.npmrc` with `legacy-peer-deps=true` exists because `eslint-config-airbnb@19` peer-depends on `eslint ^7/^8` while the spec pins `eslint@9`. Can be removed if airbnb config is replaced with `@stylistic`-based alternatives (also a Plan D candidate).
 
 ---
 
@@ -754,36 +760,28 @@ Open the latest `.xlsx` in Excel on the Mac. Manually verify:
 - AutoFilter applies cleanly.
 - Notes appendix present and aligned with rows.
 
-- [ ] **Step 3: Tailscale preview hands-on walkthrough**
+- [ ] **Step 3: Smoke test the running app (agent-side)**
 
 ```bash
 npm run build
-npm run preview -- --host &
+npm run preview -- --host 127.0.0.1 --port 4173 &
 PREVIEW_PID=$!
 sleep 3
-tailscale serve --bg https+insecure://localhost:4173
-tailscale serve status
+curl -sf http://127.0.0.1:4173/ > /dev/null && echo "preview serves HTTP 200" || echo "preview FAILED"
+kill $PREVIEW_PID 2>/dev/null
 ```
 
-Post the resulting Tailscale URL.
+Expected: `preview serves HTTP 200`. (User-side hands-on QA is deferred to Plan D's final gate per `project_eoic_etech_migration.md` decisions.)
 
-Hands-on items (agent runs from Mac; user re-tests from real device):
-- Create job from sample seed. Add a panel. Add several rows.
-- Capture a photo via camera path (overlay metadata correct).
-- Capture a photo via library path (EXIF GPS recovered).
-- Open lightbox; navigate photos.
-- Export xlsx (zip mode). Open in Excel; verify overlay-baked photos and cell checkboxes.
-- Export xlsx (xlsx-only mode). Verify the bare file.
-- Pull a job from an existing xlsx; verify diff view; create new job.
-- Re-sync an unchanged xlsx into an existing job; verify zero diffs.
-- Re-sync a modified xlsx; verify changes show with keep/drop pills.
-- Reload the page; data persists.
+Additionally verify exporter round-trip automatically:
+- The e2e suite (Step 1) already exercises the full xlsx export path — confirm it produced an artifact in `/tmp/eoic-e2e/`.
+- If the e2e suite writes an `.xlsx` artifact, verify it is non-zero bytes:
+  ```bash
+  ls -la /tmp/eoic-e2e/*.xlsx 2>/dev/null || echo "no artifact found"
+  ```
+  Expected: at least one `.xlsx` file present and > 0 bytes. If no artifact, re-run `npm run test:e2e` with `DEBUG=1` to diagnose.
 
-Stop preview after handoff:
-```bash
-kill $PREVIEW_PID
-tailscale serve reset
-```
+These automated checks are sufficient for Plan C merge; visual xlsx inspection and photo-overlay QA are reserved for Plan D's final gate.
 
 - [ ] **Step 4: Push branch + open PR**
 
@@ -819,16 +817,11 @@ Wait for all five CI jobs green.
 
 ```
 Confidence: NN%
-Automated: lint ✅ | tsc ✅ | unit (n/n) ✅ | e2e ✅ | build ✅
-Hands-on:
-- Sample xlsx opens in Excel; checkboxes native, tables/autofilter clean.
-- Photo capture both source modes correct.
-- xlsx export both modes correct.
-- SharePoint pull-as-new + resync (zero-diff and with-changes) correct.
-- IDB persistence intact.
+Automated: lint ✅ | tsc ✅ | unit (n/n) ✅ | e2e ✅ | build ✅ | preview HTTP 200 ✅ | xlsx artifact present ✅
 Known gaps/risks: <list or "none">
-Tailscale URL: https://...
 ```
+
+(Visual xlsx inspection, photo-overlay QA, and full hands-on walkthrough are deferred to Plan D's final gate per `project_eoic_etech_migration.md` decisions.)
 
 If < 95%, fix and re-test.
 
