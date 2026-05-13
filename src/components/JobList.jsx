@@ -6,7 +6,7 @@ import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
-import CountUp from './CountUp.jsx';
+import CountUp from './CountUp';
 import Icon from './Icon';
 import Marquee from './Marquee.jsx';
 import PullOrNewModal from './PullOrNewModal.jsx';

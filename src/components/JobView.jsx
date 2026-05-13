@@ -14,7 +14,7 @@ import AppBar from './AppBar.jsx';
 import Icon from './Icon';
 import EmptyState from './EmptyState.jsx';
 import Marquee from './Marquee.jsx';
-import CountUp from './CountUp.jsx';
+import CountUp from './CountUp';
 import PercentRing from './PercentRing';
 import PercentBar from './PercentBar';
 

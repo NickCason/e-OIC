@@ -7,7 +7,7 @@ import AppBar from './AppBar.jsx';
 import Icon from './Icon';
 import SheetPicker from './SheetPicker.jsx';
 import Marquee from './Marquee.jsx';
-import CountUp from './CountUp.jsx';
+import CountUp from './CountUp';
 
 const SHEET_ORDER = [
   'Panels', 'Power', 'PLC Racks', 'PLC Slots', 'Fieldbus IO',

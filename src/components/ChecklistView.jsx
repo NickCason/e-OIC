@@ -10,7 +10,7 @@ import AppBar from './AppBar.jsx';
 import PercentBar from './PercentBar';
 import ChecklistTaskRow from './ChecklistTaskRow.jsx';
 import Icon from './Icon';
-import CountUp from './CountUp.jsx';
+import CountUp from './CountUp';
 
 export default function ChecklistView({ jobId }) {
   const [job, setJob] = useState(null);

@@ -9,7 +9,7 @@ import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
-import CountUp from './CountUp.jsx';
+import CountUp from './CountUp';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 // One-shot typewriter for the export success filename. Snaps to full
