@@ -6,7 +6,7 @@ import {
 import { getJobChecklist, getJobPercent, CHECKLIST_SECTIONS } from '../lib/metrics';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
-import AppBar from './AppBar.jsx';
+import AppBar from './AppBar';
 import PercentBar from './PercentBar';
 import ChecklistTaskRow from './ChecklistTaskRow.jsx';
 import Icon from './Icon';

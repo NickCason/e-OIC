@@ -4,7 +4,7 @@ import { getJobPercent } from '../lib/metrics';
 import PercentRing from './PercentRing';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
-import AppBar from './AppBar.jsx';
+import AppBar from './AppBar';
 import EmptyState from './EmptyState';
 import CountUp from './CountUp';
 import Icon from './Icon';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AppBar from './AppBar.jsx';
+import AppBar from './AppBar';
 import Icon from './Icon';
 import { nav } from '../App.jsx';
 import { BUILD_VERSION } from '../version';
