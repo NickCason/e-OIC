@@ -8,7 +8,7 @@ import schemaMap from '../schema.json' with { type: 'json' };
 import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader';
-import LoadingPhrases from './LoadingPhrases.jsx';
+import LoadingPhrases from './LoadingPhrases';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;

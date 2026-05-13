@@ -5,7 +5,7 @@ import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader';
-import LoadingPhrases from './LoadingPhrases.jsx';
+import LoadingPhrases from './LoadingPhrases';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;

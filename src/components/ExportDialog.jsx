@@ -8,7 +8,7 @@ import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob }
 import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader';
-import LoadingPhrases from './LoadingPhrases.jsx';
+import LoadingPhrases from './LoadingPhrases';
 import CountUp from './CountUp';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
