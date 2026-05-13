@@ -3,7 +3,7 @@ import Icon from './Icon.jsx';
 import DiffView from './DiffView.jsx';
 import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { diffJobs } from '../lib/jobDiff';
-import { applyResyncToJob } from '../lib/xlsxRoundTrip.js';
+import { applyResyncToJob } from '../lib/xlsxRoundTrip';
 import schemaMap from '../schema.json' with { type: 'json' };
 import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import { toast } from '../lib/toast';

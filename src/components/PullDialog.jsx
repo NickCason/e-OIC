@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Icon from './Icon.jsx';
 import { parseChecklistXlsx } from '../lib/xlsxParser';
-import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip.js';
+import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
