@@ -367,37 +367,61 @@ if (totalChanges !== 0) {
     throw new Error('round-trip diff is not a no-op — parser/exporter divergence');
 }
 
-console.log('[e2e] running resync-with-edit assertion…');
-const sheetWithRows = Object.keys(parsed.rowsBySheet).find((s) => (parsed.rowsBySheet[s]?.length ?? 0) > 0);
-if (sheetWithRows) {
-    const editedParsed = JSON.parse(JSON.stringify(parsed)) as IParsedXlsx;
+// Extracted to a helper so the assertion stays flat (max-depth: 2). Early
+// returns replace the previous nested if-pyramid; the diff/throw logic at
+// the bottom is the actual assertion the script cares about.
+function assertEditResyncDetected(
+    parsedXlsx: IParsedXlsx,
+    local: IDiffJobsLocalState,
+    schemas: Record<string, ISheetSchema>,
+): void {
+    const sheetWithRows = Object.keys(parsedXlsx.rowsBySheet).find(
+        (s) => (parsedXlsx.rowsBySheet[s]?.length ?? 0) > 0,
+    );
+    if (!sheetWithRows) {
+        console.log('[e2e] no sheets with rows — skipping edit assertion');
+        return;
+    }
+    const editedParsed = JSON.parse(JSON.stringify(parsedXlsx)) as IParsedXlsx;
     const sheetRows = editedParsed.rowsBySheet[sheetWithRows];
     const targetRow: IParsedRow | undefined = sheetRows?.[0];
-    if (targetRow) {
-        const editableField = Object.keys(targetRow.data).find((k) => k !== 'Panel Name' && typeof targetRow.data[k] === 'string');
-        if (editableField) {
-            targetRow.data[editableField] = 'CHANGED-' + String(targetRow.data[editableField]);
-            const editDiff = diffJobs(localState, editedParsed, schemaMap);
-            const sd = editDiff.sheets[sheetWithRows];
-            if (!sd) throw new Error(`edit diff missing sheet ${sheetWithRows}`);
-            const mods = sd.modified.length;
-            if (mods !== 1) {
-                // Could be that label-stable mutation causes added+removed instead of modified.
-                // Check that path too — but ideally the test should pick a non-label field.
-                // If field IS a label component, we'd see 1 added + 1 removed.
-                const totalSheetChanges = sd.modified.length + sd.added.length + sd.removed.length;
-                if (totalSheetChanges < 1) throw new Error(`expected ≥1 change in ${sheetWithRows}, got ${totalSheetChanges}`);
-                console.log(`[e2e] edit detected (label-affecting): +${sd.added.length} −${sd.removed.length} ~${sd.modified.length}`);
-            } else {
-                const firstMod = sd.modified[0];
-                if (!firstMod) throw new Error('edit diff modified[0] missing despite mods === 1');
-                const fc = firstMod.fieldChanges.find((f) => f.field === editableField);
-                if (!fc) throw new Error(`expected fieldChange on ${editableField}`);
-                console.log(`[e2e] edit detected: ${sheetWithRows}.${editableField} → "${String(fc.new)}"`);
-            }
-        }
+    if (!targetRow) {
+        console.log('[e2e] no target row — skipping edit assertion');
+        return;
     }
+    const editableField = Object.keys(targetRow.data).find(
+        (k) => k !== 'Panel Name' && typeof targetRow.data[k] === 'string',
+    );
+    if (!editableField) {
+        console.log('[e2e] no editable string field — skipping edit assertion');
+        return;
+    }
+    const originalValue = targetRow.data[editableField];
+    if (typeof originalValue !== 'string') {
+        throw new Error(`editableField "${editableField}" value type changed unexpectedly`);
+    }
+    targetRow.data[editableField] = `CHANGED-${originalValue}`;
+    const editDiff = diffJobs(local, editedParsed, schemas);
+    const sd = editDiff.sheets[sheetWithRows];
+    if (!sd) throw new Error(`edit diff missing sheet ${sheetWithRows}`);
+    const mods = sd.modified.length;
+    if (mods === 1) {
+        const firstMod = sd.modified[0];
+        if (!firstMod) throw new Error('edit diff modified[0] missing despite mods === 1');
+        const fc = firstMod.fieldChanges.find((f) => f.field === editableField);
+        if (!fc) throw new Error(`expected fieldChange on ${editableField}`);
+        console.log(`[e2e] edit detected: ${sheetWithRows}.${editableField} → "${String(fc.new)}"`);
+        return;
+    }
+    // Label-stable mutation can surface as added+removed instead of modified.
+    // Tolerate that path; ideally the test picks a non-label field.
+    const totalSheetChanges = sd.modified.length + sd.added.length + sd.removed.length;
+    if (totalSheetChanges < 1) throw new Error(`expected ≥1 change in ${sheetWithRows}, got ${totalSheetChanges}`);
+    console.log(`[e2e] edit detected (label-affecting): +${sd.added.length} −${sd.removed.length} ~${sd.modified.length}`);
 }
+
+console.log('[e2e] running resync-with-edit assertion…');
+assertEditResyncDetected(parsed, localState, schemaMap);
 
 console.log('[e2e] round-trip + resync assertions passed.');
 

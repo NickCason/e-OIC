@@ -31,6 +31,9 @@ interface IFakeFetchResponse {
 }
 
 const fakeFetch = async (url: string): Promise<IFakeFetchResponse> => {
+    if (url.startsWith('http')) {
+        throw new Error('gen-fixtures does not allow network fetches');
+    }
     const p = url.startsWith('./')
         ? path.join(ROOT, 'public', url.slice(2))
         : path.join(ROOT, 'public', url);
