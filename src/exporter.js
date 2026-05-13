@@ -259,6 +259,11 @@ function applyExampleStyles(row, exampleStyles, columnCount) {
   }
 }
 
+// Null out every cell in a row from column 1..columnCount.
+function blankRow(row, columnCount) {
+  for (let c = 1; c <= columnCount; c++) row.getCell(c).value = null;
+}
+
 // Build the value for a row's Photo/Folder Hyperlink cell.
 //   - If the row has photos, return an ExcelJS hyperlink object pointing at
 //     IMG_001.jpg (Excel for Mac won't reliably open folder URLs but will
@@ -349,7 +354,7 @@ async function populateSheet({
     });
     for (const row of sheetRows) {
       const r = ws.getRow(writeRow);
-      for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
+      blankRow(r, ws.columnCount);
       applyExampleStyles(r, exampleStyles, ws.columnCount);
       writeDataRow({
         ws, writeRow, row, schema, colIndex, panel, sheetName, rowsWithPhotos,
@@ -371,7 +376,7 @@ function clearLeftoverExampleRows(ws, startRow) {
   while (safetyLimit-- > 0) {
     const r = ws.getRow(clearRow);
     if (!rowHasAnyValue(r, ws.columnCount)) break;
-    for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
+    blankRow(r, ws.columnCount);
     r.commit();
     clearRow += 1;
   }
