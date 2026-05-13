@@ -234,6 +234,31 @@ async function rewriteCellXfRefs(zip) {
   zip.file(checklistPath, rewritten);
 }
 
+// Capture the template's example-row cell styles BEFORE we overwrite them.
+// Each new data row beyond the first inherits these so banding, borders,
+// number formats, and the Photo Checklist columns' checkbox xfId all carry
+// through. Returns an index { columnNumber: style } map.
+function captureExampleRowStyles(ws, headerRow) {
+  const exampleStyles = {};
+  const exampleRow = ws.getRow(headerRow);
+  for (let c = 1; c <= ws.columnCount; c++) {
+    const cell = exampleRow.getCell(c);
+    if (!cell.style) continue;
+    try { exampleStyles[c] = JSON.parse(JSON.stringify(cell.style)); }
+    catch { /* ignore non-serializable styles */ }
+  }
+  return exampleStyles;
+}
+
+// Apply captured example styles to a row's cells so new rows inherit
+// banding/borders/checkbox xfIds from the template's first data row.
+function applyExampleStyles(row, exampleStyles, columnCount) {
+  for (let c = 1; c <= columnCount; c++) {
+    if (!exampleStyles[c]) continue;
+    try { row.getCell(c).style = exampleStyles[c]; } catch { /* ignore */ }
+  }
+}
+
 // Clear any leftover example rows the template ships below our data.
 // The template starts with example rows at `first_data_row`; whatever
 // we didn't overwrite needs to be wiped or the user gets fake "Example"
@@ -363,21 +388,7 @@ export async function buildExport(job, {
     let writeRow = schema.first_data_row;
     let wroteAnything = false;
 
-    // Capture the template's example-row cell styles BEFORE we overwrite
-    // them. Each new data row beyond the first inherits these so banding,
-    // borders, number formats, and the Photo Checklist columns' checkbox
-    // xfId all carry through.
-    const exampleStyles = {};
-    {
-      const exampleRow = ws.getRow(schema.first_data_row);
-      for (let c = 1; c <= ws.columnCount; c++) {
-        const cell = exampleRow.getCell(c);
-        if (cell.style) {
-          try { exampleStyles[c] = JSON.parse(JSON.stringify(cell.style)); }
-          catch { /* ignore non-serializable styles */ }
-        }
-      }
-    }
+    const exampleStyles = captureExampleRowStyles(ws, schema.first_data_row);
 
     for (const panel of panels) {
       const allRows = await listAllRows(panel.id);
@@ -399,14 +410,7 @@ export async function buildExport(job, {
       for (const row of sheetRows) {
         const r = ws.getRow(writeRow);
         for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
-
-        // Apply example-row styles so banding, borders, and the Photo
-        // Checklist's checkbox xfId carry through to new rows.
-        for (let c = 1; c <= ws.columnCount; c++) {
-          if (exampleStyles[c]) {
-            try { r.getCell(c).style = exampleStyles[c]; } catch { /* ignore */ }
-          }
-        }
+        applyExampleStyles(r, exampleStyles, ws.columnCount);
 
         for (const col of schema.columns) {
           const ci = colIndex[col.header];
