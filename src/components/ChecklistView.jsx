@@ -7,7 +7,7 @@ import { getJobChecklist, getJobPercent, CHECKLIST_SECTIONS } from '../lib/metri
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
-import PercentBar from './PercentBar.jsx';
+import PercentBar from './PercentBar';
 import ChecklistTaskRow from './ChecklistTaskRow.jsx';
 import Icon from './Icon';
 import CountUp from './CountUp.jsx';

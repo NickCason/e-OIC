@@ -16,7 +16,7 @@ import EmptyState from './EmptyState.jsx';
 import Marquee from './Marquee.jsx';
 import CountUp from './CountUp.jsx';
 import PercentRing from './PercentRing.jsx';
-import PercentBar from './PercentBar.jsx';
+import PercentBar from './PercentBar';
 
 export default function JobView({ jobId }) {
   const [job, setJob] = useState(null);
