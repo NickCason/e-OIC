@@ -22,21 +22,26 @@ import { DotmSquare17 } from "./DotmSquare17";
 import { DotmSquare18 } from "./DotmSquare18";
 import { DotmSquare19 } from "./DotmSquare19";
 import { DotmSquare20 } from "./DotmSquare20";
-import type { DotMatrixCommonProps } from "./core";
+import type { IDotMatrixCommonProps } from "./core";
 
-// All 20 square-pattern loaders share the same DotMatrixCommonProps shape,
+// All 20 square-pattern loaders share the same IDotMatrixCommonProps shape,
 // so a random pick is a drop-in for any of them. Pick is captured once at
 // mount via lazy useState so the variant stays stable across re-renders
 // (e.g., progress percent updates) and only changes when the loader is
 // unmounted and re-mounted.
 const VARIANTS = [
-  DotmSquare1, DotmSquare2, DotmSquare3, DotmSquare4, DotmSquare5,
-  DotmSquare6, DotmSquare7, DotmSquare8, DotmSquare9, DotmSquare10,
-  DotmSquare11, DotmSquare12, DotmSquare13, DotmSquare14, DotmSquare15,
-  DotmSquare16, DotmSquare17, DotmSquare18, DotmSquare19, DotmSquare20,
-];
+    DotmSquare1, DotmSquare2, DotmSquare3, DotmSquare4, DotmSquare5,
+    DotmSquare6, DotmSquare7, DotmSquare8, DotmSquare9, DotmSquare10,
+    DotmSquare11, DotmSquare12, DotmSquare13, DotmSquare14, DotmSquare15,
+    DotmSquare16, DotmSquare17, DotmSquare18, DotmSquare19, DotmSquare20,
+] as const;
 
-export function RandomDotmSquare(props: DotMatrixCommonProps) {
-  const [Variant] = useState(() => VARIANTS[Math.floor(Math.random() * VARIANTS.length)]);
-  return <Variant {...props} />;
-}
+// eslint-disable-next-line import/prefer-default-export -- named export matches consumer-side import style for the dotmatrix family
+export const RandomDotmSquare = (props: IDotMatrixCommonProps) => {
+    // Fallback to VARIANTS[0] keeps the type non-undefined under noUncheckedIndexedAccess.
+    const [Variant] = useState(() => (
+        VARIANTS[Math.floor(Math.random() * VARIANTS.length)] ?? VARIANTS[0]
+    ));
+    // eslint-disable-next-line react/jsx-props-no-spreading -- forward presentational props to selected variant
+    return <Variant {...props} />;
+};
