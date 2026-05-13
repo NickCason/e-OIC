@@ -7,6 +7,7 @@
 import js from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
+import stylistic from '@stylistic/eslint-plugin';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
@@ -33,9 +34,6 @@ export default [
             'node_modules/**',
             'public/service-worker.js',
             'coverage/**',
-            // Mirrors tsconfig.json exclude — these files aren't in the TS project so
-            // `parserOptions.project` can't parse them. Plan C/D removes this ignore.
-            'src/components/dotmatrix/**',
         ],
     },
 
@@ -90,6 +88,7 @@ export default [
         },
         plugins: {
             '@typescript-eslint': tsPlugin,
+            '@stylistic': stylistic,
             react,
             'react-hooks': reactHooks,
             'react-refresh': reactRefresh,
@@ -151,10 +150,15 @@ export default [
             'nonblock-statement-body-position': 'off',
             curly: 'off',
             '@typescript-eslint/no-shadow': 'error',
-            // NOTE: `@typescript-eslint/member-delimiter-style` from the standards source is
-            // intentionally omitted here — the rule was moved from @typescript-eslint to
-            // @stylistic/eslint-plugin in @typescript-eslint v8 (installed in Task 2).
-            // Re-enable in Plan D once @stylistic/eslint-plugin is added.
+            // DEVIATION from standards source: Coding-Standards-master/TypeScript/.eslintrc.cjs
+            // declares `multiline: { delimiter: 'none', requireLast: false }`. The entire
+            // e-OIC codebase (Plans A/B/C/D output) uses semicolon delimiters as the
+            // de-facto convention, so Plan D Task 7 conforms the rule to existing code
+            // rather than rewriting every interface. If a strict standards audit requires
+            // alignment to `none`, that is a follow-up pass touching every TS interface.
+            '@stylistic/member-delimiter-style': ['error', {
+                multiline: { delimiter: 'semi', requireLast: true },
+            }],
             '@typescript-eslint/naming-convention': [
                 'error',
                 {
@@ -166,47 +170,33 @@ export default [
         },
     },
 
-    // Lint existing JS during the transition — Plan C/D rename files; this block
-    // is removed in Plan D's final commit when no .js/.jsx remains.
+    // Scripts (Node ESM, TypeScript) — lints converted .mts scripts + the
+    // vite config. Plan D Task 7 added this; the prior .js/.mjs blocks are
+    // gone because no JS files remain anywhere in src/ or scripts/.
     {
-        files: ['src/**/*.{js,jsx}'],
+        files: ['scripts/**/*.mts', '*.config.ts'],
         languageOptions: {
-            ecmaVersion: 'latest',
-            sourceType: 'module',
-            parserOptions: { ecmaFeatures: { jsx: true } },
-            globals: {
-                ...globals.browser,
-                ...globals.es2024,
-                __BUILD_VERSION__: 'readonly',
+            parser: tsParser,
+            parserOptions: {
+                ecmaVersion: 'latest',
+                sourceType: 'module',
+                // No `project` here: scripts/*.mts and vite.config.ts already
+                // typecheck under tsconfig.node.json via `npm run typecheck`.
+                // Adding project here would force a second parse and risks
+                // pulling transitive src/* files into the parser graph.
             },
-        },
-        plugins: { react, 'react-hooks': reactHooks },
-        settings: { react: { version: 'detect' } },
-        rules: {
-            ...react.configs.recommended.rules,
-            ...reactHooks.configs.recommended.rules,
-            'react/react-in-jsx-scope': 'off',
-            'react/prop-types': 'off',
-            'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-            'no-empty': ['error', { allowEmptyCatch: true }],
-        },
-    },
-
-    // Scripts (Node ESM) — JS for now; .mts equivalents are created in Plan D
-    {
-        files: ['scripts/**/*.{js,mjs}', '*.config.js'],
-        languageOptions: {
-            ecmaVersion: 'latest',
-            sourceType: 'module',
             globals: { ...globals.node },
         },
-    },
-
-    // JS tests — same shape as src/ JS during transition
-    {
-        files: ['src/lib/*.test.js'],
-        languageOptions: {
-            globals: { ...globals.node, ...globals.browser },
+        plugins: { '@typescript-eslint': tsPlugin },
+        rules: {
+            ...tsPlugin.configs.recommended.rules,
+            'no-console': 'off', // scripts may log
+            // @typescript-eslint/no-unused-expressions extends the core rule and
+            // reads its options object. Without either rule explicitly set, the
+            // core rule's `allowShortCircuit` lookup is undefined and ESLint
+            // crashes at parse time. Disabling both is necessary on this block.
+            'no-unused-expressions': 'off',
+            '@typescript-eslint/no-unused-expressions': 'off',
         },
     },
 ];

@@ -2,14 +2,11 @@
 
 import { useMemo } from "react";
 
-import { DotMatrixBase } from "./core";
-import { useDotMatrixPhases } from "./hooks";
-import { MATRIX_SIZE } from "./core";
-import { usePrefersReducedMotion } from "./hooks";
-import { useSteppedCycle } from "./hooks";
-import type { DotAnimationResolver, DotMatrixCommonProps } from "./core";
+import { DotMatrixBase , MATRIX_SIZE } from "./core";
+import { useDotMatrixPhases , usePrefersReducedMotion , useSteppedCycle } from "./hooks";
+import type { DotAnimationResolver, IDotMatrixCommonProps } from "./core";
 
-export type DotmSquare8Props = DotMatrixCommonProps;
+export type DotmSquare8Props = IDotMatrixCommonProps;
 
 const ROWS = MATRIX_SIZE;
 const COLS = MATRIX_SIZE;
@@ -30,87 +27,88 @@ const SETTLED_OPACITY = 0.52;
 const CAP_OPACITY = 1;
 
 function fillHeight(col: number, fillTick: number): number {
-  return Math.max(0, Math.min(ROWS, fillTick - col));
+    return Math.max(0, Math.min(ROWS, fillTick - col));
 }
 
 function drainHeight(col: number, drainTick: number): number {
-  return Math.max(0, Math.min(ROWS, ROWS - Math.max(0, drainTick - col)));
+    return Math.max(0, Math.min(ROWS, ROWS - Math.max(0, drainTick - col)));
 }
 
-export function DotmSquare8({
-  speed = 1.4,
-  pattern = "full",
-  animated = true,
-  hoverAnimated = false,
-  ...rest
-}: DotmSquare8Props) {
-  const reducedMotion = usePrefersReducedMotion();
-  const { phase: matrixPhase, onMouseEnter, onMouseLeave } = useDotMatrixPhases({
-    animated: Boolean(animated && !reducedMotion),
-    hoverAnimated: Boolean(hoverAnimated && !reducedMotion),
-    speed
-  });
-  const step = useSteppedCycle({
-    active: !reducedMotion && matrixPhase !== "idle" && SEQUENCE_LEN > 0,
-    cycleMsBase: 2000,
-    steps: SEQUENCE_LEN,
-    speed,
-  });
+export const DotmSquare8 = ({
+    speed = 1.4,
+    pattern = "full",
+    animated = true,
+    hoverAnimated = false,
+    ...rest
+}: DotmSquare8Props) => {
+    const reducedMotion = usePrefersReducedMotion();
+    const { phase: matrixPhase, onMouseEnter, onMouseLeave } = useDotMatrixPhases({
+        animated: Boolean(animated && !reducedMotion),
+        hoverAnimated: Boolean(hoverAnimated && !reducedMotion),
+        speed
+    });
+    const step = useSteppedCycle({
+        active: !reducedMotion && matrixPhase !== "idle" && SEQUENCE_LEN > 0,
+        cycleMsBase: 2000,
+        steps: SEQUENCE_LEN,
+        speed,
+    });
 
-  const resolver = useMemo<DotAnimationResolver>(() => {
-    return ({ isActive, row, col, phase }) => {
-      if (!isActive) {
-        return { className: "dmx-inactive" };
-      }
+    const resolver = useMemo<DotAnimationResolver>(() => {
+        return ({
+            isActive, row, col, phase
+        }) => {
+            if (!isActive) {
+                return { className: "dmx-inactive" };
+            }
 
-      if (reducedMotion || phase === "idle") {
-        return { style: { opacity: BASE_OPACITY } };
-      }
+            if (reducedMotion || phase === "idle") {
+                return { style: { opacity: BASE_OPACITY } };
+            }
 
-      let height = 0;
-      let blinkOpacity: number | null = null;
+            let height = 0;
+            let blinkOpacity: number | null = null;
 
-      if (step <= FILL_LAST) {
-        height = fillHeight(col, step);
-      } else if (step < FILL_LAST + 1 + BLINK_STEPS) {
-        height = ROWS;
-        blinkOpacity = BLINK_OPACITIES[step - (FILL_LAST + 1)] ?? 1;
-      } else {
-        const drainTick = step - (FILL_LAST + 1 + BLINK_STEPS);
-        height = drainHeight(col, drainTick);
-      }
+            if (step <= FILL_LAST) {
+                height = fillHeight(col, step);
+            } else if (step < FILL_LAST + 1 + BLINK_STEPS) {
+                height = ROWS;
+                blinkOpacity = BLINK_OPACITIES[step - (FILL_LAST + 1)] ?? 1;
+            } else {
+                const drainTick = step - (FILL_LAST + 1 + BLINK_STEPS);
+                height = drainHeight(col, drainTick);
+            }
 
-      const bottomRow = ROWS - 1;
-      const topLitRow = ROWS - height;
-      const isLit = height > 0 && row >= topLitRow && row <= bottomRow;
-      if (!isLit) {
-        return { style: { opacity: BASE_OPACITY } };
-      }
+            const bottomRow = ROWS - 1;
+            const topLitRow = ROWS - height;
+            const isLit = height > 0 && row >= topLitRow && row <= bottomRow;
+            if (!isLit) {
+                return { style: { opacity: BASE_OPACITY } };
+            }
 
-      if (blinkOpacity !== null) {
-        return { style: { opacity: blinkOpacity } };
-      }
+            if (blinkOpacity !== null) {
+                return { style: { opacity: blinkOpacity } };
+            }
 
-      const isCap = row === topLitRow && height > 0 && height < ROWS;
-      return {
-        style: { opacity: isCap ? CAP_OPACITY : SETTLED_OPACITY }
-      };
-    };
-  }, [reducedMotion, step]);
+            const isCap = row === topLitRow && height > 0 && height < ROWS;
+            return {style: { opacity: isCap ? CAP_OPACITY : SETTLED_OPACITY }};
+        };
+    }, [reducedMotion, step]);
 
-  return (
-    <DotMatrixBase
-      {...rest}
-      size={rest.size ?? 36}
-      dotSize={rest.dotSize ?? 5}
-      speed={speed}
-      pattern={pattern}
-      animated={animated}
-      phase={matrixPhase}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      reducedMotion={reducedMotion}
-      animationResolver={resolver}
-    />
-  );
-}
+    return (
+        <DotMatrixBase
+            // eslint-disable-next-line react/jsx-props-no-spreading -- forward presentational props to DotMatrixBase
+            {...rest}
+            size={rest.size ?? 36}
+            dotSize={rest.dotSize ?? 5}
+            speed={speed}
+            pattern={pattern}
+            animated={animated}
+            phase={matrixPhase}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            reducedMotion={reducedMotion}
+            animationResolver={resolver}
+        />
+    );
+};

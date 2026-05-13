@@ -1,4 +1,4 @@
-// Single source of truth: ../version.json (read by vite.config.js)
+// Single source of truth: ../version.json (read by vite.config.ts)
 // and injected as __BUILD_VERSION__ at build time. Consumed in
 // Settings → About, JobList header badge, PhotoCapture footer.
 //

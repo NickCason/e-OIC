@@ -11,8 +11,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:unit": "tsx --test src/lib/*.test.ts",
-    "test:e2e": "node --import tsx scripts/e2e-test.mjs",
-    "test": "npm run typecheck && npm run lint && npm run test:unit && npm run test:e2e"
+    "test:e2e": "tsx scripts/e2e-test.mts",
+    "test": "npm run typecheck && npm run lint && npm run test:unit && npm run test:e2e",
+    "gen:fixtures": "tsx scripts/gen-fixtures.mts"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "~3.1.0",
     "@eslint/js": "9.39.4",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "~20.0.0",
     "@types/react": "~18.3.0",
     "@types/react-dom": "~18.3.0",
