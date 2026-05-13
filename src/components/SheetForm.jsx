@@ -13,7 +13,7 @@ import {
 } from '../lib/fieldHints';
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
-import SaveBar from './SaveBar.jsx';
+import SaveBar from './SaveBar';
 import Icon from './Icon';
 import Marquee from './Marquee';
 
