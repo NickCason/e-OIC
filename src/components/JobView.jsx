@@ -13,7 +13,7 @@ import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon';
 import EmptyState from './EmptyState.jsx';
-import Marquee from './Marquee.jsx';
+import Marquee from './Marquee';
 import CountUp from './CountUp';
 import PercentRing from './PercentRing';
 import PercentBar from './PercentBar';

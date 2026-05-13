@@ -8,7 +8,7 @@ import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
 import CountUp from './CountUp';
 import Icon from './Icon';
-import Marquee from './Marquee.jsx';
+import Marquee from './Marquee';
 import PullOrNewModal from './PullOrNewModal.jsx';
 import PullDialog from './PullDialog.jsx';
 import InstallBanner from './InstallBanner.jsx';

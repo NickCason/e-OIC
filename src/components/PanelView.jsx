@@ -6,7 +6,7 @@ import SheetForm from './SheetForm.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon';
 import SheetPicker from './SheetPicker.jsx';
-import Marquee from './Marquee.jsx';
+import Marquee from './Marquee';
 import CountUp from './CountUp';
 
 const SHEET_ORDER = [
