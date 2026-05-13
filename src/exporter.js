@@ -387,7 +387,9 @@ function appendNotesSheet(wb, job, notesAppendix) {
 function collectRowsWithPhotos(photosByPanel) {
   const rowsWithPhotos = new Set();
   for (const photos of photosByPanel.values()) {
-    for (const ph of photos) if (ph.rowId) rowsWithPhotos.add(ph.rowId);
+    for (const id of photos.map((ph) => ph.rowId).filter(Boolean)) {
+      rowsWithPhotos.add(id);
+    }
   }
   return rowsWithPhotos;
 }
@@ -444,6 +446,27 @@ function reportPhotoProgress(onProgress, writtenPhotos, grandTotalPhotos) {
     percent: 60 + Math.floor((writtenPhotos / grandTotalPhotos) * 30),
     detail: `${writtenPhotos} / ${grandTotalPhotos} photos`,
   });
+}
+
+// Write every photo in one panel into the zip + CSV, then return the
+// updated writtenPhotos counter. Reports progress every 5 photos.
+async function writePanelPhotos({
+  zip, csvRows, panel, photos, job, onProgress,
+  writtenPhotos, grandTotalPhotos,
+}) {
+  const rowInfo = await buildRowInfoMap(panel);
+  const byFolder = groupPhotosByFolder(photos, panel, rowInfo);
+  let written = writtenPhotos;
+  for (const [folder, list] of byFolder) {
+    for (let i = 0; i < list.length; i++) {
+      await writePhotoToZip({
+        zip, csvRows, folder, entry: list[i], index: i, job, panel,
+      });
+      written += 1;
+      reportPhotoProgress(onProgress, written, grandTotalPhotos);
+    }
+  }
+  return written;
 }
 
 // Bake one photo (overlay + EXIF) into the zip and append a metadata CSV
@@ -828,17 +851,10 @@ export async function buildExport(job, {
   const grandTotalPhotos = allPanelPhotos.reduce((s, p) => s + p.photos.length, 0);
 
   for (const { panel, photos } of allPanelPhotos) {
-    const rowInfo = await buildRowInfoMap(panel);
-    const byFolder = groupPhotosByFolder(photos, panel, rowInfo);
-    for (const [folder, list] of byFolder) {
-      for (let i = 0; i < list.length; i++) {
-        await writePhotoToZip({
-          zip, csvRows, folder, entry: list[i], index: i, job, panel,
-        });
-        writtenPhotos += 1;
-        reportPhotoProgress(onProgress, writtenPhotos, grandTotalPhotos);
-      }
-    }
+    writtenPhotos = await writePanelPhotos({
+      zip, csvRows, panel, photos, job, onProgress,
+      writtenPhotos, grandTotalPhotos,
+    });
   }
 
   zip.file(`${jobSafe}_photo_metadata.csv`, csvRows.join('\n'));
