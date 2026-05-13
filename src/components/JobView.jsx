@@ -9,7 +9,7 @@ import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import ExportDialog from './ExportDialog';
 import ResyncDialog from './ResyncDialog';
-import { fmtRelative } from './JobList.jsx';
+import { fmtRelative } from '../lib/timeFormat';
 import AppBar from './AppBar';
 import Icon from './Icon';
 import EmptyState from './EmptyState';
