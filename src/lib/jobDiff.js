@@ -69,6 +69,37 @@ function groupByPanelLabel(rows, sheetName, schemaMap, getData) {
   return groups;
 }
 
+function diffGroupPair(lg, xg, sheetName, schemaMap, sheetDiff) {
+  const localItems = lg?.items || [];
+  const xlsxItems = xg?.items || [];
+  if (localItems.length > 1 || xlsxItems.length > 1) {
+    const lbl = (lg || xg).label;
+    if (!sheetDiff.labelCollisions.includes(lbl) && lbl !== '') sheetDiff.labelCollisions.push(lbl);
+  }
+  const pairCount = Math.min(localItems.length, xlsxItems.length);
+  const label = (lg || xg).label;
+  for (let i = 0; i < pairCount; i++) {
+    const local = localItems[i];
+    const xlsx = xlsxItems[i];
+    const fieldChanges = compareRowFields(local, xlsx, sheetName, schemaMap);
+    if (fieldChanges.length === 0) sheetDiff.unchanged.push({ local, xlsx, label });
+    else sheetDiff.modified.push({ local, xlsx, label, fieldChanges });
+  }
+  for (let i = pairCount; i < localItems.length; i++) sheetDiff.removed.push(localItems[i]);
+  for (let i = pairCount; i < xlsxItems.length; i++) sheetDiff.added.push(xlsxItems[i]);
+}
+
+function diffSheetRows(localRows, xlsxRows, sheetName, schemaMap) {
+  const localGroups = groupByPanelLabel(localRows, sheetName, schemaMap, (r) => r.data || {});
+  const xlsxGroups = groupByPanelLabel(xlsxRows, sheetName, schemaMap, (r) => r.data || {});
+  const sheetDiff = { added: [], removed: [], modified: [], unchanged: [], labelCollisions: [] };
+  const allKeys = new Set([...localGroups.keys(), ...xlsxGroups.keys()]);
+  for (const key of allKeys) {
+    diffGroupPair(localGroups.get(key), xlsxGroups.get(key), sheetName, schemaMap, sheetDiff);
+  }
+  return sheetDiff;
+}
+
 export function diffJobs(localState, parsedXlsx, schemaMap, options = {}) {
   const { localJob, localPanels, localRowsBySheet, localSheetNotes } = localState;
 
@@ -119,37 +150,7 @@ export function diffJobs(localState, parsedXlsx, schemaMap, options = {}) {
   for (const sheetName of allSheetNames) {
     const localRows = (localRowsBySheet && localRowsBySheet[sheetName]) || [];
     const xlsxRows = (parsedXlsx.rowsBySheet && parsedXlsx.rowsBySheet[sheetName]) || [];
-    const localGroups = groupByPanelLabel(localRows, sheetName, schemaMap, (r) => r.data || {});
-    const xlsxGroups = groupByPanelLabel(xlsxRows, sheetName, schemaMap, (r) => r.data || {});
-
-    const sheetDiff = { added: [], removed: [], modified: [], unchanged: [], labelCollisions: [] };
-
-    const allKeys = new Set([...localGroups.keys(), ...xlsxGroups.keys()]);
-    for (const key of allKeys) {
-      const lg = localGroups.get(key);
-      const xg = xlsxGroups.get(key);
-      const localItems = lg?.items || [];
-      const xlsxItems = xg?.items || [];
-      if (localItems.length > 1 || xlsxItems.length > 1) {
-        const lbl = (lg || xg).label;
-        if (!sheetDiff.labelCollisions.includes(lbl) && lbl !== '') sheetDiff.labelCollisions.push(lbl);
-      }
-      const pairCount = Math.min(localItems.length, xlsxItems.length);
-      for (let i = 0; i < pairCount; i++) {
-        const local = localItems[i];
-        const xlsx = xlsxItems[i];
-        const label = (lg || xg).label;
-        const fieldChanges = compareRowFields(local, xlsx, sheetName, schemaMap);
-        if (fieldChanges.length === 0) {
-          sheetDiff.unchanged.push({ local, xlsx, label });
-        } else {
-          sheetDiff.modified.push({ local, xlsx, label, fieldChanges });
-        }
-      }
-      for (let i = pairCount; i < localItems.length; i++) sheetDiff.removed.push(localItems[i]);
-      for (let i = pairCount; i < xlsxItems.length; i++) sheetDiff.added.push(xlsxItems[i]);
-    }
-    result.sheets[sheetName] = sheetDiff;
+    result.sheets[sheetName] = diffSheetRows(localRows, xlsxRows, sheetName, schemaMap);
   }
 
   // Sheet notes
