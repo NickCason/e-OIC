@@ -58,9 +58,9 @@ export const CyclingDotmSquare = ({
     // we also fall back to the first variant for safety under noUncheckedIndexedAccess.
     const Variant = VARIANTS[idx] ?? VARIANTS[0];
     return (
-        <span className="cycling-dotmatrix" key={idx}>
+        <span className="cycling-dotmatrix">
             {/* eslint-disable-next-line react/jsx-props-no-spreading -- forward presentational props to selected variant */}
-            <Variant {...props} />
+            <Variant key={idx} {...props} />
         </span>
     );
 };

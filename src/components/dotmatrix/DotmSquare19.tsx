@@ -16,8 +16,8 @@ const PEAK_OPACITY = 1;
 const CURVE_OPACITY = 0.2;
 
 interface IPoint {
-  x: number;
-  y: number;
+    x: number;
+    y: number;
 }
 
 const CURVE_SAMPLES: readonly IPoint[] = Array.from({ length: 96 }, (_, index) => {
