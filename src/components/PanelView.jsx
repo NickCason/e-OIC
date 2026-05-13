@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getJob, getPanel } from '../db';
 import { getPanelProgress } from '../lib/metrics';
 import { nav } from '../App.jsx';
-import SheetForm from './SheetForm.jsx';
+import SheetForm from './SheetForm';
 import AppBar from './AppBar';
 import Icon from './Icon';
 import SheetPicker from './SheetPicker.jsx';
