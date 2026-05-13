@@ -122,6 +122,118 @@ function repairAutoFilter(xml) {
   return xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
 }
 
+// Add the FeaturePropertyBag relationship to workbook.xml.rels if missing.
+async function addFpbRelationship(zip) {
+  const relsPath = 'xl/_rels/workbook.xml.rels';
+  const relsFile = zip.file(relsPath);
+  if (!relsFile) return;
+  let rels = await relsFile.async('string');
+  const fpbType = 'http://schemas.microsoft.com/office/2022/11/relationships/FeaturePropertyBag';
+  if (rels.includes(fpbType)) return;
+  const idMatches = [...rels.matchAll(/Id="rId(\d+)"/g)].map((m) => parseInt(m[1], 10));
+  const nextId = (idMatches.length ? Math.max(...idMatches) : 0) + 1;
+  const rel = `<Relationship Id="rId${nextId}" Type="${fpbType}" Target="featurePropertyBag/featurePropertyBag.xml"/>`;
+  rels = rels.replace('</Relationships>', `${rel}</Relationships>`);
+  zip.file(relsPath, rels);
+}
+
+// Add the FeaturePropertyBag override to [Content_Types].xml if missing.
+async function addFpbContentTypeOverride(zip, fpbPath) {
+  const ctPath = '[Content_Types].xml';
+  const ctFile = zip.file(ctPath);
+  if (!ctFile) return;
+  let ct = await ctFile.async('string');
+  const ctType = 'application/vnd.ms-excel.featurepropertybag+xml';
+  if (ct.includes(ctType)) return;
+  const override = `<Override PartName="/${fpbPath}" ContentType="${ctType}"/>`;
+  ct = ct.replace('</Types>', `${override}</Types>`);
+  zip.file(ctPath, ct);
+}
+
+// If ExcelJS dropped the xfpb:xfComplement extLst entries from styles.xml,
+// restore styles.xml wholesale from the template. Safe because the
+// exporter only mutates cell values, never styles.
+async function restoreStylesIfStripped(zip, tmplZip) {
+  const stylesPath = 'xl/styles.xml';
+  const stylesFile = zip.file(stylesPath);
+  if (!stylesFile) return;
+  const styles = await stylesFile.async('string');
+  if (styles.includes('xfpb:xfComplement')) return;
+  const tmplStyles = await tmplZip.file(stylesPath)?.async('uint8array');
+  if (tmplStyles) zip.file(stylesPath, tmplStyles);
+}
+
+// Re-attach the FeaturePropertyBag part + relationship + content-type +
+// styles from the original template. The template uses Microsoft 365's
+// native in-cell checkbox feature; ExcelJS strips this part on round-trip,
+// so we copy it back from the source template before generating output.
+async function attachFeaturePropertyBag(zip, tmplZip) {
+  const fpbPath = 'xl/featurePropertyBag/featurePropertyBag.xml';
+  const fpbFile = tmplZip.file(fpbPath);
+  if (!fpbFile) return false;
+  const fpbXml = await fpbFile.async('uint8array');
+  zip.file(fpbPath, fpbXml);
+  await addFpbRelationship(zip);
+  await addFpbContentTypeOverride(zip, fpbPath);
+  await restoreStylesIfStripped(zip, tmplZip);
+  return true;
+}
+
+// Walk styles.xml's <cellXfs> entries; return indices of xfs that carry
+// the xfpb:xfComplement marker (i.e. checkbox-enabled xfs).
+function findCheckboxXfIds(stylesXml) {
+  const cellXfsMatch = stylesXml.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);
+  const checkboxXfIds = [];
+  if (!cellXfsMatch) return checkboxXfIds;
+  const xfRe = /<xf\b[^/]*?(?:\/>|>[\s\S]*?<\/xf>)/g;
+  let i = 0;
+  let m;
+  while ((m = xfRe.exec(cellXfsMatch[1])) !== null) {
+    if (m[0].includes('xfpb:xfComplement')) checkboxXfIds.push(i);
+    i += 1;
+  }
+  return checkboxXfIds;
+}
+
+// Resolve the worksheet file path for a named sheet via workbook.xml +
+// workbook.xml.rels. Returns null if the sheet or its rel target is missing.
+async function resolveSheetPath(zip, sheetName) {
+  const wbXml = await zip.file('xl/workbook.xml').async('string');
+  const nameRe = new RegExp(`<sheet[^>]+name="${sheetName}"[^>]+r:id="(rId\\d+)"`);
+  const sheetMatch = wbXml.match(nameRe);
+  if (!sheetMatch) return null;
+  const wbRels = await zip.file('xl/_rels/workbook.xml.rels').async('string');
+  const ridRe = new RegExp(`Id="${sheetMatch[1]}"[^>]+Target="([^"]+)"`);
+  const targetMatch = wbRels.match(ridRe);
+  if (!targetMatch) return null;
+  return `xl/${targetMatch[1].replace(/^\.\//, '')}`;
+}
+
+// Rewrite every t="b" cell's s="N" attribute on the Checklist sheet so it
+// points at a checkbox-enabled xfId. ExcelJS rewrites these references on
+// round-trip; without the right xfId, Excel renders TRUE/FALSE text
+// instead of a live checkbox even when the FPB part is wired up.
+async function rewriteCellXfRefs(zip) {
+  const stylesPath = 'xl/styles.xml';
+  const stylesFile = zip.file(stylesPath);
+  if (!stylesFile) return;
+  const finalStyles = await stylesFile.async('string');
+  const checkboxXfIds = findCheckboxXfIds(finalStyles);
+  const checklistXfId = checkboxXfIds[0];
+  if (checklistXfId === undefined) return;
+  const checklistPath = await resolveSheetPath(zip, 'Checklist');
+  if (!checklistPath) return;
+  const checklistFile = zip.file(checklistPath);
+  if (!checklistFile) return;
+  const xml = await checklistFile.async('string');
+  const rewritten = xml.replace(/<c\s+([^>]*?)>/g, (m2, attrs) => {
+    if (!/\bt="b"/.test(attrs)) return m2;
+    const cleaned = attrs.replace(/\s*s="\d+"/g, '');
+    return `<c ${cleaned} s="${checklistXfId}">`;
+  });
+  zip.file(checklistPath, rewritten);
+}
+
 // Extend each table's `ref` attribute so it covers the actual last data row
 // in the sheet. Without this, rows beyond the template's example row sit
 // outside the table and lose banding/totals/auto-extension. Walks the
@@ -507,99 +619,13 @@ export async function buildExport(job, {
       await extendTableRefsForSheet(fixZip, sheetFile);
     }
 
-    // Re-attach FeaturePropertyBag from the template so cell-checkboxes work.
+    // Re-attach FeaturePropertyBag from the template so cell-checkboxes work,
+    // then rewrite the Checklist sheet's t="b" cells to reference the
+    // checkbox-enabled xfId.
     const tmplZip = new JSZip();
     await tmplZip.loadAsync(tmplBuf);
-    const fpbPath = 'xl/featurePropertyBag/featurePropertyBag.xml';
-    const fpbFile = tmplZip.file(fpbPath);
-    if (fpbFile) {
-      const fpbXml = await fpbFile.async('uint8array');
-      fixZip.file(fpbPath, fpbXml);
-
-      // workbook.xml.rels — add the FeaturePropertyBag relationship if missing.
-      const relsPath = 'xl/_rels/workbook.xml.rels';
-      const relsFile = fixZip.file(relsPath);
-      if (relsFile) {
-        let rels = await relsFile.async('string');
-        const fpbType = 'http://schemas.microsoft.com/office/2022/11/relationships/FeaturePropertyBag';
-        if (!rels.includes(fpbType)) {
-          const idMatches = [...rels.matchAll(/Id="rId(\d+)"/g)].map((m) => parseInt(m[1], 10));
-          const nextId = (idMatches.length ? Math.max(...idMatches) : 0) + 1;
-          const rel = `<Relationship Id="rId${nextId}" Type="${fpbType}" Target="featurePropertyBag/featurePropertyBag.xml"/>`;
-          rels = rels.replace('</Relationships>', `${rel}</Relationships>`);
-          fixZip.file(relsPath, rels);
-        }
-      }
-
-      // [Content_Types].xml — add the override for the FeaturePropertyBag part.
-      const ctPath = '[Content_Types].xml';
-      const ctFile = fixZip.file(ctPath);
-      if (ctFile) {
-        let ct = await ctFile.async('string');
-        const ctType = 'application/vnd.ms-excel.featurepropertybag+xml';
-        if (!ct.includes(ctType)) {
-          const override = `<Override PartName="/${fpbPath}" ContentType="${ctType}"/>`;
-          ct = ct.replace('</Types>', `${override}</Types>`);
-          fixZip.file(ctPath, ct);
-        }
-      }
-
-      // styles.xml — if ExcelJS dropped the xfpb:xfComplement extLst entries
-      // from xf rows, restore styles.xml from the template wholesale. This is
-      // safe because the exporter never modifies styles, only cell values.
-      const stylesPath = 'xl/styles.xml';
-      const stylesFile = fixZip.file(stylesPath);
-      if (stylesFile) {
-        const styles = await stylesFile.async('string');
-        if (!styles.includes('xfpb:xfComplement')) {
-          const tmplStyles = await tmplZip.file(stylesPath)?.async('uint8array');
-          if (tmplStyles) fixZip.file(stylesPath, tmplStyles);
-        }
-      }
-
-      // Cell → xf reference remap. ExcelJS rewrites every t="b" cell's
-      // s="N" attribute to point at a plain xf instead of the
-      // checkbox-enabled xf (the one carrying <xfpb:xfComplement>). Without
-      // the right xfId, Excel renders TRUE/FALSE text instead of a live
-      // checkbox even when the FeaturePropertyBag part is wired up. We
-      // resolve which xfIds are checkbox-enabled by parsing the (now
-      // restored) styles.xml and pick the first one as the canonical
-      // reference for the Checklist sheet's boolean cells.
-      const finalStyles = await fixZip.file(stylesPath).async('string');
-      const cellXfsMatch = finalStyles.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);
-      const checkboxXfIds = [];
-      if (cellXfsMatch) {
-        const xfRe = /<xf\b[^/]*?(?:\/>|>[\s\S]*?<\/xf>)/g;
-        let i = 0;
-        let m;
-        while ((m = xfRe.exec(cellXfsMatch[1])) !== null) {
-          if (m[0].includes('xfpb:xfComplement')) checkboxXfIds.push(i);
-          i += 1;
-        }
-      }
-      const checklistXfId = checkboxXfIds[0];
-      if (checklistXfId !== undefined) {
-        // Find the sheet file that holds the Checklist by parsing
-        // workbook.xml + workbook.xml.rels.
-        const wbXml = await fixZip.file('xl/workbook.xml').async('string');
-        const sheetMatch = wbXml.match(/<sheet[^>]+name="Checklist"[^>]+r:id="(rId\d+)"/);
-        const wbRels = await fixZip.file('xl/_rels/workbook.xml.rels').async('string');
-        if (sheetMatch) {
-          const ridRe = new RegExp(`Id="${sheetMatch[1]}"[^>]+Target="([^"]+)"`);
-          const targetMatch = wbRels.match(ridRe);
-          if (targetMatch) {
-            const checklistPath = `xl/${targetMatch[1].replace(/^\.\//, '')}`;
-            let xml = await fixZip.file(checklistPath).async('string');
-            xml = xml.replace(/<c\s+([^>]*?)>/g, (m2, attrs) => {
-              if (!/\bt="b"/.test(attrs)) return m2;
-              const cleaned = attrs.replace(/\s*s="\d+"/g, '');
-              return `<c ${cleaned} s="${checklistXfId}">`;
-            });
-            fixZip.file(checklistPath, xml);
-          }
-        }
-      }
-    }
+    const fpbAttached = await attachFeaturePropertyBag(fixZip, tmplZip);
+    if (fpbAttached) await rewriteCellXfRefs(fixZip);
 
     xlsxBuf = await fixZip.generateAsync({ type: 'arraybuffer' });
   }
