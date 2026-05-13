@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Icon from './Icon.jsx';
 import DiffView from './DiffView.jsx';
-import { buildExport, downloadBlob, shareBlob } from '../exporter.js';
+import { buildExport, downloadBlob, shareBlob } from '../exporter';
 import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { diffJobs } from '../lib/jobDiff';
 import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
