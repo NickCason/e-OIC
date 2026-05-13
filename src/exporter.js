@@ -112,6 +112,16 @@ function reorderTableParts(xml) {
   );
 }
 
+// ExcelJS rewrites every table's <autoFilter> with explicit <filterColumn
+// hiddenButton="1"/> children AND adds totalsRowShown="1" + headerRowCount="0"
+// attributes. The combination is contradictory (an autoFilter requires a
+// header row) and Excel logs an XmlReaderFatalError on the table records,
+// prompting the "needs repair" dialog. Stripping the autoFilter element
+// entirely matches what Excel's own auto-repair does.
+function repairAutoFilter(xml) {
+  return xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
+}
+
 export async function buildExport(job, {
   templateUrl = './template.xlsx',
   onProgress = () => {},
@@ -451,9 +461,8 @@ export async function buildExport(job, {
       /^xl\/tables\/table\d+\.xml$/.test(f),
     );
     for (const f of tableFiles) {
-      let xml = await fixZip.file(f).async('string');
-      xml = xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
-      fixZip.file(f, xml);
+      const xml = await fixZip.file(f).async('string');
+      fixZip.file(f, repairAutoFilter(xml));
     }
 
     // Extend each table's `ref` to cover the actual last data row in its
