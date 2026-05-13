@@ -113,10 +113,10 @@ console.log(`[e2e] wrote zip -> ${zipPath}`);
 const { default: JSZip } = await import('jszip');
 const innerZip = await JSZip.loadAsync(fs.readFileSync(zipPath));
 const xlsxFiles = Object.keys(innerZip.files).filter((f) => f.endsWith('.xlsx'));
-if (xlsxFiles.length !== 1) {
+const [xlsxName] = xlsxFiles;
+if (xlsxFiles.length !== 1 || !xlsxName) {
     throw new Error(`expected exactly 1 xlsx in zip, found ${xlsxFiles.length}: ${xlsxFiles.join(', ')}`);
 }
-const xlsxName = xlsxFiles[0]!;
 const xlsxFile = innerZip.file(xlsxName);
 if (!xlsxFile) throw new Error(`xlsx ${xlsxName} missing from zip`);
 const xlsxBuf = await xlsxFile.async('nodebuffer');
@@ -321,14 +321,14 @@ const localSheetNotes: Record<string, Record<string, string>> = {};
 for (const p of localPanels) {
     const rs = await listAllRows(p.id);
     for (const r of rs) {
-        if (!localRowsBySheet[r.sheet]) localRowsBySheet[r.sheet] = [];
-        localRowsBySheet[r.sheet]!.push(r);
+        const arr = localRowsBySheet[r.sheet] ?? (localRowsBySheet[r.sheet] = []);
+        arr.push(r);
     }
     for (const sn of Object.keys(schemaMap)) {
         const txt = await getSheetNotes(p.id, sn);
         if (txt) {
-            if (!localSheetNotes[p.name]) localSheetNotes[p.name] = {};
-            localSheetNotes[p.name]![sn] = txt;
+            const notes = localSheetNotes[p.name] ?? (localSheetNotes[p.name] = {});
+            notes[sn] = txt;
         }
     }
 }
