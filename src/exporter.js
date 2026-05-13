@@ -90,6 +90,17 @@ function csvEscape(v) {
   return s;
 }
 
+// ─── xlsx zip post-processing helpers ────────────────────────────────────────
+// ExcelJS round-trips with several quirks that Excel rejects. Each helper
+// below transforms one slice of the generated zip in place. They run inside
+// the fixZip block at the end of buildExport.
+
+// Strip ExcelJS's "unset" sentinel DPI values (uint32-max). Modern Excel
+// rejects horizontalDpi/verticalDpi="4294967295" as out-of-range integers.
+function fixDpiSentinels(xml) {
+  return xml.replace(/\s+(horizontalDpi|verticalDpi)="4294967295"/g, '');
+}
+
 export async function buildExport(job, {
   templateUrl = './template.xlsx',
   onProgress = () => {},
@@ -421,7 +432,7 @@ export async function buildExport(job, {
     );
     for (const f of sheetFiles) {
       let xml = await fixZip.file(f).async('string');
-      xml = xml.replace(/\s+(horizontalDpi|verticalDpi)="4294967295"/g, '');
+      xml = fixDpiSentinels(xml);
       xml = xml.replace(
         /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
         '$3$2$1',
