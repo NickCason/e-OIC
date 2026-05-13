@@ -101,6 +101,17 @@ function fixDpiSentinels(xml) {
   return xml.replace(/\s+(horizontalDpi|verticalDpi)="4294967295"/g, '');
 }
 
+// ExcelJS writes <tableParts> before <legacyDrawing> at the tail of each
+// worksheet. OOXML schema (ECMA-376 § 18.3.1) requires legacyDrawing
+// (element 31) to precede tableParts (element 37). Excel is strict about
+// the order even though openpyxl/ExcelJS/LibreOffice are not.
+function reorderTableParts(xml) {
+  return xml.replace(
+    /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
+    '$3$2$1',
+  );
+}
+
 export async function buildExport(job, {
   templateUrl = './template.xlsx',
   onProgress = () => {},
@@ -433,10 +444,7 @@ export async function buildExport(job, {
     for (const f of sheetFiles) {
       let xml = await fixZip.file(f).async('string');
       xml = fixDpiSentinels(xml);
-      xml = xml.replace(
-        /(<tableParts(?:[^<]|<(?!\/tableParts>))*<\/tableParts>)(\s*)(<legacyDrawing[^/]*\/>)/,
-        '$3$2$1',
-      );
+      xml = reorderTableParts(xml);
       fixZip.file(f, xml);
     }
     const tableFiles = Object.keys(fixZip.files).filter((f) =>
