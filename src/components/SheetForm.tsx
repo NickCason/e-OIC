@@ -51,8 +51,8 @@ function addRowToAcc(row: IRow, acc: Record<string, Set<string>>): void {
         if (typeof v !== 'string') return;
         const t = v.trim();
         if (!t) return;
-        if (!acc[k]) acc[k] = new Set<string>();
-        acc[k].add(t);
+        const s = acc[k] ?? (acc[k] = new Set<string>());
+        s.add(t);
     });
 }
 
