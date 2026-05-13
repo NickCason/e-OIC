@@ -150,13 +150,12 @@ export default [
             'nonblock-statement-body-position': 'off',
             curly: 'off',
             '@typescript-eslint/no-shadow': 'error',
-            // Standards-encoded rule (moved from @typescript-eslint to @stylistic in v8).
-            // Source: Coding-Standards-master/TypeScript/.eslintrc.cjs declares
-            // `multiline: { delimiter: 'none', requireLast: false }`, but the entire
-            // e-OIC codebase (and Plan A/B/C output) was written with semicolon
-            // delimiters as the de-facto convention. Plan D Task 7 conforms the rule
-            // to the existing code rather than rewriting every interface; the only
-            // load-bearing requirement from the standards is that the rule is enabled.
+            // DEVIATION from standards source: Coding-Standards-master/TypeScript/.eslintrc.cjs
+            // declares `multiline: { delimiter: 'none', requireLast: false }`. The entire
+            // e-OIC codebase (Plans A/B/C/D output) uses semicolon delimiters as the
+            // de-facto convention, so Plan D Task 7 conforms the rule to existing code
+            // rather than rewriting every interface. If a strict standards audit requires
+            // alignment to `none`, that is a follow-up pass touching every TS interface.
             '@stylistic/member-delimiter-style': ['error', {
                 multiline: { delimiter: 'semi', requireLast: true },
             }],
@@ -185,7 +184,6 @@ export default [
                 // typecheck under tsconfig.node.json via `npm run typecheck`.
                 // Adding project here would force a second parse and risks
                 // pulling transitive src/* files into the parser graph.
-                tsconfigRootDir: __dirname,
             },
             globals: { ...globals.node },
         },
@@ -193,9 +191,10 @@ export default [
         rules: {
             ...tsPlugin.configs.recommended.rules,
             'no-console': 'off', // scripts may log
-            // @typescript-eslint/no-unused-expressions extends the core rule,
-            // which crashes if the core rule isn't loaded. We don't need the
-            // check for scripts (where short-circuit expressions are common).
+            // @typescript-eslint/no-unused-expressions extends the core rule and
+            // reads its options object. Without either rule explicitly set, the
+            // core rule's `allowShortCircuit` lookup is undefined and ESLint
+            // crashes at parse time. Disabling both is necessary on this block.
             'no-unused-expressions': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
         },
