@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db';
 import { getJobPercent } from '../lib/metrics';
-import PercentRing from './PercentRing.jsx';
+import PercentRing from './PercentRing';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
