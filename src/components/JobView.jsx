@@ -8,7 +8,7 @@ import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
 import ExportDialog from './ExportDialog';
-import ResyncDialog from './ResyncDialog.jsx';
+import ResyncDialog from './ResyncDialog';
 import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar';
 import Icon from './Icon';
