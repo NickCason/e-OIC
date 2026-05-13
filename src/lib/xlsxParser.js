@@ -86,6 +86,16 @@ function parseSheetRows(ws, schema, warnings) {
   return rows;
 }
 
+function extractPanelsFromRows(rows) {
+  const panels = [];
+  for (const row of rows) {
+    const name = row.data?.['Panel Name'] != null ? String(row.data['Panel Name']).trim() : '';
+    if (!name) continue;
+    panels.push({ name, sourceRowIndex: row.sourceRowIndex });
+  }
+  return panels;
+}
+
 function parseNotesSheet(ws) {
   const out = { jobNotes: '', sheetNotes: [], rowNoteAssignments: [] };
   if (!ws) return out;
@@ -185,12 +195,7 @@ export async function parseChecklistXlsx(arrayBuffer, { onProgress } = {}) {
     const ws = wb.getWorksheet('Panels');
     const rows = parseSheetRows(ws, schemaMap['Panels'], result.warnings);
     result.rowsBySheet['Panels'] = rows;
-    for (const row of rows) {
-      const name = row.data?.['Panel Name'] != null ? String(row.data['Panel Name']).trim() : '';
-      if (name) {
-        result.panels.push({ name, sourceRowIndex: row.sourceRowIndex });
-      }
-    }
+    result.panels.push(...extractPanelsFromRows(rows));
   }
   emit('panels', `Found ${result.panels.length} panel${result.panels.length === 1 ? '' : 's'}`);
 
