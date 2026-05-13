@@ -12,7 +12,7 @@ import ResyncDialog from './ResyncDialog.jsx';
 import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon';
-import EmptyState from './EmptyState.jsx';
+import EmptyState from './EmptyState';
 import Marquee from './Marquee';
 import CountUp from './CountUp';
 import PercentRing from './PercentRing';
