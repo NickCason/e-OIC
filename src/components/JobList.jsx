@@ -12,7 +12,7 @@ import Marquee from './Marquee';
 import PullOrNewModal from './PullOrNewModal.jsx';
 import PullDialog from './PullDialog.jsx';
 import InstallBanner from './InstallBanner';
-import WrapperUpdateBanner from './WrapperUpdateBanner.jsx';
+import WrapperUpdateBanner from './WrapperUpdateBanner';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
