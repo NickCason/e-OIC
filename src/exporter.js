@@ -259,6 +259,43 @@ function applyExampleStyles(row, exampleStyles, columnCount) {
   }
 }
 
+// Build the value for a row's Photo/Folder Hyperlink cell.
+//   - If the row has photos, return an ExcelJS hyperlink object pointing at
+//     IMG_001.jpg (Excel for Mac won't reliably open folder URLs but will
+//     open a JPG in Preview, so we target the first photo while keeping
+//     the folder path as display text).
+//   - If the row has no photos, return the folder path as plain text so
+//     the user can see where photos would go without a broken hyperlink.
+function buildHyperlinkCellValue(folder, hasPhotos) {
+  if (!hasPhotos) return folder;
+  const firstFile = folder + 'IMG_001.jpg';
+  return { text: folder, hyperlink: encodeURI(firstFile) };
+}
+
+// Write a single data row to the worksheet at writeRow. Returns nothing
+// — mutates the worksheet row in place and commits it.
+function writeDataRow({
+  ws, writeRow, row, schema, colIndex, panel, sheetName, rowsWithPhotos,
+}) {
+  const r = ws.getRow(writeRow);
+  for (const col of schema.columns) {
+    const ci = colIndex[col.header];
+    if (!ci) continue;
+    if (col.header !== schema.hyperlink_column) {
+      r.getCell(ci).value = coerce(row.data?.[col.header]);
+      continue;
+    }
+    const folder = `Photos/${safe(panel.name)}/${safe(sheetName)}/${rowLabel(row, schema)}/`;
+    const hasPhotos = rowsWithPhotos.has(row.id);
+    try {
+      r.getCell(ci).value = buildHyperlinkCellValue(folder, hasPhotos);
+    } catch {
+      r.getCell(ci).value = folder;
+    }
+  }
+  r.commit();
+}
+
 // Clear any leftover example rows the template ships below our data.
 // The template starts with example rows at `first_data_row`; whatever
 // we didn't overwrite needs to be wiped or the user gets fake "Example"
@@ -411,36 +448,9 @@ export async function buildExport(job, {
         const r = ws.getRow(writeRow);
         for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
         applyExampleStyles(r, exampleStyles, ws.columnCount);
-
-        for (const col of schema.columns) {
-          const ci = colIndex[col.header];
-          if (!ci) continue;
-          if (col.header === schema.hyperlink_column) {
-            const folder = `Photos/${safe(panel.name)}/${safe(sheetName)}/${rowLabel(row, schema)}/`;
-            if (rowsWithPhotos.has(row.id)) {
-              // Excel for Mac (and the App Sandbox) won't reliably "open" a
-              // folder URL via a relative hyperlink — clicks end up no-ops.
-              // It WILL reliably open a JPG file in Preview, so target the
-              // first photo (we always name the first IMG_001.jpg). Display
-              // text remains the folder path so the user can see where the
-              // batch lives.
-              const firstFile = folder + 'IMG_001.jpg';
-              try {
-                r.getCell(ci).value = { text: folder, hyperlink: encodeURI(firstFile) };
-              } catch (e) {
-                r.getCell(ci).value = folder;
-              }
-            } else {
-              // No row-level photos for this row — write plain text so the
-              // user can still see where photos would go, but no broken
-              // hyperlink to click on.
-              r.getCell(ci).value = folder;
-            }
-          } else {
-            r.getCell(ci).value = coerce(row.data?.[col.header]);
-          }
-        }
-        r.commit();
+        writeDataRow({
+          ws, writeRow, row, schema, colIndex, panel, sheetName, rowsWithPhotos,
+        });
 
         if (row.notes && row.notes.trim()) {
           notesAppendix.push({
