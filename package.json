@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:unit": "tsx --test src/lib/*.test.ts",
-    "test:e2e": "node --import tsx scripts/e2e-test.mjs",
+    "test:e2e": "tsx scripts/e2e-test.mts",
     "test": "npm run typecheck && npm run lint && npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
