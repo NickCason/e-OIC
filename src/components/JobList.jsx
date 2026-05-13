@@ -10,7 +10,7 @@ import CountUp from './CountUp';
 import Icon from './Icon';
 import Marquee from './Marquee';
 import PullOrNewModal from './PullOrNewModal.jsx';
-import PullDialog from './PullDialog.jsx';
+import PullDialog from './PullDialog';
 import InstallBanner from './InstallBanner';
 import WrapperUpdateBanner from './WrapperUpdateBanner';
 
