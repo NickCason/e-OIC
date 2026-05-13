@@ -86,6 +86,16 @@ function parseSheetRows(ws, schema, warnings) {
   return rows;
 }
 
+function countUnknownPanelReferences(rows, knownPanelNames) {
+  const counts = new Map();
+  for (const row of rows) {
+    if (row.panelName == null) continue;
+    if (knownPanelNames.has(row.panelName)) continue;
+    counts.set(row.panelName, (counts.get(row.panelName) || 0) + 1);
+  }
+  return counts;
+}
+
 function extractPanelsFromRows(rows) {
   const panels = [];
   for (const row of rows) {
@@ -211,19 +221,9 @@ export async function parseChecklistXlsx(arrayBuffer, { onProgress } = {}) {
   const knownPanelNames = new Set(result.panels.map((p) => p.name));
   for (const sn of Object.keys(result.rowsBySheet)) {
     if (sn === 'Panels') continue;
-    const counts = new Map();
-    for (const row of result.rowsBySheet[sn]) {
-      if (row.panelName == null) continue;
-      if (knownPanelNames.has(row.panelName)) continue;
-      counts.set(row.panelName, (counts.get(row.panelName) || 0) + 1);
-    }
+    const counts = countUnknownPanelReferences(result.rowsBySheet[sn], knownPanelNames);
     for (const [panelName, rowCount] of counts) {
-      result.warnings.push({
-        kind: 'unknown-panel-reference',
-        sheetName: sn,
-        panelName,
-        rowCount,
-      });
+      result.warnings.push({ kind: 'unknown-panel-reference', sheetName: sn, panelName, rowCount });
     }
   }
 
