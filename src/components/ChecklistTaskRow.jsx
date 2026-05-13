@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 
 // One row in the Checklist screen. Renders auto, manual, or custom tasks.
 //

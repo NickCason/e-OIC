@@ -14,7 +14,7 @@ import {
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
 import SaveBar from './SaveBar.jsx';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import Marquee from './Marquee.jsx';
 
 // Top-level form for one (panel, sheet). Renders:

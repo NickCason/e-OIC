@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import DiffView from './DiffView.jsx';
 import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { diffJobs } from '../lib/jobDiff';

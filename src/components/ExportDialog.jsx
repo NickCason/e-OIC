@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import DiffView from './DiffView.jsx';
 import { buildExport, downloadBlob, shareBlob } from '../exporter';
 import { parseChecklistXlsx } from '../lib/xlsxParser';

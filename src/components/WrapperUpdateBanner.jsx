@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import { isInWrapper, getWrapperVersion, compareWrapperVersions, downloadAndInstallApk } from '../lib/wrapperBridge';
 import { toast } from '../lib/toast';
 

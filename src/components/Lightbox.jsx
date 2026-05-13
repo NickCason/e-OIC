@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import { fmtTimestamp, fmtGps } from '../photoOverlay';
 
 // Themed photo lightbox.

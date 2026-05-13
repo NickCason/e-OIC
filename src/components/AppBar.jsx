@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import Marquee from './Marquee.jsx';
 
 // Reusable app bar.

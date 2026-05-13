@@ -9,7 +9,7 @@ import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
 import PercentBar from './PercentBar.jsx';
 import ChecklistTaskRow from './ChecklistTaskRow.jsx';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import CountUp from './CountUp.jsx';
 
 export default function ChecklistView({ jobId }) {

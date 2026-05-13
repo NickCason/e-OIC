@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import { useUpdateState, applyUpdate } from '../lib/swUpdate';
 
 // Floating "Update ready" pill. Renders only when a newer service worker

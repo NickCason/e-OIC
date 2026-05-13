@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { listRowPhotos, deletePhoto } from '../db';
 import schemaMap from '../schema.json';
 import PhotoCapture from './PhotoCapture.jsx';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import Lightbox from './Lightbox.jsx';
 import { toast } from '../lib/toast';
 import PhotoOverlay from './PhotoOverlay.jsx';

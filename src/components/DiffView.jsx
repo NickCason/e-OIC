@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import { rowDisplayLabel } from '../lib/rowLabel';
 import schemaMap from '../schema.json' with { type: 'json' };
 

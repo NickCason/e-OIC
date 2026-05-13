@@ -11,7 +11,7 @@ import ExportDialog from './ExportDialog.jsx';
 import ResyncDialog from './ResyncDialog.jsx';
 import { fmtRelative } from './JobList.jsx';
 import AppBar from './AppBar.jsx';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import EmptyState from './EmptyState.jsx';
 import Marquee from './Marquee.jsx';
 import CountUp from './CountUp.jsx';

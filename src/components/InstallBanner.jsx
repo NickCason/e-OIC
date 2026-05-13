@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import { usePwaInstall } from '../lib/usePwaInstall';
 
 const DISMISS_KEY = 'eoic-install-banner-dismissed';

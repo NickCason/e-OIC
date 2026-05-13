@@ -6,7 +6,7 @@ import { readPhotoExif } from '../lib/photoExif';
 import { maybeGetGps } from '../lib/geolocation';
 import { toast } from '../lib/toast';
 import { BUILD_VERSION } from '../version';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
 import EtechLoader from './EtechLoader.jsx';

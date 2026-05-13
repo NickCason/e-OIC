@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { subscribe, dismiss } from '../lib/toast';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 
 export default function ToastHost() {
   const [toasts, setToasts] = useState([]);

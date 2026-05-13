@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { listPhotos } from '../db';
 import PhotoCapture from './PhotoCapture.jsx';
-import Icon from './Icon.jsx';
+import Icon from './Icon';
 
 // Renders the "Photo Checklist" group for the Panels sheet (panel-level shots
 // like Full Panel, Each Door, etc.). Tappable, opens a capture modal.
