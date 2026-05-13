@@ -3,10 +3,10 @@ import {
   getJob, listPanels, createPanel, updatePanel, deletePanel, duplicatePanel,
   listAllRows, listPanelPhotos, exportJobJSON, updateJob,
   exportPanelRaw, restorePanelRaw,
-} from '../db.js';
-import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics.js';
+} from '../db';
+import { getPanelProgress, getJobAggregateStats, getJobChecklist } from '../lib/metrics';
 import { nav } from '../App.jsx';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import ExportDialog from './ExportDialog.jsx';
 import ResyncDialog from './ResyncDialog.jsx';
 import { fmtRelative } from './JobList.jsx';

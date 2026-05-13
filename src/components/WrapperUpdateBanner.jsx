@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Icon from './Icon.jsx';
-import { isInWrapper, getWrapperVersion, compareWrapperVersions, downloadAndInstallApk } from '../lib/wrapperBridge.js';
-import { toast } from '../lib/toast.js';
+import { isInWrapper, getWrapperVersion, compareWrapperVersions, downloadAndInstallApk } from '../lib/wrapperBridge';
+import { toast } from '../lib/toast';
 
 const DISMISS_KEY = 'eoic-wrapper-update-dismissed';
 // Relative path so it resolves under the deployed base

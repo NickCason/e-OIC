@@ -135,7 +135,7 @@ export default [
                 namedComponents: 'arrow-function',
                 unnamedComponents: 'function-expression',
             }],
-            'import/extensions': ['error', 'never'],
+            'import/extensions': ['error', 'never', { json: 'always' }],
             'import/no-unresolved': 'off',
             'react/no-unescaped-entities': 'off',
             'react/destructuring-assignment': 'off',

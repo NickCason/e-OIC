@@ -32,7 +32,7 @@ globalThis.fetch = async (url) => {
 };
 
 const { importJSON, getJob } = await import('../src/db.js');
-const { buildExport } = await import('../src/exporter.js');
+const { buildExport } = await import('../src/exporter');
 
 console.log('[gen] importing seed…');
 const seed = JSON.parse(fs.readFileSync(path.join(ROOT, 'public', 'seed.json'), 'utf8'));

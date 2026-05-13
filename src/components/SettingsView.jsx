@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import AppBar from './AppBar.jsx';
 import Icon from './Icon.jsx';
 import { nav } from '../App.jsx';
-import { BUILD_VERSION } from '../version.js';
-import { getSetting, setSetting, exportAllJSON, importJSON } from '../db.js';
-import { applyTheme, saveTheme } from '../lib/theme.js';
-import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation.js';
-import { reloadSampleJob } from '../lib/seed.js';
-import { toast } from '../lib/toast.js';
+import { BUILD_VERSION } from '../version';
+import { getSetting, setSetting, exportAllJSON, importJSON } from '../db';
+import { applyTheme, saveTheme } from '../lib/theme';
+import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from '../lib/geolocation';
+import { reloadSampleJob } from '../lib/seed';
+import { toast } from '../lib/toast';
 
 export default function SettingsView() {
   const [theme, setTheme] = useState('auto');

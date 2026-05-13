@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db.js';
-import { getJobPercent } from '../lib/metrics.js';
+import { listJobs, createJob, updateJob, deleteJob, getJobSizeEstimate, exportJobRaw, restoreJobRaw } from '../db';
+import { getJobPercent } from '../lib/metrics';
 import PercentRing from './PercentRing.jsx';
 import { nav } from '../App.jsx';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import AppBar from './AppBar.jsx';
 import EmptyState from './EmptyState.jsx';
 import CountUp from './CountUp.jsx';

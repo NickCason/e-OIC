@@ -1,15 +1,15 @@
 import React, { useState, useRef } from 'react';
 import Icon from './Icon.jsx';
 import DiffView from './DiffView.jsx';
-import { parseChecklistXlsx } from '../lib/xlsxParser.js';
-import { diffJobs } from '../lib/jobDiff.js';
-import { applyResyncToJob } from '../lib/xlsxRoundTrip.js';
+import { parseChecklistXlsx } from '../lib/xlsxParser';
+import { diffJobs } from '../lib/jobDiff';
+import { applyResyncToJob } from '../lib/xlsxRoundTrip';
 import schemaMap from '../schema.json' with { type: 'json' };
-import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
-import { toast } from '../lib/toast.js';
+import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
+import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
-import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 

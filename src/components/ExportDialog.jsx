@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Icon from './Icon.jsx';
 import DiffView from './DiffView.jsx';
-import { buildExport, downloadBlob, shareBlob } from '../exporter.js';
-import { parseChecklistXlsx } from '../lib/xlsxParser.js';
-import { diffJobs } from '../lib/jobDiff.js';
-import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db.js';
+import { buildExport, downloadBlob, shareBlob } from '../exporter';
+import { parseChecklistXlsx } from '../lib/xlsxParser';
+import { diffJobs } from '../lib/jobDiff';
+import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import schemaMap from '../schema.json' with { type: 'json' };
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
 import CountUp from './CountUp.jsx';
-import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 // One-shot typewriter for the export success filename. Snaps to full
 // text under prefers-reduced-motion.

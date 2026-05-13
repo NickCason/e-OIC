@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import Icon from './Icon.jsx';
-import { parseChecklistXlsx } from '../lib/xlsxParser.js';
-import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip.js';
+import { parseChecklistXlsx } from '../lib/xlsxParser';
+import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip';
 import { nav } from '../App.jsx';
-import { toast } from '../lib/toast.js';
+import { toast } from '../lib/toast';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
-import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 

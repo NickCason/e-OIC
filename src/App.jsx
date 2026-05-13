@@ -6,9 +6,9 @@ import SettingsView from './components/SettingsView.jsx';
 import ChecklistView from './components/ChecklistView.jsx';
 import ToastHost from './components/ToastHost.jsx';
 import UpdatePill from './components/UpdatePill.jsx';
-import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation.js';
-import { maybeSeedSampleJob } from './lib/seed.js';
-import useKeyboardInset from './lib/useKeyboardInset.js';
+import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation';
+import { maybeSeedSampleJob } from './lib/seed';
+import useKeyboardInset from './lib/useKeyboardInset';
 
 // Route depth drives the directional cue on the cross-fade. Going to a
 // deeper route reads "forward"; going back up the hierarchy reads "back".

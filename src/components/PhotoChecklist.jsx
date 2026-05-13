@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { listPhotos } from '../db.js';
+import { listPhotos } from '../db';
 import PhotoCapture from './PhotoCapture.jsx';
 import Icon from './Icon.jsx';
 

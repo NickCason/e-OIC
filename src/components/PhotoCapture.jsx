@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db.js';
-import { processIncomingPhoto } from '../lib/photoStore.js';
-import { readPhotoExif } from '../lib/photoExif.js';
-import { maybeGetGps } from '../lib/geolocation.js';
-import { toast } from '../lib/toast.js';
-import { BUILD_VERSION } from '../version.js';
+import { listPhotos, listRowPhotos, addPhoto, deletePhoto } from '../db';
+import { processIncomingPhoto } from '../lib/photoStore';
+import { readPhotoExif } from '../lib/photoExif';
+import { maybeGetGps } from '../lib/geolocation';
+import { toast } from '../lib/toast';
+import { BUILD_VERSION } from '../version';
 import Icon from './Icon.jsx';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
 import EtechLoader from './EtechLoader.jsx';
 import LoadingPhrases from './LoadingPhrases.jsx';
-import { withMinDuration, fadeOutLoader } from '../lib/loaderHold.js';
+import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
 // iOS standalone-PWA Safari has documented issues with `display: none` file
 // inputs not propagating selected files. Off-screen positioning works.

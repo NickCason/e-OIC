@@ -19,7 +19,7 @@
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "noEmit": true
   },
   "include": ["src", "src/types"],

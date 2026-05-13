@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { pickPhrase } from '../lib/loadingPhrases.js';
+import { pickPhrase } from '../lib/loadingPhrases';
 
 // Typewriter-style phrase rotation. The current phrase backspaces to
 // empty, then the next phrase types in character by character.

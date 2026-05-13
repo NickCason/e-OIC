@@ -4,13 +4,13 @@ import {
   listRows, createRow, updateRow, deleteRow, reorderRow,
   getSheetNotes, setSheetNotes, listRowPhotos, exportJobJSON, importJSON,
   listPanels, listAllRows,
-} from '../db.js';
-import { toast } from '../lib/toast.js';
-import { rowPhotoFolder } from '../lib/paths.js';
-import { rowDisplayLabel } from '../lib/rowLabel.js';
+} from '../db';
+import { toast } from '../lib/toast';
+import { rowPhotoFolder } from '../lib/paths';
+import { rowDisplayLabel } from '../lib/rowLabel';
 import {
   getHint, getEnumOptions, isSharedHeader, slugForId,
-} from '../lib/fieldHints.js';
+} from '../lib/fieldHints';
 import PhotoChecklist from './PhotoChecklist.jsx';
 import RowPhotos from './RowPhotos.jsx';
 import SaveBar from './SaveBar.jsx';
