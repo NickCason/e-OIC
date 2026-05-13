@@ -8,8 +8,26 @@ declare module 'piexifjs' {
         thumbnail?: string | null
     }
 
-    export function load(jpegBinary: string): IExifData
+    export interface IGpsIfdTags {
+        GPSLatitudeRef: number
+        GPSLatitude: number
+        GPSLongitudeRef: number
+        GPSLongitude: number
+        GPSHPositioningError: number
+        GPSDateStamp: number
+    }
 
-    const piexif: { load: typeof load };
+    export function load(jpegBinary: string): IExifData
+    export function dump(exifObj: IExifData): string
+    export function insert(exifBytes: string, jpegBinary: string): string
+
+    export const GPSIFD: IGpsIfdTags;
+
+    const piexif: {
+        load: typeof load;
+        dump: typeof dump;
+        insert: typeof insert;
+        GPSIFD: IGpsIfdTags;
+    };
     export default piexif;
 }

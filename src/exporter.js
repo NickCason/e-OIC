@@ -15,7 +15,7 @@ import {
   listPanels, listAllRows, listPanelPhotos, getSheetNotes, getJob,
   getChecklistState, slugifyTaskLabel, exportJobJSON,
 } from './db';
-import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay.js';
+import { applyOverlay, fmtTimestamp, fmtGps } from './photoOverlay';
 import { safe, rowLabel, shareSafeFilename } from './lib/paths';
 import { isInWrapper, shareViaCapacitor } from './lib/wrapperBridge';
 

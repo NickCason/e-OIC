@@ -1,5 +1,5 @@
 import React from 'react';
-import { fmtTimestamp, fmtGps } from '../photoOverlay.js';
+import { fmtTimestamp, fmtGps } from '../photoOverlay';
 
 // Live overlay rendered on top of an <img>. The overlay text is derived
 // purely from props — renaming a panel/job re-renders consumers and the
