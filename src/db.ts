@@ -672,13 +672,27 @@ async function putAllIfMissingOrReplace<
     mode: ImportMode,
     mapValue: (item: IEoicDBSchema[Name]['value']) => IEoicDBSchema[Name]['value'] = (x) => x,
 ): Promise<void> {
-    await Promise.all(items.map(async (item) => {
-        const objectStore = tx.objectStore(store);
-        const existing = await objectStore.get(keyOf(item));
-        if (!existing || mode === 'replace') {
-            await tx.objectStore(store).put(mapValue(item));
-        }
-    }));
+    if (items.length === 0) return;
+    const objectStore = tx.objectStore(store);
+    // Fan out all gets synchronously so they share the same idb microtask
+    // realm; awaiting them serially (or interleaving each get/put inside a
+    // separate async closure) can let the tx auto-commit between requests.
+    const existingResults = await Promise.all(
+        items.map((item) => objectStore.get(keyOf(item))),
+    );
+    // Synchronously issue every needed put before any await — keeps the tx
+    // alive across them. Matches the invariant used in restoreJobRaw /
+    // restorePanelRaw.
+    const putPromises = items
+        .map((item, i) => (
+            !existingResults[i] || mode === 'replace'
+                ? objectStore.put(mapValue(item))
+                : null
+        ))
+        .filter((p): p is ReturnType<typeof objectStore.put> => p !== null);
+    if (putPromises.length > 0) {
+        await Promise.all(putPromises);
+    }
 }
 
 export async function importJSON(
