@@ -22,10 +22,10 @@ export interface IBeforeInstallPromptEvent extends Event {
  * Augmenting built-in DOM interfaces (Window, Navigator, WindowEventMap)
  * requires their exact names — they can't carry the I-prefix the standards
  * apply to interfaces we own. __BUILD_VERSION__ is the literal Vite
- * `define` token; its name is fixed by vite.config.js.
+ * `define` token; its name is fixed by vite.config.ts.
  */
 declare global {
-    /** Injected by Vite's `define` (see vite.config.js) from version.json
+    /** Injected by Vite's `define` (see vite.config.ts) from version.json
      *  at build time. Consumed via src/version.ts → BUILD_VERSION. */
     const __BUILD_VERSION__: string;
 
