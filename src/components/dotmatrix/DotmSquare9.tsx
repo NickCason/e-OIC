@@ -3,11 +3,10 @@
 import { useMemo } from "react";
 
 import { DotMatrixBase } from "./core";
-import { useDotMatrixPhases } from "./hooks";
-import { usePrefersReducedMotion } from "./hooks";
-import type { DotAnimationResolver, DotMatrixCommonProps } from "./core";
+import { useDotMatrixPhases , usePrefersReducedMotion } from "./hooks";
+import type { DotAnimationResolver, IDotMatrixCommonProps } from "./core";
 
-export type DotmSquare9Props = DotMatrixCommonProps;
+export type DotmSquare9Props = IDotMatrixCommonProps;
 
 /**
  * Dots 1–6 in Unicode / ISO braille numbering (matches U+2800 + mask):
@@ -22,7 +21,9 @@ const D4 = 0x08;
 const D5 = 0x10;
 const D6 = 0x20;
 
-/** Left column “odd” / right column “even” — classic 2×3 checkerboard. */
+/** Left column "odd" / right column "even" — classic 2×3 checkerboard.
+ *  Bitwise OR is intentional: braille cell masks are 6-bit integers. */
+// eslint-disable-next-line no-bitwise -- intentional braille bitmask composition
 const CHECK_A = D1 | D3 | D5;
 
 const BASE_OPACITY = 0.08;
@@ -34,103 +35,109 @@ const LEFT_COL = 0;
 const RIGHT_CELL_COL = 3;
 
 function brailleBitForCell(row: number, col: number, cellColStart: number): number | null {
-  if (row < CELL_ROW_START || row > CELL_ROW_START + 2) {
+    if (row < CELL_ROW_START || row > CELL_ROW_START + 2) {
+        return null;
+    }
+    const dr = row - CELL_ROW_START;
+    if (col === cellColStart) {
+        // eslint-disable-next-line no-bitwise -- intentional braille bit shift
+        return D1 << dr;
+    }
+    if (col === cellColStart + 1) {
+        // eslint-disable-next-line no-bitwise -- intentional braille bit shift
+        return D4 << dr;
+    }
     return null;
-  }
-  const dr = row - CELL_ROW_START;
-  if (col === cellColStart) {
-    return D1 << dr;
-  }
-  if (col === cellColStart + 1) {
-    return D4 << dr;
-  }
-  return null;
 }
 
 function resolveBraille(row: number, col: number): { bit: number } | null {
-  const left = brailleBitForCell(row, col, LEFT_COL);
-  if (left !== null) {
-    return { bit: left };
-  }
-  const right = brailleBitForCell(row, col, RIGHT_CELL_COL);
-  if (right !== null) {
-    return { bit: right };
-  }
-  return null;
+    const left = brailleBitForCell(row, col, LEFT_COL);
+    if (left !== null) {
+        return { bit: left };
+    }
+    const right = brailleBitForCell(row, col, RIGHT_CELL_COL);
+    if (right !== null) {
+        return { bit: right };
+    }
+    return null;
 }
 
-export function DotmSquare9({
-  speed = 1.5,
-  pattern = "full",
-  animated = true,
-  hoverAnimated = false,
-  ...rest
-}: DotmSquare9Props) {
-  const reducedMotion = usePrefersReducedMotion();
-  const { phase: matrixPhase, onMouseEnter, onMouseLeave } = useDotMatrixPhases({
-    animated: Boolean(animated && !reducedMotion),
-    hoverAnimated: Boolean(hoverAnimated && !reducedMotion),
-    speed
-  });
+export const DotmSquare9 = ({
+    speed = 1.5,
+    pattern = "full",
+    animated = true,
+    hoverAnimated = false,
+    ...rest
+}: DotmSquare9Props) => {
+    const reducedMotion = usePrefersReducedMotion();
+    const { phase: matrixPhase, onMouseEnter, onMouseLeave } = useDotMatrixPhases({
+        animated: Boolean(animated && !reducedMotion),
+        hoverAnimated: Boolean(hoverAnimated && !reducedMotion),
+        speed
+    });
 
-  const resolver = useMemo<DotAnimationResolver>(() => {
-    return ({ isActive, row, col, phase }) => {
-      if (!isActive) {
-        return { className: "dmx-inactive" };
-      }
+    const resolver = useMemo<DotAnimationResolver>(() => {
+        return ({
+            isActive, row, col, phase
+        }) => {
+            if (!isActive) {
+                return { className: "dmx-inactive" };
+            }
 
-      const braille = resolveBraille(row, col);
+            const braille = resolveBraille(row, col);
 
-      if (reducedMotion || phase === "idle") {
-        if (braille) {
-          const mask = CHECK_A;
-          const on = (mask & braille.bit) !== 0;
-          return { style: { opacity: on ? MID_OPACITY : BASE_OPACITY } };
-        }
-        if (row >= CELL_ROW_START && row <= CELL_ROW_START + 2 && col === 2) {
-          return { style: { opacity: GAP_OPACITY } };
-        }
-        return { style: { opacity: BASE_OPACITY } };
-      }
+            if (reducedMotion || phase === "idle") {
+                if (braille) {
+                    const mask = CHECK_A;
+                    // eslint-disable-next-line no-bitwise -- intentional braille bitmask AND
+                    const on = (mask & braille.bit) !== 0;
+                    return { style: { opacity: on ? MID_OPACITY : BASE_OPACITY } };
+                }
+                if (row >= CELL_ROW_START && row <= CELL_ROW_START + 2 && col === 2) {
+                    return { style: { opacity: GAP_OPACITY } };
+                }
+                return { style: { opacity: BASE_OPACITY } };
+            }
 
-      if (row >= CELL_ROW_START && row <= CELL_ROW_START + 2 && col === 2) {
-        return { style: { opacity: GAP_OPACITY } };
-      }
+            if (row >= CELL_ROW_START && row <= CELL_ROW_START + 2 && col === 2) {
+                return { style: { opacity: GAP_OPACITY } };
+            }
 
-      if (!braille) {
-        return { style: { opacity: BASE_OPACITY } };
-      }
+            if (!braille) {
+                return { style: { opacity: BASE_OPACITY } };
+            }
 
-      let bitClass = "dmx-square9-d1";
-      if (braille.bit === D2) {
-        bitClass = "dmx-square9-d2";
-      } else if (braille.bit === D3) {
-        bitClass = "dmx-square9-d3";
-      } else if (braille.bit === D4) {
-        bitClass = "dmx-square9-d4";
-      } else if (braille.bit === D5) {
-        bitClass = "dmx-square9-d5";
-      } else if (braille.bit === D6) {
-        bitClass = "dmx-square9-d6";
-      }
+            let bitClass = "dmx-square9-d1";
+            if (braille.bit === D2) {
+                bitClass = "dmx-square9-d2";
+            } else if (braille.bit === D3) {
+                bitClass = "dmx-square9-d3";
+            } else if (braille.bit === D4) {
+                bitClass = "dmx-square9-d4";
+            } else if (braille.bit === D5) {
+                bitClass = "dmx-square9-d5";
+            } else if (braille.bit === D6) {
+                bitClass = "dmx-square9-d6";
+            }
 
-      return { className: `dmx-square9-bit ${bitClass}` };
-    };
-  }, [reducedMotion]);
+            return { className: `dmx-square9-bit ${bitClass}` };
+        };
+    }, [reducedMotion]);
 
-  return (
-    <DotMatrixBase
-      {...rest}
-      size={rest.size ?? 36}
-      dotSize={rest.dotSize ?? 5}
-      speed={speed}
-      pattern={pattern}
-      animated={animated}
-      phase={matrixPhase}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      reducedMotion={reducedMotion}
-      animationResolver={resolver}
-    />
-  );
-}
+    return (
+        <DotMatrixBase
+            // eslint-disable-next-line react/jsx-props-no-spreading -- forward presentational props to DotMatrixBase
+            {...rest}
+            size={rest.size ?? 36}
+            dotSize={rest.dotSize ?? 5}
+            speed={speed}
+            pattern={pattern}
+            animated={animated}
+            phase={matrixPhase}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            reducedMotion={reducedMotion}
+            animationResolver={resolver}
+        />
+    );
+};
