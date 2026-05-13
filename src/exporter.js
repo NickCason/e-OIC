@@ -264,6 +264,111 @@ function blankRow(row, columnCount) {
   for (let c = 1; c <= columnCount; c++) row.getCell(c).value = null;
 }
 
+// Mapping of Checklist sheet task labels → workbook sheet names. Used so
+// that filling rows in a sheet automatically completes its checklist task.
+const CHECKLIST_TASK_TO_SHEET = {
+  'Panel Sheet': 'Panels',
+  'Power Sheet': 'Power',
+  'PLC Racks Sheet': 'PLC Racks',
+  'PLC Slots sheet': 'PLC Slots',
+  'HMIs Sheet': 'HMIs',
+  'Ethernet Switches Sheet': 'Ethernet Switches',
+  'Fieldbus IO Sheet': 'Fieldbus IO',
+  'Devices Sheet': 'Network Devices',
+  'Conv. Speeds Sheet': 'Conv. Speeds',
+  'Safety Circuit Sheet': 'Safety Circuit',
+  'Safety Devices Sheet': 'Safety Devices',
+  'Peer to Peer Comms': 'Peer to Peer Comms',
+};
+
+// Build the set of sheet names that have at least one row across any panel.
+async function buildFilledSheetSet(panels) {
+  const filled = new Set();
+  for (const p of panels) {
+    const rs = await listAllRows(p.id);
+    for (const r of rs) filled.add(r.sheet);
+  }
+  return filled;
+}
+
+// Walk the Checklist sheet's task rows, marking column C complete when:
+//   - the task's mapped sheet has any rows (auto-complete), OR
+//   - the user manually marked it complete in-app (manualTasks[slug] === true).
+// Returns the last row index touched, used by the custom-tasks appender.
+function applyChecklistCompletion(cl, filled, manualTasks) {
+  let lastTaskRow = 0;
+  for (let r = 2; r <= cl.rowCount; r++) {
+    const taskCell = cl.getCell(r, 1).value;
+    if (!taskCell) continue;
+    const taskLabel = String(taskCell).trim();
+    lastTaskRow = r;
+    const sheet = CHECKLIST_TASK_TO_SHEET[taskLabel];
+    if (sheet && filled.has(sheet)) {
+      cl.getCell(r, 3).value = true;
+      continue;
+    }
+    const slug = slugifyTaskLabel(taskLabel);
+    if (manualTasks[slug] === true) cl.getCell(r, 3).value = true;
+  }
+  return lastTaskRow;
+}
+
+// Update the Checklist worksheet (auto-mark sheet tasks + manual tasks) and
+// return { checklistSheet, checklistLastTaskRow } for the custom-tasks
+// appender. Returns nulls when the Checklist sheet is absent or on error.
+async function updateChecklistCompletion(wb, job, panels) {
+  try {
+    const cl = wb.getWorksheet('Checklist');
+    if (!cl) return { checklistSheet: null, checklistLastTaskRow: 0 };
+    const filled = await buildFilledSheetSet(panels);
+    const cls = await getChecklistState(job.id);
+    const manualTasks = cls.manualTasks || {};
+    const checklistLastTaskRow = applyChecklistCompletion(cl, filled, manualTasks);
+    return { checklistSheet: cl, checklistLastTaskRow };
+  } catch (e) {
+    console.warn('Checklist update skipped:', e);
+    return { checklistSheet: null, checklistLastTaskRow: 0 };
+  }
+}
+
+// Copy ABC-column cell styles from a source row onto the given cells. Used
+// when appending custom checklist task rows so they match the template's look.
+function copyChecklistRowStyles(srcRow, [a, b, c]) {
+  const srcA = srcRow.getCell(1);
+  const srcB = srcRow.getCell(2);
+  const srcC = srcRow.getCell(3);
+  if (srcA.style) a.style = { ...srcA.style };
+  if (srcB.style) b.style = { ...srcB.style };
+  if (srcC.style) c.style = { ...srcC.style };
+}
+
+// Append the job's custom checklist tasks (added via the in-app Checklist
+// screen) below the existing tasks, copying styles from the last template
+// row so the appended rows match.
+async function appendCustomChecklistTasks(checklistSheet, checklistLastTaskRow, job) {
+  try {
+    if (!checklistSheet || checklistLastTaskRow <= 0) return;
+    const cls = await getChecklistState(job.id);
+    const customTasks = cls.customTasks || [];
+    if (customTasks.length === 0) return;
+    const cl = checklistSheet;
+    const styleSrcRow = cl.getRow(checklistLastTaskRow);
+    for (let i = 0; i < customTasks.length; i++) {
+      const t = customTasks[i];
+      const r = checklistLastTaskRow + 1 + i;
+      const a = cl.getCell(r, 1);
+      const b = cl.getCell(r, 2);
+      const c = cl.getCell(r, 3);
+      a.value = t.label;
+      b.value = true;
+      c.value = !!t.completed;
+      copyChecklistRowStyles(styleSrcRow, [a, b, c]);
+    }
+  } catch (e) {
+    console.warn('Custom checklist append skipped:', e);
+  }
+}
+
 // Build the value for a row's Photo/Folder Hyperlink cell.
 //   - If the row has photos, return an ExcelJS hyperlink object pointing at
 //     IMG_001.jpg (Excel for Mac won't reliably open folder URLs but will
@@ -490,83 +595,9 @@ export async function buildExport(job, {
   }
 
   // 4. Update Checklist completion (auto + manual) and append custom tasks
-  let checklistSheet = null;
-  let checklistLastTaskRow = 0;
-  try {
-    const cl = wb.getWorksheet('Checklist');
-    if (cl) {
-      checklistSheet = cl;
-      const sheetByTask = {
-        'Panel Sheet': 'Panels',
-        'Power Sheet': 'Power',
-        'PLC Racks Sheet': 'PLC Racks',
-        'PLC Slots sheet': 'PLC Slots',
-        'HMIs Sheet': 'HMIs',
-        'Ethernet Switches Sheet': 'Ethernet Switches',
-        'Fieldbus IO Sheet': 'Fieldbus IO',
-        'Devices Sheet': 'Network Devices',
-        'Conv. Speeds Sheet': 'Conv. Speeds',
-        'Safety Circuit Sheet': 'Safety Circuit',
-        'Safety Devices Sheet': 'Safety Devices',
-        'Peer to Peer Comms': 'Peer to Peer Comms',
-      };
-      const filled = new Set();
-      for (const p of panels) {
-        const rs = await listAllRows(p.id);
-        for (const r of rs) filled.add(r.sheet);
-      }
-      const cls = await getChecklistState(job.id);
-      const manualTasks = cls.manualTasks || {};
-      for (let r = 2; r <= cl.rowCount; r++) {
-        const taskCell = cl.getCell(r, 1).value;
-        if (!taskCell) continue;
-        const taskLabel = String(taskCell).trim();
-        checklistLastTaskRow = r;
-        const sheet = sheetByTask[taskLabel];
-        if (sheet && filled.has(sheet)) {
-          cl.getCell(r, 3).value = true;
-          continue;
-        }
-        const slug = slugifyTaskLabel(taskLabel);
-        if (manualTasks[slug] === true) {
-          cl.getCell(r, 3).value = true;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('Checklist update skipped:', e);
-  }
-
-  // 4b. Append custom checklist tasks (added via the in-app Checklist screen)
-  try {
-    if (checklistSheet && checklistLastTaskRow > 0) {
-      const cls = await getChecklistState(job.id);
-      const customTasks = cls.customTasks || [];
-      if (customTasks.length > 0) {
-        const cl = checklistSheet;
-        const styleSrcRow = cl.getRow(checklistLastTaskRow);
-        const srcA = styleSrcRow.getCell(1);
-        const srcB = styleSrcRow.getCell(2);
-        const srcC = styleSrcRow.getCell(3);
-        for (let i = 0; i < customTasks.length; i++) {
-          const t = customTasks[i];
-          const r = checklistLastTaskRow + 1 + i;
-          const a = cl.getCell(r, 1);
-          const b = cl.getCell(r, 2);
-          const c = cl.getCell(r, 3);
-          a.value = t.label;
-          b.value = true;
-          c.value = !!t.completed;
-          // Copy styles so the appended rows match the template's look
-          if (srcA.style) a.style = { ...srcA.style };
-          if (srcB.style) b.style = { ...srcB.style };
-          if (srcC.style) c.style = { ...srcC.style };
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('Custom checklist append skipped:', e);
-  }
+  const { checklistSheet, checklistLastTaskRow } =
+    await updateChecklistCompletion(wb, job, panels);
+  await appendCustomChecklistTasks(checklistSheet, checklistLastTaskRow, job);
 
   // 5. Append Notes sheet (job + per-row notes) — added only if we have any
   if (job.notes?.trim() || notesAppendix.length > 0) {
