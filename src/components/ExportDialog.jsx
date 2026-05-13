@@ -7,7 +7,7 @@ import { diffJobs } from '../lib/jobDiff';
 import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import schemaMap from '../schema.json' with { type: 'json' };
 import { toast } from '../lib/toast';
-import EtechLoader from './EtechLoader.jsx';
+import EtechLoader from './EtechLoader';
 import LoadingPhrases from './LoadingPhrases.jsx';
 import CountUp from './CountUp';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';

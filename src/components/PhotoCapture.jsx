@@ -9,7 +9,7 @@ import { BUILD_VERSION } from '../version';
 import Icon from './Icon';
 import Lightbox from './Lightbox.jsx';
 import PhotoOverlay from './PhotoOverlay.jsx';
-import EtechLoader from './EtechLoader.jsx';
+import EtechLoader from './EtechLoader';
 import LoadingPhrases from './LoadingPhrases.jsx';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 

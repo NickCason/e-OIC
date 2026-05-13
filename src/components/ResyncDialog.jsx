@@ -7,7 +7,7 @@ import { applyResyncToJob } from '../lib/xlsxRoundTrip';
 import schemaMap from '../schema.json' with { type: 'json' };
 import { listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import { toast } from '../lib/toast';
-import EtechLoader from './EtechLoader.jsx';
+import EtechLoader from './EtechLoader';
 import LoadingPhrases from './LoadingPhrases.jsx';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 

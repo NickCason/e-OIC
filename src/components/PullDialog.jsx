@@ -4,7 +4,7 @@ import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';
-import EtechLoader from './EtechLoader.jsx';
+import EtechLoader from './EtechLoader';
 import LoadingPhrases from './LoadingPhrases.jsx';
 import { withMinDuration, fadeOutLoader } from '../lib/loaderHold';
 
