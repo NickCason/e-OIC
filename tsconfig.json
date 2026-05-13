@@ -23,6 +23,6 @@
     "noEmit": true
   },
   "include": ["src", "src/types"],
-  "exclude": ["dist", "node_modules", "src/components/dotmatrix"],
+  "exclude": ["dist", "node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

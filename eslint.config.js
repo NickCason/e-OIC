@@ -33,9 +33,6 @@ export default [
             'node_modules/**',
             'public/service-worker.js',
             'coverage/**',
-            // Mirrors tsconfig.json exclude — these files aren't in the TS project so
-            // `parserOptions.project` can't parse them. Plan C/D removes this ignore.
-            'src/components/dotmatrix/**',
         ],
     },
 
