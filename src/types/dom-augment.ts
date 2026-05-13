@@ -45,6 +45,11 @@ declare global {
         /** Older IE / Edge legacy. usePwaInstall reads it as part of an
          *  iOS detection guard. */
         readonly MSStream?: unknown;
+
+        /** Installed by the splash coordinator inlined in index.html. Called
+         *  by src/main.tsx after the first React commit to release the
+         *  splash without waiting for the MAX_MS fallback. */
+        __dismissSplash?: () => void;
     }
 }
 /* eslint-enable @typescript-eslint/naming-convention, no-underscore-dangle */
