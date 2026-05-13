@@ -296,6 +296,71 @@ function writeDataRow({
   r.commit();
 }
 
+// Build a { columnHeader: columnIndex } lookup for the schema's columns
+// against the actual worksheet headers. Skips headers that aren't found.
+function buildColumnIndexMap(ws, schema) {
+  const colIndex = {};
+  for (const col of schema.columns) {
+    const idx = findColumnIndex(ws, schema.header_row, col.header);
+    if (idx) colIndex[col.header] = idx;
+  }
+  return colIndex;
+}
+
+// Collect sheet-level + row-level notes for one (panel, sheet) into the
+// notesAppendix list. Returns nothing — appends to the passed array.
+async function collectPanelNotes({
+  panel, sheetName, schema, sheetRows, notesAppendix,
+}) {
+  const sheetNote = await getSheetNotes(panel.id, sheetName);
+  if (sheetNote) {
+    notesAppendix.push({
+      sheet: sheetName, panel: panel.name, label: '(sheet)', notes: sheetNote,
+    });
+  }
+  for (const row of sheetRows) {
+    if (!row.notes || !row.notes.trim()) continue;
+    notesAppendix.push({
+      sheet: sheetName,
+      panel: panel.name,
+      label: rowLabel(row, schema),
+      notes: row.notes.trim(),
+    });
+  }
+}
+
+// Populate one worksheet with all panels' rows for this sheet, replicating
+// the template's example-row styling and clearing any leftover example rows
+// below. Mutates the worksheet in place and appends to notesAppendix.
+async function populateSheet({
+  ws, sheetName, schema, panels, rowsWithPhotos, notesAppendix,
+}) {
+  const colIndex = buildColumnIndexMap(ws, schema);
+  const exampleStyles = captureExampleRowStyles(ws, schema.first_data_row);
+  let writeRow = schema.first_data_row;
+
+  for (const panel of panels) {
+    const allRows = await listAllRows(panel.id);
+    const sheetRows = allRows
+      .filter((r) => r.sheet === sheetName)
+      .sort((a, b) => a.idx - b.idx);
+    await collectPanelNotes({
+      panel, sheetName, schema, sheetRows, notesAppendix,
+    });
+    for (const row of sheetRows) {
+      const r = ws.getRow(writeRow);
+      for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
+      applyExampleStyles(r, exampleStyles, ws.columnCount);
+      writeDataRow({
+        ws, writeRow, row, schema, colIndex, panel, sheetName, rowsWithPhotos,
+      });
+      writeRow += 1;
+    }
+  }
+
+  clearLeftoverExampleRows(ws, writeRow);
+}
+
 // Clear any leftover example rows the template ships below our data.
 // The template starts with example rows at `first_data_row`; whatever
 // we didn't overwrite needs to be wiped or the user gets fake "Example"
@@ -410,63 +475,13 @@ export async function buildExport(job, {
       percent: 15 + Math.floor((sheetI / sheetCount) * 35),
       detail: sheetName,
     });
-
     const schema = schemaMap[sheetName];
     if (!schema) continue;
     const ws = wb.getWorksheet(sheetName);
     if (!ws) continue;
-
-    const colIndex = {};
-    for (const col of schema.columns) {
-      const idx = findColumnIndex(ws, schema.header_row, col.header);
-      if (idx) colIndex[col.header] = idx;
-    }
-
-    let writeRow = schema.first_data_row;
-    let wroteAnything = false;
-
-    const exampleStyles = captureExampleRowStyles(ws, schema.first_data_row);
-
-    for (const panel of panels) {
-      const allRows = await listAllRows(panel.id);
-      const sheetRows = allRows
-        .filter((r) => r.sheet === sheetName)
-        .sort((a, b) => a.idx - b.idx);
-
-      // Sheet-level note for (panel, sheet)
-      const sheetNote = await getSheetNotes(panel.id, sheetName);
-      if (sheetNote) {
-        notesAppendix.push({
-          sheet: sheetName,
-          panel: panel.name,
-          label: '(sheet)',
-          notes: sheetNote,
-        });
-      }
-
-      for (const row of sheetRows) {
-        const r = ws.getRow(writeRow);
-        for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
-        applyExampleStyles(r, exampleStyles, ws.columnCount);
-        writeDataRow({
-          ws, writeRow, row, schema, colIndex, panel, sheetName, rowsWithPhotos,
-        });
-
-        if (row.notes && row.notes.trim()) {
-          notesAppendix.push({
-            sheet: sheetName,
-            panel: panel.name,
-            label: rowLabel(row, schema),
-            notes: row.notes.trim(),
-          });
-        }
-
-        writeRow += 1;
-        wroteAnything = true;
-      }
-    }
-
-    clearLeftoverExampleRows(ws, writeRow);
+    await populateSheet({
+      ws, sheetName, schema, panels, rowsWithPhotos, notesAppendix,
+    });
   }
 
   // 4. Update Checklist completion (auto + manual) and append custom tasks
