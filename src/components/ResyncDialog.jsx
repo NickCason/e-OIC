@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Icon from './Icon.jsx';
 import DiffView from './DiffView.jsx';
-import { parseChecklistXlsx } from '../lib/xlsxParser.js';
+import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { diffJobs } from '../lib/jobDiff.js';
 import { applyResyncToJob } from '../lib/xlsxRoundTrip.js';
 import schemaMap from '../schema.json' with { type: 'json' };

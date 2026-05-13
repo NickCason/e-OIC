@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Icon from './Icon.jsx';
-import { parseChecklistXlsx } from '../lib/xlsxParser.js';
+import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { applyParsedXlsxToNewJob } from '../lib/xlsxRoundTrip.js';
 import { nav } from '../App.jsx';
 import { toast } from '../lib/toast';

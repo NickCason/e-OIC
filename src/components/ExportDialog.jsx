@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Icon from './Icon.jsx';
 import DiffView from './DiffView.jsx';
 import { buildExport, downloadBlob, shareBlob } from '../exporter.js';
-import { parseChecklistXlsx } from '../lib/xlsxParser.js';
+import { parseChecklistXlsx } from '../lib/xlsxParser';
 import { diffJobs } from '../lib/jobDiff.js';
 import { getJobSizeEstimate, listPanels, listAllRows, getSheetNotes, updateJob } from '../db';
 import schemaMap from '../schema.json' with { type: 'json' };

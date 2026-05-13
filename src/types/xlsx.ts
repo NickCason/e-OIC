@@ -23,6 +23,9 @@ export interface ISheetSchema {
     first_data_row?: number;
     columns: ISheetSchemaColumn[];
     photo_checklist_columns?: string[];
+    hyperlink_column?: string;
+    primary_key?: string;
+    row_photos_enabled?: boolean;
 }
 
 // ===== Parser output =====
