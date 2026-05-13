@@ -234,6 +234,31 @@ async function rewriteCellXfRefs(zip) {
   zip.file(checklistPath, rewritten);
 }
 
+// Clear any leftover example rows the template ships below our data.
+// The template starts with example rows at `first_data_row`; whatever
+// we didn't overwrite needs to be wiped or the user gets fake "Example"
+// entries in their export. Stops at the first blank row.
+function clearLeftoverExampleRows(ws, startRow) {
+  let clearRow = startRow;
+  let safetyLimit = 30; // don't run forever on weird sheets
+  while (safetyLimit-- > 0) {
+    const r = ws.getRow(clearRow);
+    if (!rowHasAnyValue(r, ws.columnCount)) break;
+    for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
+    r.commit();
+    clearRow += 1;
+  }
+}
+
+// True if any cell in row 1..columnCount has a non-empty value.
+function rowHasAnyValue(row, columnCount) {
+  for (let c = 1; c <= columnCount; c++) {
+    const v = row.getCell(c).value;
+    if (v !== null && v !== undefined && v !== '') return true;
+  }
+  return false;
+}
+
 // Extend each table's `ref` attribute so it covers the actual last data row
 // in the sheet. Without this, rows beyond the template's example row sit
 // outside the table and lose banding/totals/auto-extension. Walks the
@@ -427,25 +452,7 @@ export async function buildExport(job, {
       }
     }
 
-    // Clear any leftover example rows that the template had below our data.
-    // The template ships with example rows starting at `first_data_row`.
-    // Whatever we didn't overwrite needs to be wiped or the user gets fake
-    // "Example" entries in their export.
-    let clearRow = writeRow;
-    let safetyLimit = 30; // don't run forever on weird sheets
-    while (safetyLimit-- > 0) {
-      const r = ws.getRow(clearRow);
-      // Stop when we hit a blank row (no values across the meaningful columns)
-      let hasValue = false;
-      for (let c = 1; c <= ws.columnCount; c++) {
-        const v = r.getCell(c).value;
-        if (v !== null && v !== undefined && v !== '') { hasValue = true; break; }
-      }
-      if (!hasValue) break;
-      for (let c = 1; c <= ws.columnCount; c++) r.getCell(c).value = null;
-      r.commit();
-      clearRow += 1;
-    }
+    clearLeftoverExampleRows(ws, writeRow);
   }
 
   // 4. Update Checklist completion (auto + manual) and append custom tasks
