@@ -52,9 +52,7 @@ const Icon = ({
 }: IIconProps) => {
     const Cmp = ICONS[name];
     if (!Cmp) {
-        if (typeof console !== 'undefined' && console.warn) {
-            console.warn(`Icon: unknown name "${name}"`);
-        }
+        console.warn(`Icon: unknown name "${name}"`);
         return null;
     }
     // eslint-disable-next-line react/jsx-props-no-spreading -- pass-through SVG attrs (className, style, etc.)

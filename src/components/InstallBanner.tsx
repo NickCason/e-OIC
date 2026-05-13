@@ -31,8 +31,12 @@ const InstallBanner = () => {
             window.location.href = APK_URL;
             return;
         }
-        const r = await install();
-        if (r === 'ios-instructions') setIosOpen(true);
+        try {
+            const r = await install();
+            if (r === 'ios-instructions') setIosOpen(true);
+        } catch (err) {
+            console.warn('InstallBanner: install() failed', err);
+        }
     }
 
     const title = isAndroid ? 'Install Android app' : 'Install e-OIC';

@@ -34,7 +34,7 @@ export interface ILoadingPhrasesProps {
 
 const LoadingPhrases = ({ set = 'general', className = '' }: ILoadingPhrasesProps) => {
     const [target, setTarget] = useState<string>(() => pickPhrase(set));
-    const [shown, setShown] = useState<string>(REDUCED ? () => target : '');
+    const [shown, setShown] = useState<string>(REDUCED ? target : '');
     const [phase, setPhase] = useState<Phase>(REDUCED ? 'hold' : 'type');
     const recentRef = useRef<string[]>([target]);
 
