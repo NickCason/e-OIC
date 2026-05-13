@@ -11,7 +11,7 @@ import Icon from './Icon';
 import Marquee from './Marquee';
 import PullOrNewModal from './PullOrNewModal.jsx';
 import PullDialog from './PullDialog.jsx';
-import InstallBanner from './InstallBanner.jsx';
+import InstallBanner from './InstallBanner';
 import WrapperUpdateBanner from './WrapperUpdateBanner.jsx';
 
 export default function JobList() {
