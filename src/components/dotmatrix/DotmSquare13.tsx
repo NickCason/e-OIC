@@ -66,6 +66,7 @@ export const DotmSquare13 = ({
 
     const resolver = useMemo<DotAnimationResolver>(() => {
         const frameIndex = FRAME_SEQUENCE[step] ?? 0;
+        // `!` justified: FRAME_MASKS is a non-empty readonly tuple; index 0 is fully populated.
         const mask = FRAME_MASKS[frameIndex] ?? FRAME_MASKS[0]!;
 
         return ({ isActive, row, col }) => {

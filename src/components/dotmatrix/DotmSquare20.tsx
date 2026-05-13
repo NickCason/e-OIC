@@ -54,6 +54,7 @@ function opacityFromTail(distance: number, tail: readonly number[]): number {
     if (distance < 0 || distance >= tail.length) {
         return 0;
     }
+    // `!` justified: bounds check above guarantees tail[distance] is populated.
     return tail[distance]!;
 }
 

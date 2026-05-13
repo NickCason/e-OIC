@@ -69,6 +69,7 @@ export const DotmSquare2 = ({
     const visitsByIndex = useMemo(() => {
         const visits = new Map<number, number[]>();
         for (let step = 0; step < routeLen; step += 1) {
+            // `!` justified: step is bound by routeLen = route.length, so route[step] is always populated.
             const index = route[step]!;
             const list = visits.get(index) ?? [];
             list.push(step);

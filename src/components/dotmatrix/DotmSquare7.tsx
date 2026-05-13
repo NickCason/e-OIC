@@ -69,6 +69,7 @@ export const DotmSquare7 = ({
                 return { className: "dmx-inactive" };
             }
 
+            // `!` justified: FRAME_MASKS is a fully-populated readonly tuple covering every frame index.
             const cell = maskCell(FRAME_MASKS[frame]!, row, col);
             if (cell === "x") {
                 return { style: { opacity: ACTIVE_OPACITY } };
