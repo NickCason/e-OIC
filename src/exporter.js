@@ -122,6 +122,41 @@ function repairAutoFilter(xml) {
   return xml.replace(/<autoFilter\b[^>]*(\/>|>[\s\S]*?<\/autoFilter>)/g, '');
 }
 
+// Extend each table's `ref` attribute so it covers the actual last data row
+// in the sheet. Without this, rows beyond the template's example row sit
+// outside the table and lose banding/totals/auto-extension. Walks the
+// sheet's row anchors to find the last row, then rewrites every related
+// table.xml's ref. Returns nothing — mutates zip files in place.
+async function extendTableRefsForSheet(zip, sheetFile) {
+  const sheetXml = await zip.file(sheetFile).async('string');
+  const rowMatches = [...sheetXml.matchAll(/<row\s+r="(\d+)"/g)];
+  if (rowMatches.length === 0) return;
+  const lastRow = Math.max(...rowMatches.map((m) => parseInt(m[1], 10)));
+
+  const sheetNum = sheetFile.match(/sheet(\d+)\.xml$/)?.[1];
+  if (!sheetNum) return;
+  const relsPath = `xl/worksheets/_rels/sheet${sheetNum}.xml.rels`;
+  const relsFile = zip.file(relsPath);
+  if (!relsFile) return;
+  const rels = await relsFile.async('string');
+  const tableTargets = [...rels.matchAll(/Target="([^"]*tables\/table\d+\.xml)"/g)]
+    .map((m) => m[1].replace(/^\.\.\//, ''));
+  for (const t of tableTargets) {
+    const tablePath = `xl/${t}`;
+    const tableFile = zip.file(tablePath);
+    if (!tableFile) continue;
+    const tableXml = await tableFile.async('string');
+    const updated = tableXml.replace(
+      /(<table\b[^>]*?\sref=")([A-Z]+)(\d+):([A-Z]+)(\d+)(")/,
+      (_m, p1, c1, r1, c2, r2, p2) => {
+        const newR2 = Math.max(parseInt(r2, 10), lastRow);
+        return `${p1}${c1}${r1}:${c2}${newR2}${p2}`;
+      },
+    );
+    zip.file(tablePath, updated);
+  }
+}
+
 export async function buildExport(job, {
   templateUrl = './template.xlsx',
   onProgress = () => {},
@@ -469,33 +504,7 @@ export async function buildExport(job, {
     // sheet. Without this, rows beyond the template's example row sit
     // outside the table and lose banding/totals/auto-extension.
     for (const sheetFile of sheetFiles) {
-      const sheetXml = await fixZip.file(sheetFile).async('string');
-      const rowMatches = [...sheetXml.matchAll(/<row\s+r="(\d+)"/g)];
-      if (rowMatches.length === 0) continue;
-      const lastRow = Math.max(...rowMatches.map((m) => parseInt(m[1], 10)));
-
-      const sheetNum = sheetFile.match(/sheet(\d+)\.xml$/)?.[1];
-      if (!sheetNum) continue;
-      const relsPath = `xl/worksheets/_rels/sheet${sheetNum}.xml.rels`;
-      const relsFile = fixZip.file(relsPath);
-      if (!relsFile) continue;
-      const rels = await relsFile.async('string');
-      const tableTargets = [...rels.matchAll(/Target="([^"]*tables\/table\d+\.xml)"/g)]
-        .map((m) => m[1].replace(/^\.\.\//, ''));
-      for (const t of tableTargets) {
-        const tablePath = `xl/${t}`;
-        const tableFile = fixZip.file(tablePath);
-        if (!tableFile) continue;
-        let tableXml = await tableFile.async('string');
-        tableXml = tableXml.replace(
-          /(<table\b[^>]*?\sref=")([A-Z]+)(\d+):([A-Z]+)(\d+)(")/,
-          (m, p1, c1, r1, c2, r2, p2) => {
-            const newR2 = Math.max(parseInt(r2, 10), lastRow);
-            return `${p1}${c1}${r1}:${c2}${newR2}${p2}`;
-          },
-        );
-        fixZip.file(tablePath, tableXml);
-      }
+      await extendTableRefsForSheet(fixZip, sheetFile);
     }
 
     // Re-attach FeaturePropertyBag from the template so cell-checkboxes work.
