@@ -222,8 +222,8 @@ const ExportDialog = ({ job, onClose }: IExportDialogProps) => {
                 panels.forEach((_p, idx) => {
                     const rows = panelRows[idx] ?? [];
                     rows.forEach((row) => {
-                        if (!rowsBySheet[row.sheet]) rowsBySheet[row.sheet] = [];
-                        rowsBySheet[row.sheet]!.push(row);
+                        const arr = rowsBySheet[row.sheet] ?? (rowsBySheet[row.sheet] = []);
+                        arr.push(row);
                     });
                 });
                 const notesPerPanel = await Promise.all(panels.map((p) => collectPanelSheetNotes(p.id)));

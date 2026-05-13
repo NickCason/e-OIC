@@ -90,8 +90,8 @@ const ResyncDialog = ({ job, onClose, onApplied }: IResyncDialogProps) => {
                 panels.forEach((_p, idx) => {
                     const rows = rowsPerPanel[idx] ?? [];
                     rows.forEach((row) => {
-                        if (!localRowsBySheet[row.sheet]) localRowsBySheet[row.sheet] = [];
-                        localRowsBySheet[row.sheet]!.push(row);
+                        const arr = localRowsBySheet[row.sheet] ?? (localRowsBySheet[row.sheet] = []);
+                        arr.push(row);
                     });
                 });
                 const notesPerPanel = await Promise.all(panels.map((p) => collectPanelSheetNotes(p.id)));
