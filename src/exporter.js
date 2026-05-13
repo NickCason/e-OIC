@@ -342,6 +342,138 @@ function copyChecklistRowStyles(srcRow, [a, b, c]) {
   if (srcC.style) c.style = { ...srcC.style };
 }
 
+// Append the Notes worksheet to the workbook if there are any notes to
+// write. Adds a "Job Notes" block (when job.notes is set) and a tabular
+// appendix of per-row/sheet notes.
+function appendNotesSheet(wb, job, notesAppendix) {
+  if (!job.notes?.trim() && notesAppendix.length === 0) return;
+  let notesWs = wb.getWorksheet('Notes');
+  if (!notesWs) notesWs = wb.addWorksheet('Notes');
+  notesWs.getColumn(1).width = 18;
+  notesWs.getColumn(2).width = 18;
+  notesWs.getColumn(3).width = 22;
+  notesWs.getColumn(4).width = 60;
+
+  let r = 1;
+  if (job.notes?.trim()) {
+    notesWs.getCell(r, 1).value = 'Job Notes';
+    notesWs.getCell(r, 1).font = { bold: true };
+    r += 1;
+    notesWs.getCell(r, 1).value = job.notes.trim();
+    notesWs.getCell(r, 1).alignment = { wrapText: true, vertical: 'top' };
+    notesWs.mergeCells(r, 1, r, 4);
+    r += 2;
+  }
+  if (notesAppendix.length === 0) return;
+  notesWs.getCell(r, 1).value = 'Sheet';
+  notesWs.getCell(r, 2).value = 'Panel';
+  notesWs.getCell(r, 3).value = 'Row';
+  notesWs.getCell(r, 4).value = 'Notes';
+  for (let c = 1; c <= 4; c++) notesWs.getCell(r, c).font = { bold: true };
+  r += 1;
+  for (const n of notesAppendix) {
+    notesWs.getCell(r, 1).value = n.sheet;
+    notesWs.getCell(r, 2).value = n.panel;
+    notesWs.getCell(r, 3).value = n.label;
+    notesWs.getCell(r, 4).value = n.notes;
+    notesWs.getCell(r, 4).alignment = { wrapText: true, vertical: 'top' };
+    r += 1;
+  }
+}
+
+// Collect the set of row IDs that have at least one photo attached. Used
+// during sheet population so rows without photos render their hyperlink
+// column as plain text instead of a broken link.
+function collectRowsWithPhotos(photosByPanel) {
+  const rowsWithPhotos = new Set();
+  for (const photos of photosByPanel.values()) {
+    for (const ph of photos) if (ph.rowId) rowsWithPhotos.add(ph.rowId);
+  }
+  return rowsWithPhotos;
+}
+
+// Build rowId → { sheet, label } map for one panel, used to decide which
+// photo subfolder each per-row photo lives in.
+async function buildRowInfoMap(panel) {
+  const rowsForPanel = await listAllRows(panel.id);
+  const rowInfo = new Map();
+  for (const r of rowsForPanel) {
+    const sch = schemaMap[r.sheet];
+    rowInfo.set(r.id, { sheet: r.sheet, label: rowLabel(r, sch) });
+  }
+  return rowInfo;
+}
+
+// Decide which folder + level + itemLabel one photo belongs to. Row-level
+// photos go under Photos/{Panel}/{Sheet}/{RowLabel}; panel-level (Photo
+// Checklist) photos go under Photos/{Panel}/{Item-or-Sheet}.
+function resolvePhotoFolder(ph, panel, rowInfo) {
+  if (ph.rowId && rowInfo.has(ph.rowId)) {
+    const ri = rowInfo.get(ph.rowId);
+    return {
+      folder: `Photos/${safe(panel.name)}/${safe(ri.sheet)}/${ri.label}`,
+      level: 'row',
+      itemLabel: ri.label,
+    };
+  }
+  return {
+    folder: `Photos/${safe(panel.name)}/${safe(ph.item || ph.sheet)}`,
+    level: 'panel',
+    itemLabel: ph.item || ph.sheet,
+  };
+}
+
+// Group a panel's photos by their destination folder, preserving capture-time
+// order within each folder. Returns Map<folder, Array<{photo, level, itemLabel}>>.
+function groupPhotosByFolder(photos, panel, rowInfo) {
+  const byFolder = new Map();
+  for (const ph of photos.sort((a, b) => a.takenAt - b.takenAt)) {
+    const { folder, level, itemLabel } = resolvePhotoFolder(ph, panel, rowInfo);
+    if (!byFolder.has(folder)) byFolder.set(folder, []);
+    byFolder.get(folder).push({ photo: ph, level, itemLabel });
+  }
+  return byFolder;
+}
+
+// Emit progress callbacks every 5 photos. Lifted out of the bundling loop
+// so the inner write block stays shallow.
+function reportPhotoProgress(onProgress, writtenPhotos, grandTotalPhotos) {
+  if (writtenPhotos % 5 !== 0 || grandTotalPhotos <= 0) return;
+  onProgress({
+    phase: 'bundling',
+    percent: 60 + Math.floor((writtenPhotos / grandTotalPhotos) * 30),
+    detail: `${writtenPhotos} / ${grandTotalPhotos} photos`,
+  });
+}
+
+// Bake one photo (overlay + EXIF) into the zip and append a metadata CSV
+// row for it. Returns nothing — mutates zip and csvRows.
+async function writePhotoToZip({
+  zip, csvRows, folder, entry, index, job, panel,
+}) {
+  const ph = entry.photo;
+  const ext = (ph.mime || 'image/jpeg').split('/')[1] || 'jpg';
+  const fname = `IMG_${pad3(index + 1)}.${ext === 'jpeg' ? 'jpg' : ext}`;
+  const overlayLines = [
+    `${job.name} • ${panel.name}`,
+    `${ph.sheet} — ${entry.itemLabel}`,
+    fmtTimestamp(new Date(ph.takenAt)) + (ph.gps ? `  ${fmtGps(ph.gps)}` : ''),
+  ];
+  const baked = await applyOverlay(ph.blob, overlayLines, ph.gps);
+  zip.file(`${folder}/${fname}`, baked.blob);
+  csvRows.push([
+    panel.name,
+    ph.sheet,
+    entry.itemLabel,
+    entry.level,
+    `${folder}/${fname}`,
+    new Date(ph.takenAt).toISOString(),
+    ph.gps?.lat ?? '',
+    ph.gps?.lng ?? '',
+    ph.gps?.accuracy ?? '',
+  ].map(csvEscape).join(','));
+}
+
 // Append the job's custom checklist tasks (added via the in-app Checklist
 // screen) below the existing tasks, copying styles from the last template
 // row so the appended rows match.
@@ -563,12 +695,7 @@ export async function buildExport(job, {
   for (const panel of panels) {
     photosByPanel.set(panel.id, await listPanelPhotos(panel.id));
   }
-  const rowsWithPhotos = new Set();
-  for (const photos of photosByPanel.values()) {
-    for (const ph of photos) {
-      if (ph.rowId) rowsWithPhotos.add(ph.rowId);
-    }
-  }
+  const rowsWithPhotos = collectRowsWithPhotos(photosByPanel);
 
   // 3. Populate sheets
   onProgress({ phase: 'populating', percent: 15 });
@@ -600,41 +727,7 @@ export async function buildExport(job, {
   await appendCustomChecklistTasks(checklistSheet, checklistLastTaskRow, job);
 
   // 5. Append Notes sheet (job + per-row notes) — added only if we have any
-  if (job.notes?.trim() || notesAppendix.length > 0) {
-    let notesWs = wb.getWorksheet('Notes');
-    if (!notesWs) notesWs = wb.addWorksheet('Notes');
-    notesWs.getColumn(1).width = 18;
-    notesWs.getColumn(2).width = 18;
-    notesWs.getColumn(3).width = 22;
-    notesWs.getColumn(4).width = 60;
-
-    let r = 1;
-    if (job.notes?.trim()) {
-      notesWs.getCell(r, 1).value = 'Job Notes';
-      notesWs.getCell(r, 1).font = { bold: true };
-      r += 1;
-      notesWs.getCell(r, 1).value = job.notes.trim();
-      notesWs.getCell(r, 1).alignment = { wrapText: true, vertical: 'top' };
-      notesWs.mergeCells(r, 1, r, 4);
-      r += 2;
-    }
-    if (notesAppendix.length > 0) {
-      notesWs.getCell(r, 1).value = 'Sheet';
-      notesWs.getCell(r, 2).value = 'Panel';
-      notesWs.getCell(r, 3).value = 'Row';
-      notesWs.getCell(r, 4).value = 'Notes';
-      for (let c = 1; c <= 4; c++) notesWs.getCell(r, c).font = { bold: true };
-      r += 1;
-      for (const n of notesAppendix) {
-        notesWs.getCell(r, 1).value = n.sheet;
-        notesWs.getCell(r, 2).value = n.panel;
-        notesWs.getCell(r, 3).value = n.label;
-        notesWs.getCell(r, 4).value = n.notes;
-        notesWs.getCell(r, 4).alignment = { wrapText: true, vertical: 'top' };
-        r += 1;
-      }
-    }
-  }
+  appendNotesSheet(wb, job, notesAppendix);
 
   // 6. Serialize
   onProgress({ phase: 'serializing', percent: 55 });
@@ -735,68 +828,15 @@ export async function buildExport(job, {
   const grandTotalPhotos = allPanelPhotos.reduce((s, p) => s + p.photos.length, 0);
 
   for (const { panel, photos } of allPanelPhotos) {
-    // Build rowId → (sheet, label) map for this panel
-    const rowsForPanel = await listAllRows(panel.id);
-    const rowInfo = new Map();
-    for (const r of rowsForPanel) {
-      const sch = schemaMap[r.sheet];
-      rowInfo.set(r.id, { sheet: r.sheet, label: rowLabel(r, sch) });
-    }
-
-    // Group photos by destination folder
-    const byFolder = new Map();
-    for (const ph of photos.sort((a, b) => a.takenAt - b.takenAt)) {
-      let folder;
-      let level;
-      let itemLabel;
-      if (ph.rowId && rowInfo.has(ph.rowId)) {
-        const ri = rowInfo.get(ph.rowId);
-        folder = `Photos/${safe(panel.name)}/${safe(ri.sheet)}/${ri.label}`;
-        level = 'row';
-        itemLabel = ri.label;
-      } else {
-        // Panel-level (Photo Checklist) photo
-        folder = `Photos/${safe(panel.name)}/${safe(ph.item || ph.sheet)}`;
-        level = 'panel';
-        itemLabel = ph.item || ph.sheet;
-      }
-      if (!byFolder.has(folder)) byFolder.set(folder, []);
-      byFolder.get(folder).push({ photo: ph, level, itemLabel });
-    }
-
+    const rowInfo = await buildRowInfoMap(panel);
+    const byFolder = groupPhotosByFolder(photos, panel, rowInfo);
     for (const [folder, list] of byFolder) {
       for (let i = 0; i < list.length; i++) {
-        const entry = list[i];
-        const ph = entry.photo;
-        const ext = (ph.mime || 'image/jpeg').split('/')[1] || 'jpg';
-        const fname = `IMG_${pad3(i + 1)}.${ext === 'jpeg' ? 'jpg' : ext}`;
-        const overlayLines = [
-          `${job.name} • ${panel.name}`,
-          `${ph.sheet} — ${entry.itemLabel}`,
-          fmtTimestamp(new Date(ph.takenAt)) + (ph.gps ? `  ${fmtGps(ph.gps)}` : ''),
-        ];
-        const baked = await applyOverlay(ph.blob, overlayLines, ph.gps);
-        zip.file(`${folder}/${fname}`, baked.blob);
-        csvRows.push([
-          panel.name,
-          ph.sheet,
-          entry.itemLabel,
-          entry.level,
-          `${folder}/${fname}`,
-          new Date(ph.takenAt).toISOString(),
-          ph.gps?.lat ?? '',
-          ph.gps?.lng ?? '',
-          ph.gps?.accuracy ?? '',
-        ].map(csvEscape).join(','));
-
+        await writePhotoToZip({
+          zip, csvRows, folder, entry: list[i], index: i, job, panel,
+        });
         writtenPhotos += 1;
-        if (writtenPhotos % 5 === 0 && grandTotalPhotos > 0) {
-          onProgress({
-            phase: 'bundling',
-            percent: 60 + Math.floor((writtenPhotos / grandTotalPhotos) * 30),
-            detail: `${writtenPhotos} / ${grandTotalPhotos} photos`,
-          });
-        }
+        reportPhotoProgress(onProgress, writtenPhotos, grandTotalPhotos);
       }
     }
   }
