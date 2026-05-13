@@ -38,9 +38,7 @@ function parseHash() {
   return { name: 'jobs' };
 }
 
-export function nav(path) {
-  window.location.hash = path;
-}
+export { nav } from './lib/nav';
 
 export default function App() {
   useKeyboardInset();
