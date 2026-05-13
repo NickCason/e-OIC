@@ -9,7 +9,7 @@ import EmptyState from './EmptyState';
 import CountUp from './CountUp';
 import Icon from './Icon';
 import Marquee from './Marquee';
-import PullOrNewModal from './PullOrNewModal.jsx';
+import PullOrNewModal from './PullOrNewModal';
 import PullDialog from './PullDialog';
 import InstallBanner from './InstallBanner';
 import WrapperUpdateBanner from './WrapperUpdateBanner';

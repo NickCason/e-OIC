@@ -5,7 +5,7 @@ import { nav } from '../App.jsx';
 import SheetForm from './SheetForm';
 import AppBar from './AppBar';
 import Icon from './Icon';
-import SheetPicker from './SheetPicker.jsx';
+import SheetPicker from './SheetPicker';
 import Marquee from './Marquee';
 import CountUp from './CountUp';
 

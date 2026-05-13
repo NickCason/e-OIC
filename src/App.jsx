@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import JobList from './components/JobList.jsx';
-import JobView from './components/JobView.jsx';
-import PanelView from './components/PanelView.jsx';
-import SettingsView from './components/SettingsView.jsx';
-import ChecklistView from './components/ChecklistView.jsx';
+import JobList from './components/JobList';
+import JobView from './components/JobView';
+import PanelView from './components/PanelView';
+import SettingsView from './components/SettingsView';
+import ChecklistView from './components/ChecklistView';
 import ToastHost from './components/ToastHost';
 import UpdatePill from './components/UpdatePill';
 import { getGeolocationConsent, setGeolocationConsent, requestGeolocation } from './lib/geolocation';
