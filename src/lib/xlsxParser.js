@@ -41,6 +41,17 @@ function rowIsAllBlank(rowData) {
   return true;
 }
 
+function buildRowData(xlsxRow, schema, headerIndex) {
+  const data = {};
+  for (const col of schema.columns) {
+    if (col.header === schema.hyperlink_column) continue;
+    const h = headerIndex[normalize(col.header)];
+    if (!h) continue;
+    data[col.header] = extractCellValue(xlsxRow.getCell(h.colNumber));
+  }
+  return data;
+}
+
 function parseSheetRows(ws, schema, warnings) {
   const headerIndex = buildHeaderIndex(ws, schema.header_row);
   const schemaHeaderNorms = new Set(schema.columns.map((c) => normalize(c.header)));
@@ -61,14 +72,7 @@ function parseSheetRows(ws, schema, warnings) {
   let r = schema.first_data_row;
   let consecutiveBlanks = 0;
   while (consecutiveBlanks < 2 && r <= ws.rowCount + 2) {
-    const xlsxRow = ws.getRow(r);
-    const data = {};
-    for (const col of schema.columns) {
-      if (col.header === schema.hyperlink_column) continue;
-      const h = headerIndex[normalize(col.header)];
-      if (!h) continue;
-      data[col.header] = extractCellValue(xlsxRow.getCell(h.colNumber));
-    }
+    const data = buildRowData(ws.getRow(r), schema, headerIndex);
     if (rowIsAllBlank(data)) {
       consecutiveBlanks += 1;
       r += 1;
