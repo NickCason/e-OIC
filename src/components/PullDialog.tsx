@@ -143,7 +143,7 @@ const PullDialog = ({ onClose, onCreated }: IPullDialogProps) => {
     const blockClose = stage === 'parsing' || stage === 'creating';
 
     return (
-        /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- modal backdrop click-to-dismiss; Cancel button covers keyboard path */
+        /* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- modal backdrop click-to-dismiss; Cancel button covers keyboard path */
         <div className="modal-bg" onClick={blockClose ? undefined : onClose}>
             {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- stopPropagation guard, not an interactive surface */}
             <div className="modal" onClick={(e) => e.stopPropagation()}>

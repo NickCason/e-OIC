@@ -321,7 +321,7 @@ const ExportDialog = ({ job, onClose }: IExportDialogProps) => {
     const blockClose = stage === 'generating' || stage === 'parsing-target';
 
     return (
-        /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- modal backdrop click-to-dismiss; Cancel button covers keyboard path */
+        /* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- modal backdrop click-to-dismiss; Cancel button covers keyboard path */
         <div className="modal-bg" onClick={blockClose ? undefined : onClose}>
             {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- stopPropagation guard, not an interactive surface */}
             <div className="export-sheet" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '85vh', overflow: 'auto' }}>
